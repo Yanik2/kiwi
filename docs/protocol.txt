@@ -1,0 +1,21 @@
+Protocol
+
+3 bytes -> method
+2 bytes -> separator
+n bytes -> key length
+2 bytes -> separator
+n bytes -> key
+2 bytes -> separator
+n bytes -> value length
+2 bytes -> separator
+n bytes -> value
+
+separator -> crlf
+
+example:
+
+GET
+5
+hello
+5
+world
