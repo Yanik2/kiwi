@@ -1,10 +1,10 @@
 package com.kiwi.util;
 
 public final class Constants {
-    public static final String GET = "GET";
-    public static final String SET = "SET";
-    public static final String DELETE = "DEL";
-    public static final String EXIT = "EXT";
+    public static final String CMD_GET = "GET";
+    public static final String CMD_SET = "SET";
+    public static final String CMD_DEL = "DEL";
+    public static final String CMD_EXT = "EXT";
 
     private Constants() {}
 }

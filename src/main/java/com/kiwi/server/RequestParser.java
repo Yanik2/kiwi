@@ -1,28 +1,29 @@
 package com.kiwi.server;
 
-import static com.kiwi.util.Constants.EXIT;
-import static com.kiwi.util.Constants.SET;
+import static com.kiwi.util.Constants.CMD_EXT;
+import static com.kiwi.util.Constants.CMD_SET;
 
 import com.kiwi.dto.TCPRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class RequestParser {
 
     public TCPRequest parse(InputStream is) throws IOException {
-        final var method = new String(is.readNBytes(3));
+        final var method = new String(is.readNBytes(3), StandardCharsets.UTF_8);
         is.readNBytes(2);
 
-        if (EXIT.equals(method)) {
+        if (CMD_EXT.equals(method)) {
             return new TCPRequest(method);
         }
 
         final var keyLen = getLength(is);
         is.readNBytes(1);
-        final var key = new String(is.readNBytes(keyLen));
+        final var key = new String(is.readNBytes(keyLen), StandardCharsets.UTF_8);
         is.readNBytes(2);
 
-        if (SET.equals(method)) {
+        if (CMD_SET.equals(method)) {
             final var valueLen = getLength(is);
             is.readNBytes(1);
             final var value = is.readNBytes(valueLen);
