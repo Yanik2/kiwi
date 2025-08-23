@@ -1,5 +1,6 @@
 package com.kiwi.server;
 
+import static com.kiwi.server.Method.EXT;
 import static com.kiwi.util.Constants.CMD_EXT;
 
 import com.kiwi.dto.TCPRequest;
@@ -31,7 +32,7 @@ public class RequestHandler {
                 final TCPRequest request = requestParser.parse(is);
                 final TCPResponse response = requestDispatcher.dispatch(request);
                 responseWriter.writeResponse(socket, response);
-                if (CMD_EXT.equals(request.method())) {
+                if (EXT.equals(request.method())) {
                     break;
                 }
             }

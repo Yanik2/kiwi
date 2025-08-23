@@ -27,11 +27,13 @@ public class ResponseWriter {
             baos.write(prefix.getBytes(StandardCharsets.UTF_8));
             baos.write(tcpResponse.message().getBytes(StandardCharsets.UTF_8));
             baos.write(SEPARATOR);
-            final int payloadLength = tcpResponse.value() != null ? tcpResponse.value().length : 0;
+            final int payloadLength = tcpResponse.value() != null
+                ? tcpResponse.value().getValue().length
+                : 0;
 
             baos.write(payloadLength + 48);
             baos.write(SEPARATOR);
-            baos.write(tcpResponse.value());
+            baos.write(tcpResponse.value().getValue());
             baos.write(SEPARATOR);
         } catch (Exception ex) {
             log.severe("Unexpected error during writing response to output stream: "

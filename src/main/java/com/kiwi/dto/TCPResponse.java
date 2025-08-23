@@ -1,7 +1,9 @@
 package com.kiwi.dto;
 
+import com.kiwi.persistent.dto.Value;
+
 public record TCPResponse(
-    byte[] value,
+    Value value,
     String message
 ) {
     public TCPResponse(String message) {

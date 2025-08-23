@@ -1,15 +1,19 @@
 package com.kiwi.dto;
 
+import com.kiwi.persistent.dto.Key;
+import com.kiwi.persistent.dto.Value;
+import com.kiwi.server.Method;
+
 public record TCPRequest(
-    String method,
-    String key,
-    byte[] value
+    Method method,
+    Key key,
+    Value value
 ) {
-    public TCPRequest(String method, String key) {
+    public TCPRequest(Method method, Key key) {
         this(method, key, null);
     }
 
-    public TCPRequest(String method) {
+    public TCPRequest(Method method) {
         this(method, null);
     }
 }
