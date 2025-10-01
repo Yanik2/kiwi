@@ -5,6 +5,8 @@ import java.util.Arrays;
 public final class Key {
     private final byte[] key;
 
+    private int hashcode;
+
     public Key(byte[] key) {
         this.key = key;
     }
@@ -20,6 +22,9 @@ public final class Key {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(key);
+        if (hashcode == 0) {
+            hashcode = Arrays.hashCode(key);
+        }
+        return hashcode;
     }
 }
