@@ -4,9 +4,10 @@ import com.kiwi.persistent.dto.Value;
 
 public record TCPResponse(
     Value value,
-    String message
+    String message,
+    boolean isSuccess
 ) {
     public TCPResponse(String message) {
-        this(null, message);
+        this(null, message, true);
     }
 }

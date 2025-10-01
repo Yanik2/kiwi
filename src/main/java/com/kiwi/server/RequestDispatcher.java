@@ -21,7 +21,7 @@ public class RequestDispatcher {
 
     public TCPResponse dispatch(TCPRequest request) {
         return switch (request.method()) {
-            case GET -> new TCPResponse(dataProcessor.getValue(request.key()), SUCCESS_MESSAGE);
+            case GET -> new TCPResponse(dataProcessor.getValue(request.key()), SUCCESS_MESSAGE, true);
             case SET -> {
                 dataProcessor.processData(new DataRequest(request.key(), request.value()));
                 yield new TCPResponse(SUCCESS_MESSAGE);
