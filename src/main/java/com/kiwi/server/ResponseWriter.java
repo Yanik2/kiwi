@@ -1,7 +1,6 @@
 package com.kiwi.server;
 
 import static com.kiwi.server.util.ServerConstants.ERROR_PREFIX;
-import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 

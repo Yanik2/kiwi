@@ -1,11 +1,11 @@
 package com.kiwi.server;
 
 import static com.kiwi.server.Method.EXT;
-import static com.kiwi.util.Constants.CMD_EXT;
 
 import com.kiwi.dto.TCPRequest;
 import com.kiwi.dto.TCPResponse;
-import com.kiwi.exception.RequestParsingException;
+import com.kiwi.exception.ProtocolException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -26,21 +26,23 @@ public class RequestHandler {
     }
 
     public void handle(Socket socket) {
-        try {
-            final InputStream is = socket.getInputStream();
-            while (true) {
-                final TCPRequest request = requestParser.parse(is);
-                final TCPResponse response = requestDispatcher.dispatch(request);
-                responseWriter.writeResponse(socket, response);
-                if (EXT.equals(request.method())) {
-                    break;
+        try (socket) {
+            try {
+                final InputStream is = socket.getInputStream();
+                while (true) {
+                    final TCPRequest request = requestParser.parse(is);
+                    final TCPResponse response = requestDispatcher.dispatch(request);
+                    responseWriter.writeResponse(socket, response);
+                    if (EXT.equals(request.method())) {
+                        break;
+                    }
                 }
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, "Unexpected error: " + ex.getMessage());
+                throw new ProtocolException("Unexpected exception", ex);
             }
-
-            socket.close();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, "Unexpected error on get input stream");
-            throw new RequestParsingException("Unexpected exception", ex);
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Cannot close socker");
         }
     }
 }
