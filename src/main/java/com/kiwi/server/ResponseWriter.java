@@ -15,26 +15,28 @@ public class ResponseWriter {
     private static final Logger log = Logger.getLogger(ResponseWriter.class.getSimpleName());
 
     public void writeResponse(Socket socket, TCPResponse tcpResponse) {
-        final var prefix = OK_MESSAGE.equals(tcpResponse.message()) ? SUCCESS_PREFIX : ERROR_PREFIX;
+        final var prefix = tcpResponse.isSuccess() ? SUCCESS_PREFIX : ERROR_PREFIX;
         final var baos = new ByteArrayOutputStream();
         writeToBaos(baos, prefix, tcpResponse);
 
         writeToOs(socket, baos);
     }
 
-    private void writeToBaos(ByteArrayOutputStream baos, String prefix, TCPResponse tcpResponse) {
+    private void writeToBaos(ByteArrayOutputStream baos, byte prefix, TCPResponse tcpResponse) {
         try {
-            baos.write(prefix.getBytes(StandardCharsets.UTF_8));
+            baos.write(prefix);
             baos.write(tcpResponse.message().getBytes(StandardCharsets.UTF_8));
             baos.write(SEPARATOR);
             final int payloadLength = tcpResponse.value() != null
                 ? tcpResponse.value().getValue().length
                 : 0;
 
-            baos.write(payloadLength + 48);
+            writePayloadLength(payloadLength, baos);
             baos.write(SEPARATOR);
-            baos.write(tcpResponse.value().getValue());
-            baos.write(SEPARATOR);
+            if (payloadLength > 0) {
+                baos.write(tcpResponse.value().getValue());
+                baos.write(SEPARATOR);
+            }
         } catch (Exception ex) {
             log.severe("Unexpected error during writing response to output stream: "
                 + ex.getMessage());
@@ -48,6 +50,26 @@ public class ResponseWriter {
         } catch (Exception ex) {
             log.severe("Unexpected exception during writing response to output stream: "
                 + ex.getMessage());
+        }
+    }
+
+    private void writePayloadLength(int len, ByteArrayOutputStream baos) {
+        if (len == 0) {
+            baos.write(48);
+            return;
+        }
+
+        int divider = 10_000_000;
+
+        while (divider > len) {
+            divider /= 10;
+        }
+
+        while (divider != 0) {
+            final var order = len / divider;
+            baos.write(order + 48);
+            len -= (divider * order);
+            divider /= 10;
         }
     }
 }
