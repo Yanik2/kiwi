@@ -9,7 +9,6 @@ import com.kiwi.dto.TCPRequest;
 import com.kiwi.exception.ProtocolException;
 import com.kiwi.persistent.dto.Key;
 import com.kiwi.persistent.dto.Value;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
@@ -21,7 +20,7 @@ public class RequestParser {
     private static final int MAX_HEADER_VAL_LEN = 8;
     private static final int MAX_VAL_LEN = 10485760;
 
-    public TCPRequest parse(InputStream is) {
+    public TCPRequest parse(InputStreamWrapper is) {
         final var method = getMethod(is);
 
         if (EXT.equals(method) || UNKNOWN.equals(method)) {
@@ -35,7 +34,7 @@ public class RequestParser {
         }
     }
 
-    private Value getValue(InputStream is) {
+    private Value getValue(InputStreamWrapper is) {
         final int valueLen = getLength(is, MAX_HEADER_VAL_LEN);
         if (valueLen > MAX_VAL_LEN) {
             log.severe("Value length bigger than allowed 10MB: " + valueLen);
@@ -45,7 +44,7 @@ public class RequestParser {
         return new Value(getBytesByLength(is, valueLen));
     }
 
-    private Key getKey(InputStream is) {
+    private Key getKey(InputStreamWrapper is) {
         final int keyLen = getLength(is, MAX_HEADER_KEY_LENGTH);
         if (keyLen > MAX_KEY_LENGTH) {
             log.severe("Key length bigger than allowed 4KB: " + keyLen);
@@ -55,29 +54,18 @@ public class RequestParser {
         return new Key(getBytesByLength(is, keyLen));
     }
 
-    private byte[] getBytesByLength(InputStream is, int length) {
-        final byte[] buf = new byte[length];
-
-        for (int i = 0; i < length; i++) {
-            final byte b = readByte(is);
-            if (b != -1) {
-                buf[i] = b;
-            } else {
-                log.severe("Unexpected EOF on parsing bytes by length");
-                throw new ProtocolException("Unexpected EOF on parsing bytes by length");
-            }
-        }
-
+    private byte[] getBytesByLength(InputStreamWrapper is, int length) {
+        final var bytes = is.readNBytes(length);
         validateSeparatorInPlace(is);
-        return buf;
+        return bytes;
     }
 
-    private int getLength(InputStream is, int headerLength) {
+    private int getLength(InputStreamWrapper is, int headerLength) {
         int len = 0;
         int current;
         int counter = 0;
 
-       while ((current = readByte(is)) != 13) {
+       while ((current = is.read()) != 13) {
            if (counter >= headerLength) {
                log.severe("Header length is too long");
                throw new ProtocolException("Header for length is too long");
@@ -97,7 +85,7 @@ public class RequestParser {
            counter++;
        }
 
-       if (readByte(is) != 10) {
+       if (is.read() != 10) {
            log.severe("Unexpected exception on parsing request, separator validation");
            throw new ProtocolException("Unexpected exception on parsing request, " +
                "separator validation");
@@ -106,49 +94,29 @@ public class RequestParser {
        return len;
     }
 
-    private Method getMethod(InputStream is) {
-        final byte[] methodBytes = new byte[3];
-
-        for (int i = 0; i < 3; i++) {
-            final byte b = readByte(is);
-            if (b == -1) {
-                log.severe("Unexpected EOF");
-                throw new ProtocolException("Unexpected EOF");
-            } else {
-                methodBytes[i] = b;
-            }
-        }
-        validateSeparatorInPlace(is);
-        return getMethod(new String(methodBytes, StandardCharsets.UTF_8));
-    }
-
-    private Method getMethod(String str) {
+    private Method getMethod(InputStreamWrapper is) {
+        final var bytes = getBytesByLength(is, 3);
+        final var methodName = new String(bytes, StandardCharsets.UTF_8);
         try {
-            return Method.valueOf(str);
+            return Method.valueOf(methodName);
         } catch (Exception ex) {
-            log.warning("Unknown method name: " + str);
+            log.warning("Unknown method name: " + methodName);
             return Method.UNKNOWN;
         }
     }
 
-    private byte readByte(InputStream is) {
+    private void validateSeparatorInPlace(InputStreamWrapper is) {
         try {
-            return (byte) is.read();
-        } catch (Exception ex) {
-            log.severe("Unexpected exception on reading input stream: " + ex.getMessage());
-            throw new ProtocolException("Unexpected exception on reading input stream");
-        }
-    }
+            final var firstByte = is.read();
+            final var secondByte = is.read();
 
-    private void validateSeparatorInPlace(InputStream is) {
-        try {
-            final byte[] separator = is.readNBytes(2);
-            if (separator[0] != SEPARATOR[0] || separator[1] != SEPARATOR[1]) {
+            if (SEPARATOR[0] != firstByte || SEPARATOR[1] != secondByte) {
                 log.severe("Separator does not validate, protocol exception");
                 throw new ProtocolException("Separator does not validate");
             }
         } catch (Exception e) {
-            log.severe("Unexpected exception on parsing request, separator validation");
+            log.severe("Unexpected exception on parsing request, separator validation: "
+                + e.getMessage());
             throw new ProtocolException("Unexpected exception on parsing request, " +
                 "separator validation");
         }
