@@ -10,4 +10,8 @@ public record TCPResponse(
     public TCPResponse(String message) {
         this(null, message, true);
     }
+
+    public TCPResponse(String message, boolean isSuccess) {
+        this(null, message, isSuccess);
+    }
 }
