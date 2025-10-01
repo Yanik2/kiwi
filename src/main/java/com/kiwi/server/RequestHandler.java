@@ -28,20 +28,22 @@ public class RequestHandler {
 
     public void handle(Socket socket) {
         try (socket) {
-            final InputStream is = socket.getInputStream();
-            while (true) {
-                final TCPRequest request = requestParser.parse(is);
-                final TCPResponse response = requestDispatcher.dispatch(request);
-                responseWriter.writeResponse(socket, response);
-                if (EXT.equals(request.method())) {
-                    break;
+            try {
+                final InputStream is = socket.getInputStream();
+                while (true) {
+                    final TCPRequest request = requestParser.parse(is);
+                    final TCPResponse response = requestDispatcher.dispatch(request);
+                    responseWriter.writeResponse(socket, response);
+                    if (EXT.equals(request.method())) {
+                        break;
+                    }
                 }
+            } catch (ProtocolException e) {
+                log.log(Level.SEVERE, "Unexpected problem with protocol: " + e.getMessage());
+                responseWriter.writeResponse(socket, new TCPResponse(ERROR_MESSAGE, false));
             }
         } catch (SocketTimeoutException e) {
             log.log(Level.WARNING, "Socket timed out");
-        } catch (ProtocolException e) {
-            log.log(Level.SEVERE, "Unexpected problem with protocol: " + e.getMessage());
-            responseWriter.writeResponse(socket, new TCPResponse(ERROR_MESSAGE, false));
         } catch (Exception e) {
             log.log(Level.WARNING, "Unexpected exception during request processing: "
                 + e.getMessage());
