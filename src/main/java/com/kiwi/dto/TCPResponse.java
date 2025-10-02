@@ -1,17 +1,17 @@
 package com.kiwi.dto;
 
-import com.kiwi.persistent.dto.Value;
+import com.kiwi.server.response.SerializableValue;
 
 public record TCPResponse(
-    Value value,
+    SerializableValue responsePayload,
     String message,
     boolean isSuccess
 ) {
     public TCPResponse(String message) {
-        this(null, message, true);
+        this(() -> new byte[0], message, true);
     }
 
     public TCPResponse(String message, boolean isSuccess) {
-        this(null, message, isSuccess);
+        this(() -> new byte[0], message, isSuccess);
     }
 }

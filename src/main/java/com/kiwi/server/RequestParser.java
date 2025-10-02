@@ -23,7 +23,7 @@ public class RequestParser {
     public TCPRequest parse(InputStreamWrapper is) {
         final var method = getMethod(is);
 
-        if (EXT.equals(method) || UNKNOWN.equals(method)) {
+        if (method.isKeyless()) {
             return new TCPRequest(method);
         }
 

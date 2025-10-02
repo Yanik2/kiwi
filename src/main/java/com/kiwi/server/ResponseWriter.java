@@ -26,14 +26,13 @@ public class ResponseWriter {
             baos.write(prefix);
             baos.write(tcpResponse.message().getBytes(StandardCharsets.UTF_8));
             baos.write(SEPARATOR);
-            final int payloadLength = tcpResponse.value() != null
-                ? tcpResponse.value().getValue().length
-                : 0;
 
-            writePayloadLength(payloadLength, baos);
+            final byte[] responsePayload = tcpResponse.responsePayload().serialize();
+
+            writePayloadLength(responsePayload.length, baos);
             baos.write(SEPARATOR);
-            if (payloadLength > 0) {
-                baos.write(tcpResponse.value().getValue());
+            if (responsePayload.length > 0) {
+                baos.write(responsePayload);
                 baos.write(SEPARATOR);
             }
         } catch (Exception ex) {

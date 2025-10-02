@@ -1,5 +1,6 @@
 package com.kiwi.server.factory;
 
+import com.kiwi.observability.ObservabilityModule;
 import com.kiwi.processor.DataProcessor;
 import com.kiwi.server.RequestDispatcher;
 import com.kiwi.server.RequestHandler;
@@ -10,9 +11,11 @@ import com.kiwi.server.TCPServer;
 public class ServerModule {
     public static TCPServer create(DataProcessor dataProcessor) {
         final var parser = new RequestParser();
-        final var dispatcher = new RequestDispatcher(dataProcessor);
+        final var observabilityRequestHandler = ObservabilityModule.getRequestHandler();
+        final var dispatcher = new RequestDispatcher(dataProcessor, observabilityRequestHandler);
         final var responseWriter = new ResponseWriter();
-        final var handler = new RequestHandler(dispatcher, parser, responseWriter);
+        final var metrics = ObservabilityModule.getMetrics();
+        final var handler = new RequestHandler(dispatcher, parser, responseWriter, metrics);
         return new TCPServer(handler);
     }
 }
