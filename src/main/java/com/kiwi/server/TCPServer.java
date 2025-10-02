@@ -18,7 +18,8 @@ public class TCPServer {
 
         while (true) {
             final var socket = serverSocket.accept();
-            socket.setSoTimeout(30000);
+            //for testing purposes timeout for 10 min
+            socket.setSoTimeout(600000);
 
             requestHandler.handle(socket);
         }
