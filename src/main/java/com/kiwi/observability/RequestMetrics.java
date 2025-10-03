@@ -3,7 +3,7 @@ package com.kiwi.observability;
 public final class RequestMetrics {
     private final MetricsRegistry metricsRegistry;
 
-    public RequestMetrics(MetricsRegistry metricsRegistry) {
+    RequestMetrics(MetricsRegistry metricsRegistry) {
         this.metricsRegistry = metricsRegistry;
     }
 
