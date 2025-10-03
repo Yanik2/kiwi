@@ -3,7 +3,7 @@ package com.kiwi.observability;
 import com.kiwi.observability.dto.MetricsDataDto;
 
 public class ObservabilityRequestHandler {
-    public ObservabilityRequestHandler(MetricsRegistry metricsRegistry) {
+    ObservabilityRequestHandler(MetricsRegistry metricsRegistry) {
         this.metricsRegistry = metricsRegistry;
     }
 

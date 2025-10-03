@@ -8,19 +8,18 @@ public record ObservabilityResponse(
 ) implements SerializableValue {
     @Override
     public byte[] serialize() {
-        return new StringBuilder("{ ")
-            .append("\"acceptedConnections\": ")
-            .append(metrics.acceptedConnections())
-            .append(", \"closedConnections\": ")
-            .append(metrics.closedConnections())
-            .append(", \"currentClients\": ")
-            .append(metrics.currentClients())
-            .append(", \"bytesIn\": ")
-            .append(metrics.bytesIn())
-            .append(", \"bytesOut\": ")
-            .append(metrics.bytesOut())
-            .append(" }")
-            .toString()
+        return ("{ " +
+            "\"acceptedConnections\": " +
+            metrics.acceptedConnections() +
+            ", \"closedConnections\": " +
+            metrics.closedConnections() +
+            ", \"currentClients\": " +
+            metrics.currentClients() +
+            ", \"bytesIn\": " +
+            metrics.bytesIn() +
+            ", \"bytesOut\": " +
+            metrics.bytesOut() +
+            " }")
             .getBytes(StandardCharsets.UTF_8);
     }
 }
