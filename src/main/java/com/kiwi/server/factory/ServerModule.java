@@ -14,7 +14,7 @@ public class ServerModule {
         final var observabilityRequestHandler = ObservabilityModule.getRequestHandler();
         final var dispatcher = new RequestDispatcher(dataProcessor, observabilityRequestHandler);
         final var responseWriter = new ResponseWriter();
-        final var metrics = ObservabilityModule.getMetrics();
+        final var metrics = ObservabilityModule.getRequestMetrics();
         final var handler = new RequestHandler(dispatcher, parser, responseWriter, metrics);
         return new TCPServer(handler);
     }

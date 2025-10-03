@@ -4,7 +4,8 @@ import static com.kiwi.server.util.ServerConstants.ERROR_PREFIX;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
-import com.kiwi.dto.TCPResponse;
+import com.kiwi.server.dto.TCPResponse;
+import com.kiwi.server.dto.WriteResponseResult;
 import java.io.ByteArrayOutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -13,12 +14,13 @@ import java.util.logging.Logger;
 public class ResponseWriter {
     private static final Logger log = Logger.getLogger(ResponseWriter.class.getSimpleName());
 
-    public void writeResponse(Socket socket, TCPResponse tcpResponse) {
+    public WriteResponseResult writeResponse(Socket socket, TCPResponse tcpResponse) {
         final var prefix = tcpResponse.isSuccess() ? SUCCESS_PREFIX : ERROR_PREFIX;
         final var baos = new ByteArrayOutputStream();
         writeToBaos(baos, prefix, tcpResponse);
 
         writeToOs(socket, baos);
+        return new WriteResponseResult(baos.size());
     }
 
     private void writeToBaos(ByteArrayOutputStream baos, byte prefix, TCPResponse tcpResponse) {
