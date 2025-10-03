@@ -4,6 +4,7 @@ import static com.kiwi.server.util.ServerConstants.ERROR_PREFIX;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
+import com.kiwi.exception.ResponseWritingException;
 import com.kiwi.server.dto.TCPResponse;
 import com.kiwi.server.dto.WriteResponseResult;
 import java.io.ByteArrayOutputStream;
@@ -50,6 +51,8 @@ public class ResponseWriter {
         } catch (Exception ex) {
             log.severe("Unexpected exception during writing response to output stream: "
                 + ex.getMessage());
+            throw new ResponseWritingException("Unexpected exception during writing response to "
+            + "output stream");
         }
     }
 
