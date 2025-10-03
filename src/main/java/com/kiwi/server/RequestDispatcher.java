@@ -3,8 +3,8 @@ package com.kiwi.server;
 import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.dto.DataRequest;
-import com.kiwi.dto.TCPRequest;
-import com.kiwi.dto.TCPResponse;
+import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.dto.TCPResponse;
 import com.kiwi.exception.UnknownMethodException;
 import com.kiwi.observability.ObservabilityRequestHandler;
 import com.kiwi.processor.DataProcessor;

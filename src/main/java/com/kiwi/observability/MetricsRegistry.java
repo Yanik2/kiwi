@@ -5,27 +5,29 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class Metrics {
-    private static final Logger logger = Logger.getLogger(Metrics.class.getName());
-    private static final Metrics instance = new Metrics();
+final class MetricsRegistry {
+    private static final Logger logger = Logger.getLogger(MetricsRegistry.class.getName());
+    private static final MetricsRegistry instance = new MetricsRegistry();
 
     private final AtomicLong clientsCurrent = new AtomicLong(0);
     private final LongAdder connectionsAccepted = new LongAdder();
     private final LongAdder connectionsClosed = new LongAdder();
+    private final LongAdder bytesIn = new LongAdder();
+    private final LongAdder bytesOut = new LongAdder();
 
-    public static Metrics getInstance() {
+    public static MetricsRegistry getInstance() {
         return instance;
     }
 
-    private Metrics() {
+    private MetricsRegistry() {
     }
 
-    public void addConnectionAccepted() {
+    public void addAcceptConnection() {
         connectionsAccepted.increment();
         clientsCurrent.incrementAndGet();
     }
 
-    public void addConnectionsClosed() {
+    public void addCloseConnection() {
         connectionsClosed.increment();
         final var currentClients = clientsCurrent.decrementAndGet();
         if (currentClients < 0) {
@@ -33,6 +35,14 @@ public final class Metrics {
                 + ", reset to 0");
             clientsCurrent.set(0);
         }
+    }
+
+    public void addParsedBytes(long bytesIn) {
+        this.bytesIn.add(bytesIn);
+    }
+
+    public void addWrittenBytes(long bytesOut) {
+        this.bytesOut.add(bytesOut);
     }
 
     public long getAcceptedConnections() {
@@ -45,5 +55,13 @@ public final class Metrics {
 
     public long getCurrentClients() {
         return clientsCurrent.get();
+    }
+
+    public long getBytesIn() {
+        return bytesIn.sum();
+    }
+
+    public long getBytesOut() {
+        return bytesOut.sum();
     }
 }

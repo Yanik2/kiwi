@@ -9,6 +9,7 @@ public class InputStreamWrapper {
     private static final Logger log = Logger.getLogger(InputStreamWrapper.class.getName());
 
     private final InputStream inputStream;
+    private int counter = 0;
 
     public InputStreamWrapper(InputStream inputStream) {
         this.inputStream = inputStream;
@@ -16,7 +17,11 @@ public class InputStreamWrapper {
 
     public int read() {
         try {
-            return inputStream.read();
+            final int b = inputStream.read();
+            if (b != -1) {
+                counter++;
+            }
+            return b;
         } catch (IOException e) {
             log.severe("Unexpected exception during read input stream" + e.getMessage());
             throw new UncheckedIOException("Unexpected exception during read input stream");
@@ -25,10 +30,16 @@ public class InputStreamWrapper {
 
     public byte[] readNBytes(int len) {
         try {
-            return inputStream.readNBytes(len);
+            final byte[] bs = inputStream.readNBytes(len);
+            counter += bs.length;
+            return bs;
         } catch (IOException e) {
             log.severe("Unexpected exception during read input stream" + e.getMessage());
             throw new UncheckedIOException("Unexpected exception during read input stream");
         }
+    }
+
+    public int getCounter() {
+        return counter;
     }
 }

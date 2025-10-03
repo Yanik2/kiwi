@@ -1,11 +1,9 @@
 package com.kiwi.server;
 
-import static com.kiwi.server.Method.EXT;
 import static com.kiwi.server.Method.SET;
-import static com.kiwi.server.Method.UNKNOWN;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 
-import com.kiwi.dto.TCPRequest;
+import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.exception.ProtocolException;
 import com.kiwi.persistent.dto.Key;
 import com.kiwi.persistent.dto.Value;
@@ -27,10 +25,11 @@ public class RequestParser {
             return new TCPRequest(method);
         }
 
+        final var key = getKey(is);
         if (SET.equals(method)) {
-            return new TCPRequest(method, getKey(is), getValue(is));
+            return new TCPRequest(method, key, getValue(is));
         } else {
-            return new TCPRequest(method, getKey(is));
+            return new TCPRequest(method, key);
         }
     }
 

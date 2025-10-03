@@ -3,14 +3,19 @@ package com.kiwi.observability;
 import com.kiwi.observability.dto.MetricsDataDto;
 
 public class ObservabilityRequestHandler {
-    public ObservabilityRequestHandler(Metrics metrics) {
-        this.metrics = metrics;
+    ObservabilityRequestHandler(MetricsRegistry metricsRegistry) {
+        this.metricsRegistry = metricsRegistry;
     }
 
-    private final Metrics metrics;
+    private final MetricsRegistry metricsRegistry;
 
     public MetricsDataDto getMetricsInfo() {
-        return new MetricsDataDto(metrics.getAcceptedConnections(),
-            metrics.getClosedConnections(), metrics.getCurrentClients());
+        return new MetricsDataDto(
+            metricsRegistry.getAcceptedConnections(),
+            metricsRegistry.getClosedConnections(),
+            metricsRegistry.getCurrentClients(),
+            metricsRegistry.getBytesIn(),
+            metricsRegistry.getBytesOut()
+        );
     }
 }

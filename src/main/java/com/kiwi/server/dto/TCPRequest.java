@@ -1,4 +1,4 @@
-package com.kiwi.dto;
+package com.kiwi.server.dto;
 
 import com.kiwi.persistent.dto.Key;
 import com.kiwi.persistent.dto.Value;

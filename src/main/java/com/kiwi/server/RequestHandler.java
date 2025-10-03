@@ -3,10 +3,10 @@ package com.kiwi.server;
 import static com.kiwi.server.Method.EXT;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
-import com.kiwi.dto.TCPRequest;
-import com.kiwi.dto.TCPResponse;
+import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.dto.TCPResponse;
 import com.kiwi.exception.ProtocolException;
-import com.kiwi.observability.Metrics;
+import com.kiwi.observability.RequestMetrics;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -19,10 +19,10 @@ public class RequestHandler {
     private final RequestDispatcher requestDispatcher;
     private final RequestParser requestParser;
     private final ResponseWriter responseWriter;
-    private final Metrics metrics;
+    private final RequestMetrics metrics;
 
     public RequestHandler(RequestDispatcher requestDispatcher, RequestParser requestParser,
-                          ResponseWriter responseWriter, Metrics metrics) {
+                          ResponseWriter responseWriter, RequestMetrics metrics) {
         this.requestDispatcher = requestDispatcher;
         this.requestParser = requestParser;
         this.responseWriter = responseWriter;
@@ -30,21 +30,26 @@ public class RequestHandler {
     }
 
     public void handle(Socket socket) {
-        metrics.addConnectionAccepted();
+        metrics.onAccept();
         try (socket) {
             try {
                 final InputStream is = socket.getInputStream();
                 while (true) {
-                    final TCPRequest request = requestParser.parse(new InputStreamWrapper(is));
+                    final var isWrapper = new InputStreamWrapper(is);
+                    final TCPRequest request = requestParser.parse(isWrapper);
+                    metrics.onParse(isWrapper.getCounter());
                     final TCPResponse response = requestDispatcher.dispatch(request);
-                    responseWriter.writeResponse(socket, response);
+                    final var writeResult = responseWriter.writeResponse(socket, response);
+                    metrics.onWrite(writeResult.writtenBytes());
                     if (EXT.equals(request.method())) {
                         break;
                     }
                 }
             } catch (ProtocolException e) {
                 log.log(Level.SEVERE, "Unexpected problem with protocol: " + e.getMessage());
-                responseWriter.writeResponse(socket, new TCPResponse(ERROR_MESSAGE, false));
+                final var writeResult =
+                    responseWriter.writeResponse(socket, new TCPResponse(ERROR_MESSAGE, false));
+                metrics.onWrite(writeResult.writtenBytes());
             }
         } catch (SocketTimeoutException e) {
             log.log(Level.WARNING, "Socket timed out");
@@ -52,6 +57,6 @@ public class RequestHandler {
             log.log(Level.WARNING, "Unexpected exception during request processing: "
                 + e.getMessage());
         }
-        metrics.addConnectionsClosed();
+        metrics.onClose();
     }
 }
