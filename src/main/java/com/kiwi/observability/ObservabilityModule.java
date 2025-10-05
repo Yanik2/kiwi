@@ -9,4 +9,8 @@ public class ObservabilityModule {
     public static RequestMetrics getRequestMetrics() {
         return new RequestMetrics(MetricsRegistry.getInstance());
     }
+
+    public static MethodMetrics getMethodMetrics() {
+        return new MethodMetrics(MetricsRegistry.getInstance());
+    }
 }

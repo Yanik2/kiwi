@@ -15,7 +15,13 @@ public class ObservabilityRequestHandler {
             metricsRegistry.getClosedConnections(),
             metricsRegistry.getCurrentClients(),
             metricsRegistry.getBytesIn(),
-            metricsRegistry.getBytesOut()
+            metricsRegistry.getBytesOut(),
+            metricsRegistry.getGetRequests(),
+            metricsRegistry.getSetRequests(),
+            metricsRegistry.getDeleteRequests(),
+            metricsRegistry.getExitRequests(),
+            metricsRegistry.getInfoRequests(),
+            metricsRegistry.getUnknownRequests()
         );
     }
 }
