@@ -1,6 +1,8 @@
 package com.kiwi.observability.dto;
 
 public record MetricsDataDto(
+    String protocolVersion,
+    String infoSchemaVersion,
     long acceptedConnections,
     long closedConnections,
     long refusedConnections,

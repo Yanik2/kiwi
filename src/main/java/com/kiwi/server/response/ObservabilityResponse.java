@@ -33,6 +33,10 @@ public record ObservabilityResponse(
             metrics.infoRequests() +
             ", \"cmd.ping\": " +
             metrics.pingRequests() +
+            ", \"proto.version\": " +
+            metrics.protocolVersion() +
+            ", \"proto.infoschemaversion\": " +
+            metrics.infoSchemaVersion() +
             ", \"proto.err.unknown\": " +
             metrics.unknownMethod() +
             ", \"proto.err.headerlen\": " +
