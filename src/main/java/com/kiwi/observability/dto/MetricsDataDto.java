@@ -17,6 +17,8 @@ public record MetricsDataDto(
     long keyTooLong,
     long unexpectedEndOfFile,
     long nonDigitInLength,
-    long invalidSeparator
+    long invalidSeparator,
+    long serverStart,
+    long serverUptime
 ) {
 }

@@ -27,7 +27,9 @@ public class ObservabilityRequestHandler {
             metricsRegistry.getKeyTooLong(),
             metricsRegistry.getUnexpectedEndOfFile(),
             metricsRegistry.getNonDigitInLength(),
-            metricsRegistry.getInvalidSeparator()
+            metricsRegistry.getInvalidSeparator(),
+            metricsRegistry.getServerStart(),
+            System.currentTimeMillis() - metricsRegistry.getServerStart()
         );
     }
 }
