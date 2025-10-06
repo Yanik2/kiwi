@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class RequestHandler {
     private static final Logger log = Logger.getLogger(RequestHandler.class.getSimpleName());
     //TODO will be moved to properties in phase 5
-    private static final int MAX_CLIENTS = 0;
+    private static final int MAX_CLIENTS = 1;
 
     private final RequestDispatcher requestDispatcher;
     private final RequestParser requestParser;

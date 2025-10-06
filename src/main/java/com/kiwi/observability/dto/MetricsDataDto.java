@@ -12,6 +12,7 @@ public record MetricsDataDto(
     long deleteRequests,
     long exitRequests,
     long infoRequests,
+    long pingRequests,
     long unknownMethod,
     long headerTooLong,
     long valueTooLong,

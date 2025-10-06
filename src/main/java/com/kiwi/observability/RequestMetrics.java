@@ -34,6 +34,7 @@ public final class RequestMetrics {
             case UNEXPECTED_EOF -> metricsRegistry.addUnexpectedEndOfFileError();
             case NON_DIGIT_IN_LENGTH -> metricsRegistry.addNonDigitInLengthError();
             case INVALID_SEPARATOR -> metricsRegistry.addInvalidSeparatorError();
+            case METHOD_TOO_LONG -> metricsRegistry.addMethodTooLongError();
         }
     }
 

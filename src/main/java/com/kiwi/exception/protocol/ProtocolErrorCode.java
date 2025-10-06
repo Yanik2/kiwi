@@ -7,5 +7,6 @@ public enum ProtocolErrorCode {
     KEY_TOO_LONG,
     UNEXPECTED_EOF,
     NON_DIGIT_IN_LENGTH,
-    INVALID_SEPARATOR
+    INVALID_SEPARATOR,
+    METHOD_TOO_LONG
 }

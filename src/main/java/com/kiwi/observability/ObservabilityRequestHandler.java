@@ -22,6 +22,7 @@ public class ObservabilityRequestHandler {
             metricsRegistry.getDeleteRequests(),
             metricsRegistry.getExitRequests(),
             metricsRegistry.getInfoRequests(),
+            metricsRegistry.getPingRequests(),
             metricsRegistry.getUnknownMethods(),
             metricsRegistry.getHeaderTooLong(),
             metricsRegistry.getValueTooLong(),
