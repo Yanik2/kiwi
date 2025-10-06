@@ -13,6 +13,7 @@ final class MetricsRegistry {
     private final BytesCounter bytesCounter = new BytesCounter();
     private final MethodCounter methodCounter = new MethodCounter();
     private final ProtoErrorCounter protoErrorCounter = new ProtoErrorCounter();
+    private final ServerCounters serverCounters = new ServerCounters();
 
     public static MetricsRegistry getInstance() {
         return instance;
@@ -157,6 +158,10 @@ final class MetricsRegistry {
         return protoErrorCounter.invalidSeparatorCounter.sum();
     }
 
+    public long getServerStart() {
+        return serverCounters.startUpMillis;
+    }
+
     private static class MethodCounter {
         private final LongAdder getCounter = new LongAdder();
         private final LongAdder setCounter = new LongAdder();
@@ -260,5 +265,9 @@ final class MetricsRegistry {
         private void onInvalidSeparator() {
             invalidSeparatorCounter.increment();
         }
+    }
+
+    private static class ServerCounters {
+        private final long startUpMillis = System.currentTimeMillis();
     }
 }

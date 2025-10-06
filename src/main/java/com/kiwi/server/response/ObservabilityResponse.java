@@ -43,6 +43,10 @@ public record ObservabilityResponse(
             metrics.nonDigitInLength() +
             ", \"proto.err.invalidseparator\": " +
             metrics.invalidSeparator() +
+            ", \"server.start\": " +
+            metrics.serverStart() +
+            ", \"server.uptime\": " +
+            metrics.serverUptime() +
             " }")
             .getBytes(StandardCharsets.UTF_8);
     }
