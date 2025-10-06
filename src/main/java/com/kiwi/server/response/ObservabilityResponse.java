@@ -25,11 +25,11 @@ public record ObservabilityResponse(
             metrics.setRequests() +
             ", \"deleteRequests\": " +
             metrics.deleteRequests() +
-            ", \"exitRequests\" " +
+            ", \"exitRequests\": " +
             metrics.exitRequests() +
             ", \"infoRequests\": " +
             metrics.infoRequests() +
-            ", \"unknownRequests\" " +
+            ", \"unknownRequests\": " +
             metrics.unknownRequests() +
             " }")
             .getBytes(StandardCharsets.UTF_8);
