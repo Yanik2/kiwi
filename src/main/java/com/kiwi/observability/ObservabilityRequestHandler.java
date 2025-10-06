@@ -21,7 +21,13 @@ public class ObservabilityRequestHandler {
             metricsRegistry.getDeleteRequests(),
             metricsRegistry.getExitRequests(),
             metricsRegistry.getInfoRequests(),
-            metricsRegistry.getUnknownRequests()
+            metricsRegistry.getUnknownMethods(),
+            metricsRegistry.getHeaderTooLong(),
+            metricsRegistry.getValueTooLong(),
+            metricsRegistry.getKeyTooLong(),
+            metricsRegistry.getUnexpectedEndOfFile(),
+            metricsRegistry.getNonDigitInLength(),
+            metricsRegistry.getInvalidSeparator()
         );
     }
 }

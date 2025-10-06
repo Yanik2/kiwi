@@ -11,6 +11,12 @@ public record MetricsDataDto(
     long deleteRequests,
     long exitRequests,
     long infoRequests,
-    long unknownRequests
+    long unknownMethod,
+    long headerTooLong,
+    long valueTooLong,
+    long keyTooLong,
+    long unexpectedEndOfFile,
+    long nonDigitInLength,
+    long invalidSeparator
 ) {
 }
