@@ -12,7 +12,9 @@ public class ServerModule {
     public static TCPServer create(DataProcessor dataProcessor) {
         final var parser = new RequestParser();
         final var observabilityRequestHandler = ObservabilityModule.getRequestHandler();
-        final var dispatcher = new RequestDispatcher(dataProcessor, observabilityRequestHandler);
+        final var methodMetrics = ObservabilityModule.getMethodMetrics();
+        final var dispatcher = new RequestDispatcher(dataProcessor, observabilityRequestHandler,
+            methodMetrics);
         final var responseWriter = new ResponseWriter();
         final var metrics = ObservabilityModule.getRequestMetrics();
         final var handler = new RequestHandler(dispatcher, parser, responseWriter, metrics);

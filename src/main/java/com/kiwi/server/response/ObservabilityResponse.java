@@ -19,6 +19,18 @@ public record ObservabilityResponse(
             metrics.bytesIn() +
             ", \"bytesOut\": " +
             metrics.bytesOut() +
+            ", \"getRequests\": " +
+            metrics.getRequests() +
+            ", \"setRequests\": " +
+            metrics.setRequests() +
+            ", \"deleteRequests\": " +
+            metrics.deleteRequests() +
+            ", \"exitRequests\": " +
+            metrics.exitRequests() +
+            ", \"infoRequests\": " +
+            metrics.infoRequests() +
+            ", \"unknownRequests\": " +
+            metrics.unknownRequests() +
             " }")
             .getBytes(StandardCharsets.UTF_8);
     }
