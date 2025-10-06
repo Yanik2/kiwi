@@ -13,6 +13,8 @@ public record ObservabilityResponse(
             metrics.acceptedConnections() +
             ", \"con.closed\": " +
             metrics.closedConnections() +
+            ", \"con.refused\": " +
+            metrics.refusedConnections() +
             ", \"con.current\": " +
             metrics.currentClients() +
             ", \"bytes.in\": " +

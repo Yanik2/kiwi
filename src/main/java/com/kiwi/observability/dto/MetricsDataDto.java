@@ -3,6 +3,7 @@ package com.kiwi.observability.dto;
 public record MetricsDataDto(
     long acceptedConnections,
     long closedConnections,
+    long refusedConnections,
     long currentClients,
     long bytesIn,
     long bytesOut,
