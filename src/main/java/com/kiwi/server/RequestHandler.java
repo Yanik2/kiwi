@@ -5,7 +5,7 @@ import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.dto.TCPResponse;
-import com.kiwi.exception.ProtocolException;
+import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.observability.RequestMetrics;
 import java.io.InputStream;
 import java.net.Socket;
@@ -50,6 +50,7 @@ public class RequestHandler {
                 final var writeResult =
                     responseWriter.writeResponse(socket, new TCPResponse(ERROR_MESSAGE, false));
                 metrics.onWrite(writeResult.writtenBytes());
+                metrics.onProtoError(e.getProtocolErrorCode());
             }
         } catch (SocketTimeoutException e) {
             log.log(Level.WARNING, "Socket timed out");

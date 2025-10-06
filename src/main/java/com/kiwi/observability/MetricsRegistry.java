@@ -12,6 +12,7 @@ final class MetricsRegistry {
     private final ConnectionCounter connectionCounter = new ConnectionCounter();
     private final BytesCounter bytesCounter = new BytesCounter();
     private final MethodCounter methodCounter = new MethodCounter();
+    private final ProtoErrorCounter protoErrorCounter = new ProtoErrorCounter();
 
     public static MetricsRegistry getInstance() {
         return instance;
@@ -60,6 +61,34 @@ final class MetricsRegistry {
         methodCounter.onUnknown();
     }
 
+    public void addUnknownMethodError() {
+        protoErrorCounter.onUnknownMethod();
+    }
+
+    public void addHeaderTooLongError() {
+        protoErrorCounter.onHeaderTooLong();
+    }
+
+    public void addValueTooLongError() {
+        protoErrorCounter.onValueTooLong();
+    }
+
+    public void addKeyTooLongError() {
+        protoErrorCounter.onKeyTooLong();
+    }
+
+    public void addUnexpectedEndOfFileError() {
+        protoErrorCounter.onUnexpectedEndOfFile();
+    }
+
+    public void addNonDigitInLengthError() {
+        protoErrorCounter.onNonDigitInLength();
+    }
+
+    public void addInvalidSeparatorError() {
+        protoErrorCounter.onInvalidSeparator();
+    }
+
     public long getAcceptedConnections() {
         return connectionCounter.connectionsAccepted.sum();
     }
@@ -100,8 +129,32 @@ final class MetricsRegistry {
         return methodCounter.infoCounter.sum();
     }
 
-    public long getUnknownRequests() {
-        return methodCounter.unknownCounter.sum();
+    public long getUnknownMethods() {
+        return protoErrorCounter.unknownMethodCounter.sum();
+    }
+
+    public long getHeaderTooLong() {
+        return protoErrorCounter.headerTooLongCounter.sum();
+    }
+
+    public long getValueTooLong() {
+        return protoErrorCounter.valueTooLongCounter.sum();
+    }
+
+    public long getKeyTooLong() {
+        return protoErrorCounter.keyTooLongCounter.sum();
+    }
+
+    public long getUnexpectedEndOfFile() {
+        return protoErrorCounter.unexpectedEndOfFileCounter.sum();
+    }
+
+    public long getNonDigitInLength() {
+        return protoErrorCounter.nonDigitInLengthCounter.sum();
+    }
+
+    public long getInvalidSeparator() {
+        return protoErrorCounter.invalidSeparatorCounter.sum();
     }
 
     private static class MethodCounter {
@@ -168,6 +221,44 @@ final class MetricsRegistry {
                     + ", reset to 0");
                 clientsCurrent.set(0);
             }
+        }
+    }
+
+    private static class ProtoErrorCounter {
+        private final LongAdder unknownMethodCounter = new LongAdder();
+        private final LongAdder headerTooLongCounter = new LongAdder();
+        private final LongAdder valueTooLongCounter = new LongAdder();
+        private final LongAdder keyTooLongCounter = new LongAdder();
+        private final LongAdder unexpectedEndOfFileCounter = new LongAdder();
+        private final LongAdder nonDigitInLengthCounter = new LongAdder();
+        private final LongAdder invalidSeparatorCounter = new LongAdder();
+
+        private void onUnknownMethod() {
+            unknownMethodCounter.increment();
+        }
+
+        private void onHeaderTooLong() {
+            headerTooLongCounter.increment();
+        }
+
+        private void onValueTooLong() {
+            valueTooLongCounter.increment();
+        }
+
+        private void onKeyTooLong() {
+            keyTooLongCounter.increment();
+        }
+
+        private void onUnexpectedEndOfFile() {
+            unexpectedEndOfFileCounter.increment();
+        }
+
+        private void onNonDigitInLength() {
+            nonDigitInLengthCounter.increment();
+        }
+
+        private void onInvalidSeparator() {
+            invalidSeparatorCounter.increment();
         }
     }
 }

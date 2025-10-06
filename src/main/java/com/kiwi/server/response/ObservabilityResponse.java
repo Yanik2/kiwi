@@ -9,28 +9,40 @@ public record ObservabilityResponse(
     @Override
     public byte[] serialize() {
         return ("{ " +
-            "\"acceptedConnections\": " +
+            "\"con.accepted\": " +
             metrics.acceptedConnections() +
-            ", \"closedConnections\": " +
+            ", \"con.closed\": " +
             metrics.closedConnections() +
-            ", \"currentClients\": " +
+            ", \"con.current\": " +
             metrics.currentClients() +
-            ", \"bytesIn\": " +
+            ", \"bytes.in\": " +
             metrics.bytesIn() +
-            ", \"bytesOut\": " +
+            ", \"bytes.out\": " +
             metrics.bytesOut() +
-            ", \"getRequests\": " +
+            ", \"cmd.get\": " +
             metrics.getRequests() +
-            ", \"setRequests\": " +
+            ", \"cmd.set\": " +
             metrics.setRequests() +
-            ", \"deleteRequests\": " +
+            ", \"cmd.del\": " +
             metrics.deleteRequests() +
-            ", \"exitRequests\": " +
+            ", \"cmd.ext\": " +
             metrics.exitRequests() +
-            ", \"infoRequests\": " +
+            ", \"cmd.inf\": " +
             metrics.infoRequests() +
-            ", \"unknownRequests\": " +
-            metrics.unknownRequests() +
+            ", \"proto.err.unknown\": " +
+            metrics.unknownMethod() +
+            ", \"proto.err.headerlen\": " +
+            metrics.headerTooLong() +
+            ", \"proto.err.valuelen\": " +
+            metrics.valueTooLong() +
+            ", \"proto.err.keylen\": " +
+            metrics.keyTooLong() +
+            ", \"proto.err.eof\": " +
+            metrics.unexpectedEndOfFile() +
+            ", \"proto.err.nondigitlen\": " +
+            metrics.nonDigitInLength() +
+            ", \"proto.err.invalidseparator\": " +
+            metrics.invalidSeparator() +
             " }")
             .getBytes(StandardCharsets.UTF_8);
     }
