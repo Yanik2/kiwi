@@ -27,7 +27,7 @@ public final class MethodMetrics {
         metricsRegistry.addInfoRequest();
     }
 
-    public void onUnknown() {
-        metricsRegistry.addUnknownRequest();
+    public void onPing() {
+        metricsRegistry.addPingRequest();
     }
 }

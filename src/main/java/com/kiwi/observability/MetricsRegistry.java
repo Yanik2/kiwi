@@ -62,8 +62,8 @@ final class MetricsRegistry {
         methodCounter.onInfo();
     }
 
-    public void addUnknownRequest() {
-        methodCounter.onUnknown();
+    public void addPingRequest() {
+        methodCounter.onPing();
     }
 
     public void addUnknownMethodError() {
@@ -92,6 +92,10 @@ final class MetricsRegistry {
 
     public void addInvalidSeparatorError() {
         protoErrorCounter.onInvalidSeparator();
+    }
+
+    public void addMethodTooLongError() {
+        protoErrorCounter.onMethodTooLong();
     }
 
     // getters
@@ -140,6 +144,10 @@ final class MetricsRegistry {
         return methodCounter.infoCounter.sum();
     }
 
+    public long getPingRequests() {
+        return methodCounter.pingCounter.sum();
+    }
+
     public long getUnknownMethods() {
         return protoErrorCounter.unknownMethodCounter.sum();
     }
@@ -178,7 +186,7 @@ final class MetricsRegistry {
         private final LongAdder deleteCounter = new LongAdder();
         private final LongAdder exitCounter = new LongAdder();
         private final LongAdder infoCounter = new LongAdder();
-        private final LongAdder unknownCounter = new LongAdder();
+        private final LongAdder pingCounter = new LongAdder();
 
         private void onGet() {
             getCounter.increment();
@@ -200,8 +208,8 @@ final class MetricsRegistry {
             infoCounter.increment();
         }
 
-        private void onUnknown() {
-            unknownCounter.increment();
+        private void onPing() {
+            pingCounter.increment();
         }
     }
 
@@ -252,6 +260,7 @@ final class MetricsRegistry {
         private final LongAdder unexpectedEndOfFileCounter = new LongAdder();
         private final LongAdder nonDigitInLengthCounter = new LongAdder();
         private final LongAdder invalidSeparatorCounter = new LongAdder();
+        private final LongAdder methodTooLongCounter = new LongAdder();
 
         private void onUnknownMethod() {
             unknownMethodCounter.increment();
@@ -279,6 +288,10 @@ final class MetricsRegistry {
 
         private void onInvalidSeparator() {
             invalidSeparatorCounter.increment();
+        }
+
+        public void onMethodTooLong() {
+            methodTooLongCounter.increment();
         }
     }
 

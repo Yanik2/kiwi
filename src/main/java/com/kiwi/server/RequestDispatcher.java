@@ -10,6 +10,7 @@ import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.dto.TCPResponse;
 import com.kiwi.server.response.DataResponse;
 import com.kiwi.server.response.ObservabilityResponse;
+import com.kiwi.server.response.PingResponse;
 
 public class RequestDispatcher {
 
@@ -53,6 +54,10 @@ public class RequestDispatcher {
                     OK_MESSAGE,
                     true
                 );
+            }
+            case PING -> {
+                metrics.onPing();
+                yield new TCPResponse(new PingResponse(), OK_MESSAGE, true);
             }
         };
     }

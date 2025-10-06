@@ -31,6 +31,8 @@ public record ObservabilityResponse(
             metrics.exitRequests() +
             ", \"cmd.inf\": " +
             metrics.infoRequests() +
+            ", \"cmd.ping\": " +
+            metrics.pingRequests() +
             ", \"proto.err.unknown\": " +
             metrics.unknownMethod() +
             ", \"proto.err.headerlen\": " +

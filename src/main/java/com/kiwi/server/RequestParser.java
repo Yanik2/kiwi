@@ -3,6 +3,7 @@ package com.kiwi.server;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.HEADER_LEN_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.INVALID_SEPARATOR;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.KEY_TOO_LONG;
+import static com.kiwi.exception.protocol.ProtocolErrorCode.METHOD_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.NON_DIGIT_IN_LENGTH;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.UNEXPECTED_EOF;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.UNKNOWN_METHOD;
@@ -24,6 +25,8 @@ public class RequestParser {
     private static final int MAX_KEY_LENGTH = 4096;
     private static final int MAX_HEADER_VAL_LEN = 8;
     private static final int MAX_VAL_LEN = 10485760;
+    private static final int MAX_HEADER_METHOD_LEN = 1;
+    private static final int MAX_METHOD_LEN = 4;
 
     public TCPRequest parse(InputStreamWrapper is) {
         final var method = getMethod(is);
@@ -105,7 +108,14 @@ public class RequestParser {
     }
 
     private Method getMethod(InputStreamWrapper is) {
-        final var bytes = getBytesByLength(is, 3);
+        final var methodLen = getLength(is, MAX_HEADER_METHOD_LEN);
+        if (methodLen > MAX_METHOD_LEN) {
+            log.severe("Method length bigger than allowed 4 symbols: " + methodLen);
+            throw new ProtocolException("Method length bigger than allowed 4 symbols: " + methodLen,
+                METHOD_TOO_LONG);
+        }
+
+        final var bytes = getBytesByLength(is, methodLen);
         final var methodName = new String(bytes, StandardCharsets.UTF_8);
         try {
             return Method.valueOf(methodName);
