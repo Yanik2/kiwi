@@ -36,4 +36,12 @@ public final class RequestMetrics {
             case INVALID_SEPARATOR -> metricsRegistry.addInvalidSeparatorError();
         }
     }
+
+    public void onRefuse() {
+        metricsRegistry.addRefusedConnection();
+    }
+
+    public long getCurrentClients() {
+        return metricsRegistry.getCurrentClients();
+    }
 }

@@ -13,6 +13,7 @@ public class ObservabilityRequestHandler {
         return new MetricsDataDto(
             metricsRegistry.getAcceptedConnections(),
             metricsRegistry.getClosedConnections(),
+            metricsRegistry.getRefusedConnections(),
             metricsRegistry.getCurrentClients(),
             metricsRegistry.getBytesIn(),
             metricsRegistry.getBytesOut(),

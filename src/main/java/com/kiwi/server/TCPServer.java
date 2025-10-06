@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 public class TCPServer {
+    //TODO will be moved to properties in phase 5
     private static final int SOCKET_PORT = 8090;
 
     private final RequestHandler requestHandler;

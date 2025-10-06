@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 
 public class RequestHandler {
     private static final Logger log = Logger.getLogger(RequestHandler.class.getSimpleName());
+    //TODO will be moved to properties in phase 5
+    private static final int MAX_CLIENTS = 0;
 
     private final RequestDispatcher requestDispatcher;
     private final RequestParser requestParser;
@@ -30,6 +32,14 @@ public class RequestHandler {
     }
 
     public void handle(Socket socket) {
+        if (metrics.getCurrentClients() < MAX_CLIENTS) {
+            acceptConnection(socket);
+        } else {
+            refuseConnection(socket);
+        }
+    }
+
+    private void acceptConnection(Socket socket) {
         metrics.onAccept();
         try (socket) {
             try {
@@ -59,5 +69,17 @@ public class RequestHandler {
                 + e.getMessage());
         }
         metrics.onClose();
+    }
+
+    private void refuseConnection(Socket socket) {
+        log.info("Maximum clients exceeded, refusing connection. Max clients: " + MAX_CLIENTS
+            + ". Current clients: " + metrics.getCurrentClients());
+        try {
+            socket.setSoLinger(true, 0);
+            metrics.onRefuse();
+            socket.close();
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Unexpected error during refusing connection");
+        }
     }
 }

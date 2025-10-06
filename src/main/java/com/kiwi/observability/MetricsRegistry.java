@@ -30,6 +30,10 @@ final class MetricsRegistry {
         connectionCounter.onClosed();
     }
 
+    public void addRefusedConnection() {
+        connectionCounter.onRefused();
+    }
+
     public void addParsedBytes(long bytesIn) {
         this.bytesCounter.onBytesIn(bytesIn);
     }
@@ -90,12 +94,18 @@ final class MetricsRegistry {
         protoErrorCounter.onInvalidSeparator();
     }
 
+    // getters
+
     public long getAcceptedConnections() {
         return connectionCounter.connectionsAccepted.sum();
     }
 
     public long getClosedConnections() {
         return connectionCounter.connectionsClosed.sum();
+    }
+
+    public long getRefusedConnections() {
+        return connectionCounter.connectionRefused.sum();
     }
 
     public long getCurrentClients() {
@@ -212,6 +222,7 @@ final class MetricsRegistry {
         private final AtomicLong clientsCurrent = new AtomicLong(0);
         private final LongAdder connectionsAccepted = new LongAdder();
         private final LongAdder connectionsClosed = new LongAdder();
+        private final LongAdder connectionRefused = new LongAdder();
 
         private void onAccepted() {
             connectionsAccepted.increment();
@@ -226,6 +237,10 @@ final class MetricsRegistry {
                     + ", reset to 0");
                 clientsCurrent.set(0);
             }
+        }
+
+        private void onRefused() {
+            connectionRefused.increment();
         }
     }
 
