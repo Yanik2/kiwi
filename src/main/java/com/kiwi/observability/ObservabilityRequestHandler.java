@@ -1,5 +1,6 @@
 package com.kiwi.observability;
 
+import com.kiwi.config.properties.ProtocolProperties;
 import com.kiwi.observability.dto.MetricsDataDto;
 
 public class ObservabilityRequestHandler {
@@ -11,6 +12,8 @@ public class ObservabilityRequestHandler {
 
     public MetricsDataDto getMetricsInfo() {
         return new MetricsDataDto(
+            ProtocolProperties.PROTOCOL_VERSION,
+            ProtocolProperties.INFO_SCHEMA_VERSION,
             metricsRegistry.getAcceptedConnections(),
             metricsRegistry.getClosedConnections(),
             metricsRegistry.getRefusedConnections(),
