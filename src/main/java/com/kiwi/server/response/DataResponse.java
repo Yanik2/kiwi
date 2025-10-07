@@ -8,7 +8,6 @@ public record DataResponse(
 
     @Override
     public byte[] serialize() {
-        //TODO clarify on absent value
-        return value == null ? new byte[0] : value.getValue();
+        return value.getValue();
     }
 }

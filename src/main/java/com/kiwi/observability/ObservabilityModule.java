@@ -13,4 +13,8 @@ public class ObservabilityModule {
     public static MethodMetrics getMethodMetrics() {
         return new MethodMetrics(MetricsRegistry.getInstance());
     }
+
+    public static StorageMetrics getStorageMetrics() {
+        return new StorageMetrics(MetricsRegistry.getInstance());
+    }
 }
