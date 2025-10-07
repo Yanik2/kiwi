@@ -23,6 +23,7 @@ public record MetricsDataDto(
     long nonDigitInLength,
     long invalidSeparator,
     long serverStart,
-    long serverUptime
+    long serverUptime,
+    long ttlExpiredEviction
 ) {
 }

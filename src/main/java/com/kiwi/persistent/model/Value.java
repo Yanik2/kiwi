@@ -7,6 +7,10 @@ public class Value {
     private final byte[] value;
     private final ExpiryPolicy expiryPolicy;
 
+    public Value(byte[] value) {
+        this(value, null);
+    }
+
     public Value(byte[] value, ExpiryPolicy expiryPolicy) {
         this.value = value;
         this.expiryPolicy = expiryPolicy;

@@ -1,12 +1,11 @@
 package com.kiwi.persistent;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.kiwi.observability.ObservabilityModule;
 
 public class PersistentModule {
 
     public static Storage create() {
-        return new Storage();
+        return new Storage(ObservabilityModule.getStorageMetrics());
     }
 
 }

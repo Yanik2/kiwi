@@ -14,6 +14,7 @@ final class MetricsRegistry {
     private final MethodCounter methodCounter = new MethodCounter();
     private final ProtoErrorCounter protoErrorCounter = new ProtoErrorCounter();
     private final ServerCounters serverCounters = new ServerCounters();
+    private final StorageCounter storageCounter = new StorageCounter();
 
     public static MetricsRegistry getInstance() {
         return instance;
@@ -98,6 +99,10 @@ final class MetricsRegistry {
         protoErrorCounter.onMethodTooLong();
     }
 
+    public void addTtlExpiredEviction() {
+        storageCounter.onTtlExpiredEviction();
+    }
+
     // getters
 
     public long getAcceptedConnections() {
@@ -179,6 +184,12 @@ final class MetricsRegistry {
     public long getServerStart() {
         return serverCounters.startUpMillis;
     }
+
+    public long getTtlExpiredEviction() {
+        return storageCounter.ttlExpiredEvictions.sum();
+    }
+
+    // private classes
 
     private static class MethodCounter {
         private final LongAdder getCounter = new LongAdder();
@@ -297,5 +308,13 @@ final class MetricsRegistry {
 
     private static class ServerCounters {
         private final long startUpMillis = System.currentTimeMillis();
+    }
+
+    private static class StorageCounter {
+        private final LongAdder ttlExpiredEvictions = new LongAdder();
+
+        private void onTtlExpiredEviction() {
+            ttlExpiredEvictions.increment();
+        }
     }
 }

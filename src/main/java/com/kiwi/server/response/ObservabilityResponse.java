@@ -55,6 +55,8 @@ public record ObservabilityResponse(
             metrics.serverStart() +
             ", \"server.uptime\": " +
             metrics.serverUptime() +
+            ", \"storage.ttl.expired.eviction\": " +
+            metrics.ttlExpiredEviction() +
             " }")
             .getBytes(StandardCharsets.UTF_8);
     }
