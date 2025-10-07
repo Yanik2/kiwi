@@ -31,16 +31,21 @@ public class RequestDispatcher {
             case GET -> {
                 metrics.onGet();
                 yield new TCPResponse(
-                    new DataResponse(dataProcessor.getValue(request.key())), OK_MESSAGE, true);
+                    new DataResponse(
+                        dataProcessor.getValue(
+                            new DataRequest(request.key())
+                        )
+                    ), OK_MESSAGE, true
+                );
             }
             case SET -> {
                 metrics.onSet();
-                dataProcessor.processData(new DataRequest(request.key(), request.value()));
+                dataProcessor.setData(new DataRequest(request.key(), request.value()));
                 yield new TCPResponse(OK_MESSAGE);
             }
             case DEL -> {
                 metrics.onDelete();
-                dataProcessor.deleteValue(request.key());
+                dataProcessor.deleteValue(new DataRequest(request.key()));
                 yield new TCPResponse(OK_MESSAGE);
             }
             case EXT -> {
