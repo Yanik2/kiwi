@@ -34,7 +34,8 @@ public class ObservabilityRequestHandler {
             metricsRegistry.getNonDigitInLength(),
             metricsRegistry.getInvalidSeparator(),
             metricsRegistry.getServerStart(),
-            System.currentTimeMillis() - metricsRegistry.getServerStart()
+            System.currentTimeMillis() - metricsRegistry.getServerStart(),
+            metricsRegistry.getTtlExpiredEviction()
         );
     }
 }
