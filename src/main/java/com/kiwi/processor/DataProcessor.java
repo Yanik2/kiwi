@@ -24,7 +24,7 @@ public class DataProcessor {
     public Value getValue(DataRequest request) {
         final var storageRequest = new StorageRequest(new Key(request.key()));
         final var value = storage.getData(storageRequest);
-        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
+        if (value != null && value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
             storage.delete(storageRequest);
         }
         return value;
