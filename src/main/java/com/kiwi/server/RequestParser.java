@@ -13,8 +13,6 @@ import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.exception.protocol.ProtocolException;
-import com.kiwi.persistent.dto.Key;
-import com.kiwi.persistent.dto.Value;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
@@ -43,7 +41,7 @@ public class RequestParser {
         }
     }
 
-    private Value getValue(InputStreamWrapper is) {
+    private byte[] getValue(InputStreamWrapper is) {
         final int valueLen = getLength(is, MAX_HEADER_VAL_LEN);
         if (valueLen > MAX_VAL_LEN) {
             log.severe("Value length bigger than allowed 10MB: " + valueLen);
@@ -51,10 +49,10 @@ public class RequestParser {
                 VALUE_TOO_LONG);
         }
 
-        return new Value(getBytesByLength(is, valueLen));
+        return getBytesByLength(is, valueLen);
     }
 
-    private Key getKey(InputStreamWrapper is) {
+    private byte[] getKey(InputStreamWrapper is) {
         final int keyLen = getLength(is, MAX_HEADER_KEY_LENGTH);
         if (keyLen > MAX_KEY_LENGTH) {
             log.severe("Key length bigger than allowed 4KB: " + keyLen);
@@ -62,7 +60,7 @@ public class RequestParser {
                 KEY_TOO_LONG);
         }
 
-        return new Key(getBytesByLength(is, keyLen));
+        return getBytesByLength(is, keyLen);
     }
 
     private byte[] getBytesByLength(InputStreamWrapper is, int length) {

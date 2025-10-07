@@ -1,4 +1,4 @@
-package com.kiwi.persistent.dto;
+package com.kiwi.persistent.model;
 
 import java.util.Arrays;
 

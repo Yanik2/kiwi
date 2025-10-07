@@ -1,24 +1,24 @@
 package com.kiwi.persistent;
 
-import com.kiwi.dto.DataRequest;
-import com.kiwi.persistent.dto.Key;
-import com.kiwi.persistent.dto.Value;
+import com.kiwi.persistent.dto.StorageRequest;
+import com.kiwi.persistent.model.Key;
+import com.kiwi.persistent.model.Value;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Storage {
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
 
-    public void save(DataRequest request) {
-        inMemoryStorage.put(request.key(), request.data());
+    public void save(StorageRequest request) {
+        inMemoryStorage.put(request.key(), request.value());
     }
 
-    public Value getData(Key key) {
+    public Value getData(StorageRequest request) {
         //TODO null check?
-        return inMemoryStorage.get(key);
+        return inMemoryStorage.get(request.key());
     }
 
-    public void delete(Key key) {
-        inMemoryStorage.remove(key);
+    public void delete(StorageRequest request) {
+        inMemoryStorage.remove(request.key());
     }
 }
