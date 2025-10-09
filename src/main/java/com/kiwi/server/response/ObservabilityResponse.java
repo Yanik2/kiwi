@@ -33,6 +33,12 @@ public record ObservabilityResponse(
             metrics.infoRequests() +
             ", \"cmd.ping\": " +
             metrics.pingRequests() +
+            ", \"cmd.expire\": " +
+            metrics.expireRequests() +
+            ", \"cmd.pexpire\": " +
+            metrics.pexpireRequests() +
+            ", \"cmd.persist\": " +
+            metrics.persistRequests() +
             ", \"proto.version\": " +
             metrics.protocolVersion() +
             ", \"proto.infoschemaversion\": " +

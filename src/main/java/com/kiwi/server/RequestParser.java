@@ -4,14 +4,14 @@ import static com.kiwi.exception.protocol.ProtocolErrorCode.HEADER_LEN_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.INVALID_SEPARATOR;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.KEY_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.METHOD_TOO_LONG;
-import static com.kiwi.exception.protocol.ProtocolErrorCode.NON_DIGIT_IN_LENGTH;
+import static com.kiwi.exception.protocol.ProtocolErrorCode.NON_DIGIT_IN_NUMERIC_VALUE;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.UNEXPECTED_EOF;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.UNKNOWN_METHOD;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_LONG;
 import static com.kiwi.server.Method.SET;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.exception.protocol.ProtocolException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
@@ -26,18 +26,18 @@ public class RequestParser {
     private static final int MAX_HEADER_METHOD_LEN = 1;
     private static final int MAX_METHOD_LEN = 4;
 
-    public TCPRequest parse(InputStreamWrapper is) {
+    public ParsedRequest parse(InputStreamWrapper is) {
         final var method = getMethod(is);
 
         if (method.isKeyless()) {
-            return new TCPRequest(method);
+            return new ParsedRequest(method);
         }
 
         final var key = getKey(is);
         if (SET.equals(method)) {
-            return new TCPRequest(method, key, getValue(is));
+            return new ParsedRequest(method, key, getValue(is));
         } else {
-            return new TCPRequest(method, key);
+            return new ParsedRequest(method, key);
         }
     }
 
@@ -90,7 +90,7 @@ public class RequestParser {
                } else {
                    log.severe("Value for single byte for length header is out of range 0-9");
                    throw new ProtocolException("Value for single byte for length header is out of range 0-9",
-                       NON_DIGIT_IN_LENGTH);
+                       NON_DIGIT_IN_NUMERIC_VALUE);
                }
            }
            counter++;

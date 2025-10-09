@@ -1,15 +1,27 @@
 package com.kiwi.server;
 
+import static com.kiwi.server.Method.DEL;
+import static com.kiwi.server.Method.EXPIRE;
 import static com.kiwi.server.Method.EXT;
+import static com.kiwi.server.Method.GET;
+import static com.kiwi.server.Method.INF;
+import static com.kiwi.server.Method.PING;
+import static com.kiwi.server.Method.SET;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.dispatcher.command.RequestCommandHandler;
+import com.kiwi.server.dispatcher.command.RequestDispatcher;
+import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.server.dto.TCPResponse;
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.observability.RequestMetrics;
+import com.kiwi.server.validator.ExpireValidator;
+import com.kiwi.server.validator.NoOpValidator;
+import com.kiwi.server.validator.RequestValidator;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,13 +34,31 @@ public class RequestHandler {
     private final RequestParser requestParser;
     private final ResponseWriter responseWriter;
     private final RequestMetrics metrics;
+    private final Map<Method, RequestValidator> requestValidators;
 
-    public RequestHandler(RequestDispatcher requestDispatcher, RequestParser requestParser,
-                          ResponseWriter responseWriter, RequestMetrics metrics) {
+    private RequestHandler(RequestDispatcher requestDispatcher, RequestParser requestParser,
+                          ResponseWriter responseWriter, RequestMetrics metrics,
+                          Map<Method, RequestValidator> requestValidators) {
         this.requestDispatcher = requestDispatcher;
         this.requestParser = requestParser;
         this.responseWriter = responseWriter;
         this.metrics = metrics;
+        this.requestValidators = requestValidators;
+    }
+
+    public static RequestHandler create(RequestDispatcher requestDispatcher, RequestParser requestParser,
+                                        ResponseWriter responseWriter, RequestMetrics metrics) {
+        final var validators = Map.of(
+            GET, NoOpValidator.getInstance(),
+            SET, NoOpValidator.getInstance(),
+            DEL, NoOpValidator.getInstance(),
+            EXT, NoOpValidator.getInstance(),
+            INF, NoOpValidator.getInstance(),
+            PING, NoOpValidator.getInstance(),
+            EXPIRE, new ExpireValidator()
+        );
+
+        return new RequestHandler(requestDispatcher, requestParser, responseWriter, metrics, validators);
     }
 
     public void handle(Socket socket) {
@@ -46,12 +76,14 @@ public class RequestHandler {
                 final InputStream is = socket.getInputStream();
                 while (true) {
                     final var isWrapper = new InputStreamWrapper(is);
-                    final TCPRequest request = requestParser.parse(isWrapper);
+                    final ParsedRequest request = requestParser.parse(isWrapper);
+                    final var validatedRequest = requestValidators.getOrDefault(request.getMethod(),
+                        NoOpValidator.getInstance()).validate(request);
                     metrics.onParse(isWrapper.getCounter());
-                    final TCPResponse response = requestDispatcher.dispatch(request);
+                    final TCPResponse response = requestDispatcher.dispatch(validatedRequest);
                     final var writeResult = responseWriter.writeResponse(socket, response);
                     metrics.onWrite(writeResult.writtenBytes());
-                    if (EXT.equals(request.method())) {
+                    if (EXT.equals(validatedRequest.getMethod())) {
                         break;
                     }
                 }

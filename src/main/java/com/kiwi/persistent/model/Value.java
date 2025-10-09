@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class Value {
     private final byte[] value;
-    private final ExpiryPolicy expiryPolicy;
+    private ExpiryPolicy expiryPolicy;
 
     public Value(byte[] value) {
         this(value, null);
@@ -22,6 +22,10 @@ public class Value {
 
     public ExpiryPolicy getExpiryPolicy() {
         return expiryPolicy;
+    }
+
+    public void setExpiryPolicy(ExpiryPolicy expiryPolicy) {
+        this.expiryPolicy = expiryPolicy;
     }
 
     @Override
