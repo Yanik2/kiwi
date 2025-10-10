@@ -24,7 +24,7 @@ public class RequestParser {
     private static final int MAX_HEADER_VAL_LEN = 8;
     private static final int MAX_VAL_LEN = 10485760;
     private static final int MAX_HEADER_METHOD_LEN = 1;
-    private static final int MAX_METHOD_LEN = 4;
+    private static final int MAX_METHOD_LEN = 7;
 
     public ParsedRequest parse(InputStreamWrapper is) {
         final var method = getMethod(is);
@@ -34,7 +34,7 @@ public class RequestParser {
         }
 
         final var key = getKey(is);
-        if (SET.equals(method)) {
+        if (method.withValue()) {
             return new ParsedRequest(method, key, getValue(is));
         } else {
             return new ParsedRequest(method, key);

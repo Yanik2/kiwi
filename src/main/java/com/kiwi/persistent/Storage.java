@@ -6,6 +6,7 @@ import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.ExpiryPolicy;
 import com.kiwi.persistent.model.expiration.HasTtlExpiration;
+import com.kiwi.persistent.model.expiration.NoOpExpiration;
 import com.kiwi.server.dto.ExpireRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,8 +53,8 @@ public class Storage {
         }
 
         if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
-            storageMetrics.onTtlExpiredEviction();
             inMemoryStorage.remove(key);
+            storageMetrics.onTtlExpiredEviction();
             return false;
         }
 
@@ -66,5 +67,25 @@ public class Storage {
 
         value.setExpiryPolicy(expiryPolicy);
         return true;
+    }
+
+    public boolean persist(Key key) {
+        final var value = inMemoryStorage.get(key);
+        if (value == null) {
+            return false;
+        }
+
+        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
+            inMemoryStorage.remove(key);
+            storageMetrics.onTtlExpiredEviction();
+            return false;
+        }
+
+        if (value.getExpiryPolicy().hasTtl()) {
+            value.setExpiryPolicy(NoOpExpiration.getInstance());
+            return true;
+        } else {
+            return false;
+        }
     }
 }

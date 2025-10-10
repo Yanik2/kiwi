@@ -5,6 +5,8 @@ import static com.kiwi.server.Method.EXPIRE;
 import static com.kiwi.server.Method.EXT;
 import static com.kiwi.server.Method.GET;
 import static com.kiwi.server.Method.INF;
+import static com.kiwi.server.Method.PERSIST;
+import static com.kiwi.server.Method.PEXPIRE;
 import static com.kiwi.server.Method.PING;
 import static com.kiwi.server.Method.SET;
 import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
@@ -31,6 +33,7 @@ public class RequestDispatcher {
     public static RequestDispatcher create(MetricsProvider metricsProvider,
                                            MethodMetrics metrics,
                                            Storage storage) {
+        final var expireCommandHandler = new ExpireCommandHandler(storage);
         final var commands = Map.of(
             GET, new GetCommandHandler(storage),
             SET, new SetCommandHandler(storage),
@@ -38,7 +41,9 @@ public class RequestDispatcher {
             EXT, new ExitCommandHandler(),
             INF, new InfoCommandHandler(metricsProvider),
             PING, new PingCommandHandler(),
-            EXPIRE, new ExpireCommandHandler(storage)
+            EXPIRE, expireCommandHandler,
+            PEXPIRE, expireCommandHandler,
+            PERSIST, new PersistCommandHandler(storage)
         );
         return new RequestDispatcher(metrics, commands);
     }

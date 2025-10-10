@@ -1,5 +1,7 @@
 package com.kiwi.server.validator;
 
+import static com.kiwi.server.Method.EXPIRE;
+
 import com.kiwi.exception.protocol.ProtocolErrorCode;
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.server.dto.ExpireRequest;
@@ -10,13 +12,18 @@ import java.util.logging.Logger;
 
 public class ExpireValidator implements RequestValidator {
     private static final Logger logger = Logger.getLogger(ExpireValidator.class.getName());
-    private static final int MAX_VALUE_LENGTH = 16;
+    private static final int EXPIRE_MAX_VALUE_LENGTH = 16;
+    private static final int PEXPIRE_MAX_VALUE_LENGTH = 19;
     private static final short ZERO_ASCII = 48;
 
     @Override
     public TCPRequest validate(ParsedRequest request) {
         final byte[] value = request.getValue();
-        if (value.length > MAX_VALUE_LENGTH) {
+        final var maxLength = EXPIRE.equals(request.getMethod())
+            ? EXPIRE_MAX_VALUE_LENGTH
+            : PEXPIRE_MAX_VALUE_LENGTH;
+
+        if (value.length > maxLength) {
             logger.log(Level.SEVERE, "Length for value in expiration request is too long");
             throw new ProtocolException("Length for value in expiration request is too long",
                 ProtocolErrorCode.VALUE_TOO_LONG);
@@ -36,7 +43,7 @@ public class ExpireValidator implements RequestValidator {
             result += digit;
         }
 
-        result *= 1000;
+        result = EXPIRE.equals(request.getMethod()) ? result * 1000 : result;
         if (result < 0) {
             logger.log(Level.SEVERE, "Seconds value is too big for expiration request");
             throw new ProtocolException("Seconds value is too big for expiration request",

@@ -1,7 +1,6 @@
 package com.kiwi;
 
 import com.kiwi.persistent.PersistentModule;
-import com.kiwi.processor.ProcessorModule;
 import com.kiwi.server.factory.ServerModule;
 import java.io.IOException;
 import java.util.logging.Logger;

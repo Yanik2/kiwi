@@ -5,14 +5,9 @@ import com.kiwi.persistent.model.Value;
 
 public record StorageRequest(
     Key key,
-    Value value,
-    long expiration
+    Value value
 ) {
     public StorageRequest(Key key) {
-        this(key, null, 0L);
-    }
-
-    public StorageRequest(Key key, long expiration) {
-        this(key, null, expiration);
+        this(key, null);
     }
 }

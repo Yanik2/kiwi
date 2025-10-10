@@ -5,6 +5,8 @@ import static com.kiwi.server.Method.EXPIRE;
 import static com.kiwi.server.Method.EXT;
 import static com.kiwi.server.Method.GET;
 import static com.kiwi.server.Method.INF;
+import static com.kiwi.server.Method.PERSIST;
+import static com.kiwi.server.Method.PEXPIRE;
 import static com.kiwi.server.Method.PING;
 import static com.kiwi.server.Method.SET;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
@@ -48,6 +50,7 @@ public class RequestHandler {
 
     public static RequestHandler create(RequestDispatcher requestDispatcher, RequestParser requestParser,
                                         ResponseWriter responseWriter, RequestMetrics metrics) {
+        final var expireValidator = new ExpireValidator();
         final var validators = Map.of(
             GET, NoOpValidator.getInstance(),
             SET, NoOpValidator.getInstance(),
@@ -55,7 +58,9 @@ public class RequestHandler {
             EXT, NoOpValidator.getInstance(),
             INF, NoOpValidator.getInstance(),
             PING, NoOpValidator.getInstance(),
-            EXPIRE, new ExpireValidator()
+            EXPIRE, expireValidator,
+            PEXPIRE, expireValidator,
+            PERSIST, NoOpValidator.getInstance()
         );
 
         return new RequestHandler(requestDispatcher, requestParser, responseWriter, metrics, validators);
