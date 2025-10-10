@@ -13,14 +13,14 @@ public final class TtlResponse implements SerializableValue {
 
     @Override
     public byte[] serialize() {
-        if (ttl != -1 && ttl != -2) {
-            if (ttl < -2) {
+        if (ttl <= 0) {
+            if (ttl == 0 || ttl < -2) {
                 return new byte[]{48};
             } else {
-                return serializeLong(ttl);
+                return new byte[]{45, (byte) (-ttl + 48)};
             }
         } else {
-            return new byte[]{45, (byte) (-ttl + 48)};
+            return serializeLong(ttl);
         }
     }
 
