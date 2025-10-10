@@ -5,13 +5,15 @@ import com.kiwi.persistent.dto.StorageRequest;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.ExpiryPolicy;
-import com.kiwi.persistent.model.expiration.HasTtlExpiration;
 import com.kiwi.persistent.model.expiration.NoOpExpiration;
-import com.kiwi.server.dto.ExpireRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Storage {
+    private static final long TTL_RESPONSE_NOT_FOUND = -2L;
+    private static final long TTL_RESPONSE_NO_TTL = -1L;
+
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
 
     private final StorageMetrics storageMetrics;
@@ -25,15 +27,7 @@ public class Storage {
     }
 
     public Value getData(StorageRequest request) {
-        final var value = inMemoryStorage.get(request.key());
-
-        if (value == null || value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
-            inMemoryStorage.remove(request.key());
-            storageMetrics.onTtlExpiredEviction();
-            return new Value(new byte[0]);
-        } else {
-            return value;
-        }
+        return expirationGate(request.key()).orElseGet(() -> new Value(new byte[0]));
     }
 
     public void delete(StorageRequest request) {
@@ -46,15 +40,8 @@ public class Storage {
     }
 
     public boolean updateExpiration(Key key, ExpiryPolicy expiryPolicy) {
-        final var value = inMemoryStorage.get(key);
-
-        if (value == null) {
-            return false;
-        }
-
-        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
-            inMemoryStorage.remove(key);
-            storageMetrics.onTtlExpiredEviction();
+        final var value = expirationGate(key);
+        if (value.isEmpty()) {
             return false;
         }
 
@@ -65,21 +52,17 @@ public class Storage {
             }
         }
 
-        value.setExpiryPolicy(expiryPolicy);
+        value.get().setExpiryPolicy(expiryPolicy);
         return true;
     }
 
     public boolean persist(Key key) {
-        final var value = inMemoryStorage.get(key);
-        if (value == null) {
+        final var optionalValue = expirationGate(key);
+        if (optionalValue.isEmpty()) {
             return false;
         }
 
-        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
-            inMemoryStorage.remove(key);
-            storageMetrics.onTtlExpiredEviction();
-            return false;
-        }
+        final var value = optionalValue.get();
 
         if (value.getExpiryPolicy().hasTtl()) {
             value.setExpiryPolicy(NoOpExpiration.getInstance());
@@ -87,5 +70,33 @@ public class Storage {
         } else {
             return false;
         }
+    }
+
+    public long getTtl(Key key) {
+        final var value = expirationGate(key);
+        if (value.isEmpty()) {
+            return TTL_RESPONSE_NOT_FOUND;
+        }
+
+        if (value.get().getExpiryPolicy().hasTtl()) {
+            return value.get().getExpiryPolicy().remainingTime(System.currentTimeMillis());
+        } else {
+            return TTL_RESPONSE_NO_TTL;
+        }
+    }
+
+    private Optional<Value> expirationGate(Key key) {
+        final var value = inMemoryStorage.get(key);
+        if (value == null) {
+            return Optional.empty();
+        }
+
+        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
+            inMemoryStorage.remove(key);
+            storageMetrics.onTtlExpiredEviction();
+            return Optional.empty();
+        }
+
+        return Optional.of(value);
     }
 }

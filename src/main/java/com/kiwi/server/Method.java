@@ -11,7 +11,9 @@ public enum Method {
     PING,
     EXPIRE,
     PEXPIRE,
-    PERSIST;
+    PERSIST,
+    TTL,
+    PTTL;
 
     private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING);
     private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE);
