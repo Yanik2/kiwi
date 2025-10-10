@@ -32,7 +32,7 @@ public final class RequestMetrics {
             case HEADER_LEN_TOO_LONG -> metricsRegistry.addHeaderTooLongError();
             case VALUE_TOO_LONG -> metricsRegistry.addValueTooLongError();
             case UNEXPECTED_EOF -> metricsRegistry.addUnexpectedEndOfFileError();
-            case NON_DIGIT_IN_LENGTH -> metricsRegistry.addNonDigitInLengthError();
+            case NON_DIGIT_IN_NUMERIC_VALUE -> metricsRegistry.addNonDigitInLengthError();
             case INVALID_SEPARATOR -> metricsRegistry.addInvalidSeparatorError();
             case METHOD_TOO_LONG -> metricsRegistry.addMethodTooLongError();
         }

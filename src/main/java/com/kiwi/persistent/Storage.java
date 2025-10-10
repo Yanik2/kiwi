@@ -4,6 +4,10 @@ import com.kiwi.observability.StorageMetrics;
 import com.kiwi.persistent.dto.StorageRequest;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
+import com.kiwi.persistent.model.expiration.ExpiryPolicy;
+import com.kiwi.persistent.model.expiration.HasTtlExpiration;
+import com.kiwi.persistent.model.expiration.NoOpExpiration;
+import com.kiwi.server.dto.ExpireRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,5 +43,49 @@ public class Storage {
             storageMetrics.onTtlExpiredEviction();
         }
         inMemoryStorage.remove(request.key());
+    }
+
+    public boolean updateExpiration(Key key, ExpiryPolicy expiryPolicy) {
+        final var value = inMemoryStorage.get(key);
+
+        if (value == null) {
+            return false;
+        }
+
+        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
+            inMemoryStorage.remove(key);
+            storageMetrics.onTtlExpiredEviction();
+            return false;
+        }
+
+        if (expiryPolicy.hasTtl()) {
+            if (expiryPolicy.remainingTime(System.currentTimeMillis()) <= 0) {
+                inMemoryStorage.remove(key);
+                return false;
+            }
+        }
+
+        value.setExpiryPolicy(expiryPolicy);
+        return true;
+    }
+
+    public boolean persist(Key key) {
+        final var value = inMemoryStorage.get(key);
+        if (value == null) {
+            return false;
+        }
+
+        if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
+            inMemoryStorage.remove(key);
+            storageMetrics.onTtlExpiredEviction();
+            return false;
+        }
+
+        if (value.getExpiryPolicy().hasTtl()) {
+            value.setExpiryPolicy(NoOpExpiration.getInstance());
+            return true;
+        } else {
+            return false;
+        }
     }
 }

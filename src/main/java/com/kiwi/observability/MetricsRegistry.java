@@ -67,6 +67,18 @@ final class MetricsRegistry {
         methodCounter.onPing();
     }
 
+    public void addExpireRequest() {
+        methodCounter.onExpire();
+    }
+
+    public void addPexpireRequest() {
+        methodCounter.onPexpire();
+    }
+
+    public void addPersistRequest() {
+        methodCounter.onPersist();
+    }
+
     public void addUnknownMethodError() {
         protoErrorCounter.onUnknownMethod();
     }
@@ -153,6 +165,18 @@ final class MetricsRegistry {
         return methodCounter.pingCounter.sum();
     }
 
+    public long getExpireRequests() {
+        return methodCounter.expireCounter.sum();
+    }
+
+    public long getPexpireRequests() {
+        return methodCounter.pexpireCounter.sum();
+    }
+
+    public long getPersistRequests() {
+        return methodCounter.persistCounter.sum();
+    }
+
     public long getUnknownMethods() {
         return protoErrorCounter.unknownMethodCounter.sum();
     }
@@ -198,6 +222,9 @@ final class MetricsRegistry {
         private final LongAdder exitCounter = new LongAdder();
         private final LongAdder infoCounter = new LongAdder();
         private final LongAdder pingCounter = new LongAdder();
+        private final LongAdder expireCounter = new LongAdder();
+        private final LongAdder pexpireCounter = new LongAdder();
+        private final LongAdder persistCounter = new LongAdder();
 
         private void onGet() {
             getCounter.increment();
@@ -221,6 +248,18 @@ final class MetricsRegistry {
 
         private void onPing() {
             pingCounter.increment();
+        }
+
+        private void onExpire() {
+            expireCounter.increment();
+        }
+
+        private void onPexpire() {
+            pexpireCounter.increment();
+        }
+
+        private void onPersist() {
+            persistCounter.increment();
         }
     }
 

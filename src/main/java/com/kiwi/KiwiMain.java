@@ -1,7 +1,6 @@
 package com.kiwi;
 
 import com.kiwi.persistent.PersistentModule;
-import com.kiwi.processor.ProcessorModule;
 import com.kiwi.server.factory.ServerModule;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -12,8 +11,7 @@ public class KiwiMain {
     public static void main(String[] args) throws IOException {
         log.info("Starting Kiwi");
         final var storage = PersistentModule.create();
-        final var dataProcessor = ProcessorModule.create(storage);
-        final var server = ServerModule.create(dataProcessor);
+        final var server = ServerModule.create(storage);
         server.start();
     }
 }

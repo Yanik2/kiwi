@@ -2,8 +2,8 @@ package com.kiwi.observability;
 
 public class ObservabilityModule {
 
-    public static ObservabilityRequestHandler getRequestHandler() {
-        return new ObservabilityRequestHandler(MetricsRegistry.getInstance());
+    public static MetricsProvider getRequestHandler() {
+        return new MetricsProvider(MetricsRegistry.getInstance());
     }
 
     public static RequestMetrics getRequestMetrics() {

@@ -3,8 +3,8 @@ package com.kiwi.observability;
 import com.kiwi.config.properties.ProtocolProperties;
 import com.kiwi.observability.dto.MetricsDataDto;
 
-public class ObservabilityRequestHandler {
-    ObservabilityRequestHandler(MetricsRegistry metricsRegistry) {
+public class MetricsProvider {
+    MetricsProvider(MetricsRegistry metricsRegistry) {
         this.metricsRegistry = metricsRegistry;
     }
 
@@ -26,6 +26,9 @@ public class ObservabilityRequestHandler {
             metricsRegistry.getExitRequests(),
             metricsRegistry.getInfoRequests(),
             metricsRegistry.getPingRequests(),
+            metricsRegistry.getExpireRequests(),
+            metricsRegistry.getPexpireRequests(),
+            metricsRegistry.getPersistRequests(),
             metricsRegistry.getUnknownMethods(),
             metricsRegistry.getHeaderTooLong(),
             metricsRegistry.getValueTooLong(),
