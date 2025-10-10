@@ -8,7 +8,9 @@ import static com.kiwi.server.Method.INF;
 import static com.kiwi.server.Method.PERSIST;
 import static com.kiwi.server.Method.PEXPIRE;
 import static com.kiwi.server.Method.PING;
+import static com.kiwi.server.Method.PTTL;
 import static com.kiwi.server.Method.SET;
+import static com.kiwi.server.Method.TTL;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
 import com.kiwi.server.dispatcher.command.RequestCommandHandler;
@@ -23,6 +25,9 @@ import com.kiwi.server.validator.RequestValidator;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,19 +56,22 @@ public class RequestHandler {
     public static RequestHandler create(RequestDispatcher requestDispatcher, RequestParser requestParser,
                                         ResponseWriter responseWriter, RequestMetrics metrics) {
         final var expireValidator = new ExpireValidator();
-        final var validators = Map.of(
-            GET, NoOpValidator.getInstance(),
-            SET, NoOpValidator.getInstance(),
-            DEL, NoOpValidator.getInstance(),
-            EXT, NoOpValidator.getInstance(),
-            INF, NoOpValidator.getInstance(),
-            PING, NoOpValidator.getInstance(),
-            EXPIRE, expireValidator,
-            PEXPIRE, expireValidator,
-            PERSIST, NoOpValidator.getInstance()
-        );
+        final var validators = new EnumMap<Method, RequestValidator>(Method.class);
 
-        return new RequestHandler(requestDispatcher, requestParser, responseWriter, metrics, validators);
+        validators.put(GET, NoOpValidator.getInstance());
+        validators.put(SET, NoOpValidator.getInstance());
+        validators.put(DEL, NoOpValidator.getInstance());
+        validators.put(EXT, NoOpValidator.getInstance());
+        validators.put(INF, NoOpValidator.getInstance());
+        validators.put(PING, NoOpValidator.getInstance());
+        validators.put(EXPIRE, expireValidator);
+        validators.put(PEXPIRE, expireValidator);
+        validators.put(PERSIST, NoOpValidator.getInstance());
+        validators.put(TTL, NoOpValidator.getInstance());
+        validators.put(PTTL, NoOpValidator.getInstance());
+
+        return new RequestHandler(requestDispatcher, requestParser, responseWriter, metrics,
+            Collections.unmodifiableMap(validators));
     }
 
     public void handle(Socket socket) {

@@ -9,9 +9,12 @@ public class KiwiMain {
     private static final Logger log = Logger.getLogger(KiwiMain.class.getName());
 
     public static void main(String[] args) throws IOException {
-        log.info("Starting Kiwi");
+        log.info("Starting initialization Kiwi");
+        final long start = System.currentTimeMillis();
         final var storage = PersistentModule.create();
         final var server = ServerModule.create(storage);
+        final long end = System.currentTimeMillis();
+        log.info("Kiwi initialized in [" + (end - start) + "]ms, starting server");
         server.start();
     }
 }

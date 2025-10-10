@@ -8,7 +8,9 @@ import static com.kiwi.server.Method.INF;
 import static com.kiwi.server.Method.PERSIST;
 import static com.kiwi.server.Method.PEXPIRE;
 import static com.kiwi.server.Method.PING;
+import static com.kiwi.server.Method.PTTL;
 import static com.kiwi.server.Method.SET;
+import static com.kiwi.server.Method.TTL;
 import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.observability.MethodMetrics;
@@ -17,6 +19,8 @@ import com.kiwi.persistent.Storage;
 import com.kiwi.server.Method;
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.dto.TCPResponse;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class RequestDispatcher {
@@ -34,18 +38,23 @@ public class RequestDispatcher {
                                            MethodMetrics metrics,
                                            Storage storage) {
         final var expireCommandHandler = new ExpireCommandHandler(storage);
-        final var commands = Map.of(
-            GET, new GetCommandHandler(storage),
-            SET, new SetCommandHandler(storage),
-            DEL, new DeleteCommandHandler(storage),
-            EXT, new ExitCommandHandler(),
-            INF, new InfoCommandHandler(metricsProvider),
-            PING, new PingCommandHandler(),
-            EXPIRE, expireCommandHandler,
-            PEXPIRE, expireCommandHandler,
-            PERSIST, new PersistCommandHandler(storage)
-        );
-        return new RequestDispatcher(metrics, commands);
+        final var ttlCommandHandler = new TtlCommandHandler(storage);
+        final var commands = new EnumMap<Method, RequestCommandHandler>(Method.class);
+
+        commands.put(GET, new GetCommandHandler(storage));
+        commands.put(SET, new SetCommandHandler(storage));
+        commands.put(DEL, new DeleteCommandHandler(storage));
+        commands.put(EXT, new ExitCommandHandler());
+        commands.put(INF, new InfoCommandHandler(metricsProvider));
+        commands.put(PING, new PingCommandHandler());
+        commands.put(EXPIRE, expireCommandHandler);
+        commands.put(PEXPIRE, expireCommandHandler);
+        commands.put(PERSIST, new PersistCommandHandler(storage));
+        commands.put(TTL, ttlCommandHandler);
+        commands.put(PTTL, ttlCommandHandler);
+
+
+        return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }
 
     public TCPResponse dispatch(TCPRequest request) {
