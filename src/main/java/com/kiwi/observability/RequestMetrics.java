@@ -35,6 +35,7 @@ public final class RequestMetrics {
             case NON_DIGIT_IN_NUMERIC_VALUE -> metricsRegistry.addNonDigitInLengthError();
             case INVALID_SEPARATOR -> metricsRegistry.addInvalidSeparatorError();
             case METHOD_TOO_LONG -> metricsRegistry.addMethodTooLongError();
+            case VALUE_TOO_SHORT -> metricsRegistry.addValueTooShort();
         }
     }
 

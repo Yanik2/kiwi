@@ -57,6 +57,8 @@ public record ObservabilityResponse(
             metrics.nonDigitInLength() +
             ", \"proto.err.invalidseparator\": " +
             metrics.invalidSeparator() +
+            ", \"proto.err.valuetooshort\": " +
+            metrics.valueTooShort() +
             ", \"server.start\": " +
             metrics.serverStart() +
             ", \"server.uptime\": " +
