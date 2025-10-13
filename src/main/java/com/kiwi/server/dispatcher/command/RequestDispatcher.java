@@ -53,7 +53,6 @@ public class RequestDispatcher {
         commands.put(TTL, ttlCommandHandler);
         commands.put(PTTL, ttlCommandHandler);
 
-
         return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }
 

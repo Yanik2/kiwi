@@ -20,12 +20,14 @@ public class ExpireCommandHandler extends StorageCommandHandler {
     @Override
     public SerializableValue handle(TCPRequest request) {
         final var expireRequest = (ExpireRequest) request;
+        final var expirationTime = expireRequest.getValue() < 0 ? -1 : expireRequest.getValue();
+        final var expiration = System.currentTimeMillis() + expirationTime;
+
 
         final var result = storage.updateExpiration(new Key(expireRequest.getKey()),
-                new HasTtlExpiration(System.currentTimeMillis() + expireRequest.getValue()));
+                new HasTtlExpiration(expiration < 0 ? Long.MAX_VALUE : expiration));
 
         return result ? SUCCESS_RESPONSE : BAD_RESPONSE;
     }
-
 
 }
