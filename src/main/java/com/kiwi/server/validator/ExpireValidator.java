@@ -28,12 +28,31 @@ public class ExpireValidator implements RequestValidator {
             throw new ProtocolException("Length for value in expiration request is too long",
                 ProtocolErrorCode.VALUE_TOO_LONG);
         }
+        if (value.length < 1) {
+            logger.log(Level.SEVERE, "Length for value in expiration request is too short");
+            throw new ProtocolException("Length for value in expiration request is too short",
+                ProtocolErrorCode.VALUE_TOO_SHORT);
+        }
+
+        final boolean isNegative = value[0] == 45;
+        int index;
+
+        if (isNegative) {
+            if (value.length < 2) {
+                logger.log(Level.SEVERE, "Non digit in value for expiration request");
+                throw new ProtocolException("Non digit in value for expiration request",
+                    ProtocolErrorCode.NON_DIGIT_IN_NUMERIC_VALUE);
+            }
+            index = 1;
+        } else {
+            index = 0;
+        }
 
         long result = 0;
 
-        for (byte b : value) {
+        for (; index < value.length; index++) {
             result *= 10;
-            final int digit = b - ZERO_ASCII;
+            final int digit = value[index] - ZERO_ASCII;
             if (digit < 0 || digit > 9) {
                 logger.log(Level.SEVERE, "Non digit in value for expiration request");
                 throw new ProtocolException("Non digit in value for expiration request",
@@ -50,6 +69,7 @@ public class ExpireValidator implements RequestValidator {
                 ProtocolErrorCode.VALUE_TOO_LONG);
         }
 
-        return new ExpireRequest(request.getMethod(), request.getKey(), result);
+        return new ExpireRequest(request.getMethod(), request.getKey(),
+            isNegative ? -result : result);
     }
 }

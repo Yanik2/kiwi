@@ -36,6 +36,7 @@ public class MetricsProvider {
             metricsRegistry.getUnexpectedEndOfFile(),
             metricsRegistry.getNonDigitInLength(),
             metricsRegistry.getInvalidSeparator(),
+            metricsRegistry.getValueTooShort(),
             metricsRegistry.getServerStart(),
             System.currentTimeMillis() - metricsRegistry.getServerStart(),
             metricsRegistry.getTtlExpiredEviction()

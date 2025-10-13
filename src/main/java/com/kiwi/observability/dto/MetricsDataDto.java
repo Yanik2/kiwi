@@ -25,6 +25,7 @@ public record MetricsDataDto(
     long unexpectedEndOfFile,
     long nonDigitInLength,
     long invalidSeparator,
+    long valueTooShort,
     long serverStart,
     long serverUptime,
     long ttlExpiredEviction
