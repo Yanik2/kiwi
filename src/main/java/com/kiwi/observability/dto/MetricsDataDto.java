@@ -1,5 +1,7 @@
 package com.kiwi.observability.dto;
 
+import java.util.Map;
+
 public record MetricsDataDto(
     String protocolVersion,
     String infoSchemaVersion,
@@ -28,6 +30,7 @@ public record MetricsDataDto(
     long valueTooShort,
     long serverStart,
     long serverUptime,
-    long ttlExpiredEviction
+    long ttlExpiredEviction,
+    Map<String, ThreadPoolCountersDto> threadPoolsMetrics
 ) {
 }

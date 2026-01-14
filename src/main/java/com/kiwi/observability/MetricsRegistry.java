@@ -1,9 +1,15 @@
 package com.kiwi.observability;
 
+import com.kiwi.observability.dto.ThreadPoolCountersDto;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 final class MetricsRegistry {
     private static final Logger logger = Logger.getLogger(MetricsRegistry.class.getName());
@@ -15,12 +21,61 @@ final class MetricsRegistry {
     private final ProtoErrorCounter protoErrorCounter = new ProtoErrorCounter();
     private final ServerCounters serverCounters = new ServerCounters();
     private final StorageCounter storageCounter = new StorageCounter();
+    private final ThreadPoolsCounters threadPoolsCounters = new ThreadPoolsCounters();
 
     public static MetricsRegistry getInstance() {
         return instance;
     }
 
     private MetricsRegistry() {
+    }
+
+    public void registerThreadPool(String threadPoolName) {
+        if (threadPoolsCounters.isCountersExists(threadPoolName)) {
+            logger.info("Thread pool metrics with name: [" + threadPoolName + "] already exists");
+            // todo maybe need to reset and archive old, will be implemented later
+        } else {
+            threadPoolsCounters.registerCounter(threadPoolName);
+        }
+    }
+
+    public void addWorkersMax(String name, int workersMax) {
+        threadPoolsCounters.onWorkersMax(name, workersMax);
+    }
+
+    public void addWorkersActive(String name, int workersActive) {
+        threadPoolsCounters.onWorkersActive(name, workersActive);
+    }
+
+    public void addQueueSize(String name, int queueSize) {
+        threadPoolsCounters.onQueueSize(name, queueSize);
+    }
+
+    public void addTaskEnqueued(String name) {
+        threadPoolsCounters.onTaskEnqueued(name);
+    }
+
+    public void addTaskCompleted(String name) {
+        threadPoolsCounters.onTaskCompleted(name);
+    }
+
+    public void addTaskRejected(String name) {
+        threadPoolsCounters.onTaskRejected(name);
+    }
+
+    public Map<String, ThreadPoolCountersDto> getThreadPoolsCounters() {
+        return threadPoolsCounters.threadPoolCounters.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ThreadPoolCountersDto(
+                                        e.getValue().workersMax.get(),
+                                        e.getValue().workersActive.get(),
+                                        e.getValue().queueSize.get(),
+                                        e.getValue().tasksEnqueued.sum(),
+                                        e.getValue().tasksCompleted.sum(),
+                                        e.getValue().tasksRejected.sum()
+                                )
+                        )
+                );
     }
 
     public void addAcceptConnection() {
@@ -300,7 +355,7 @@ final class MetricsRegistry {
             final var currentClients = clientsCurrent.decrementAndGet();
             if (currentClients < 0) {
                 logger.log(Level.SEVERE, "Current client is lower then zero: " + currentClients
-                    + ", reset to 0");
+                        + ", reset to 0");
                 clientsCurrent.set(0);
             }
         }
@@ -367,6 +422,111 @@ final class MetricsRegistry {
 
         private void onTtlExpiredEviction() {
             ttlExpiredEvictions.increment();
+        }
+    }
+
+    private static class ThreadPoolsCounters {
+        private static final String LOG_MESSAGE_PATTERN = "Thread pool with such name: [%s] doesn't exist";
+
+        private static class ThreadPoolCounters {
+            private final AtomicInteger workersMax = new AtomicInteger();
+            private final AtomicInteger workersActive = new AtomicInteger();
+            private final AtomicInteger queueSize = new AtomicInteger();
+            private final LongAdder tasksEnqueued = new LongAdder();
+            private final LongAdder tasksCompleted = new LongAdder();
+            private final LongAdder tasksRejected = new LongAdder();
+
+            private ThreadPoolCounters() {
+            }
+
+            private void onWorkersMax(int workersAmount) {
+                workersMax.set(workersAmount);
+            }
+
+            private void onWorkersActive(int workers) {
+                workersActive.addAndGet(workers);
+            }
+
+            private void onQueueSize(int delta) {
+                queueSize.addAndGet(delta);
+            }
+
+            private void onTaskEnqueued() {
+                tasksEnqueued.increment();
+            }
+
+            private void onTasksCompleted() {
+                tasksCompleted.increment();
+            }
+
+            private void onTasksRejected() {
+                tasksRejected.increment();
+            }
+        }
+
+        private final Map<String, ThreadPoolCounters> threadPoolCounters = new HashMap<>();
+
+        private void registerCounter(String name) {
+            final var counter = new ThreadPoolCounters();
+            threadPoolCounters.put(name, counter);
+        }
+
+        private boolean isCountersExists(String name) {
+            return threadPoolCounters.containsKey(name);
+        }
+
+        public void onWorkersMax(String name, int delta) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onWorkersMax(delta);
+            }
+        }
+
+        public void onWorkersActive(String name, int delta) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onWorkersActive(delta);
+            }
+        }
+
+        public void onQueueSize(String name, int delta) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onQueueSize(delta);
+            }
+        }
+
+        public void onTaskEnqueued(String name) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onTaskEnqueued();
+            }
+        }
+
+        public void onTaskCompleted(String name) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onTasksCompleted();
+            }
+        }
+
+        public void onTaskRejected(String name) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onTasksRejected();
+            }
         }
     }
 }
