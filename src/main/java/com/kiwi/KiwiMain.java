@@ -14,9 +14,7 @@ public class KiwiMain {
         final long start = System.currentTimeMillis();
         ConcurrencyModule.init();
         final var storage = PersistentModule.create();
-        //TODO size of thread pool will be in properties
-        final var serverThreadPool = ConcurrencyModule.createExecutor("server-executor", "server-thread-pool", 1, 1);
-        final var server = ServerModule.create(storage, serverThreadPool);
+        final var server = ServerModule.create(storage);
         final long end = System.currentTimeMillis();
         log.info("Kiwi initialized in [" + (end - start) + "]ms, starting server");
         server.start();

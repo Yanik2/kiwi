@@ -10,7 +10,7 @@ import com.kiwi.server.ResponseWriter;
 import com.kiwi.server.TCPServer;
 
 public class ServerModule {
-    public static TCPServer create(Storage storage, KiwiThreadPoolExecutor threadPool) {
+    public static TCPServer create(Storage storage) {
         final var parser = new RequestParser();
         final var observabilityRequestHandler = ObservabilityModule.getRequestHandler();
         final var methodMetrics = ObservabilityModule.getMethodMetrics();
@@ -19,6 +19,6 @@ public class ServerModule {
         final var responseWriter = new ResponseWriter();
         final var metrics = ObservabilityModule.getRequestMetrics();
         final var handler = RequestHandler.create(dispatcher, parser, responseWriter, metrics);
-        return new TCPServer(handler, threadPool);
+        return new TCPServer(handler);
     }
 }
