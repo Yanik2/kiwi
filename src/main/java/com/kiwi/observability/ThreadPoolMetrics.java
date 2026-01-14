@@ -21,7 +21,7 @@ public class ThreadPoolMetrics {
         metricsRegistry.addWorkersMax(threadPoolName, workersMax);
     }
 
-    public void onWorkersActive(int workersActive) {
+    public void setWorkersActive(int workersActive) {
         metricsRegistry.addWorkersActive(threadPoolName, workersActive);
     }
 

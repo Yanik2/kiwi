@@ -27,16 +27,15 @@ public class KiwiThreadPoolExecutor {
     }
 
     public void submit(Task task) {
-        if (executionThreadPool.submit(task::execute, task.getTimeout())) {
-            logger.info("Task was submitted into execution thread pool [" + executionThreadPool.getName() + "]");
-        } else {
-            if (!rejectionThreadPool.submit(task::reject, task.getTimeout())) {
-                logger.severe("Task cannot be processed, thread pool executor: [" + this.name + "]");
-            } else {
-                logger.info("Task was submitted into rejection thread pool");
+        final var taskSubmitted = executionThreadPool.submit(task::execute, task.getTimeout());
+        if (!taskSubmitted) {
+            final var rejected = rejectionThreadPool.submit(task::reject, 0);
+            if (!rejected) {
+                logger.info("Task cannot be processed, thread pool executor: [" + this.name + "], " +
+                        "task will be rejected in caller thread");
+                task.reject();
             }
         }
-
     }
 
     public void start() {

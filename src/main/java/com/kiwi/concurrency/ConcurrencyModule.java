@@ -14,7 +14,7 @@ public final class ConcurrencyModule {
                                                         int threadPoolSize,
                                                         int queueCapacity) {
         final var metrics = ObservabilityModule.getThreadPoolMetrics(threadPoolName);
-        final var threadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX);
+        final var threadFactory = new KiwiThreadFactory(threadPoolName);
         final var executor = new KiwiThreadPoolExecutor(
                 threadPoolExecutorName,
                 threadFactory,

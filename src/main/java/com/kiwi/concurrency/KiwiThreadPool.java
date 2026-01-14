@@ -1,7 +1,7 @@
 package com.kiwi.concurrency;
 
+import com.kiwi.concurrency.exception.KiwiGeneralException;
 import com.kiwi.observability.ThreadPoolMetrics;
-import com.kiwi.server.RequestHandler;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class KiwiThreadPool {
-    private static final Logger log = Logger.getLogger(RequestHandler.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(KiwiThreadPool.class.getSimpleName());
     private static final String WORKER_NAME_PREFIX = "-thread-pool-worker-";
 
     private final int size;
@@ -38,7 +38,6 @@ public class KiwiThreadPool {
         }
         this.isRunning = true;
         metrics.onWorkersMax(workers.size());
-        metrics.onWorkersActive(threads.size());
     }
 
     public void stop() {
@@ -54,7 +53,7 @@ public class KiwiThreadPool {
 
     private Consumer<String> onWorkerError() {
         return errorWorkerName -> {
-            metrics.onWorkersActive(-1);
+            metrics.setWorkersActive(-1);
             final var worker = workers.get(errorWorkerName);
             if (worker.isRunning) {
                 final var thread = threads.get(errorWorkerName);
@@ -64,17 +63,18 @@ public class KiwiThreadPool {
                 worker.isRunning = false;
             }
 
-            final var newThread = threadFactory.newThread(worker);
-            threads.put(worker.name, newThread);
-            newThread.start();
-            worker.isRunning = true;
-            metrics.onWorkersActive(1);
+            if (this.isRunning) {
+                final var newThread = threadFactory.newThread(worker);
+                threads.put(worker.name, newThread);
+                newThread.start();
+                worker.isRunning = true;
+            }
         };
     }
 
     private Consumer<String> onWorkerDone() {
         return workerName -> {
-            metrics.onWorkersActive(-1);
+            metrics.setWorkersActive(-1);
             final var worker = workers.get(workerName);
             if (worker.isRunning) {
                 worker.isRunning = false;
@@ -83,11 +83,6 @@ public class KiwiThreadPool {
             if (this.isRunning) {
                 // unknown situation
                 log.severe("Worker: [" + workerName + "] is done, but thread pool is still running");
-            } else {
-                final var thread = threads.get(workerName);
-                if (thread.isAlive()) {
-                    thread.interrupt();
-                }
             }
         };
     }
@@ -124,18 +119,24 @@ public class KiwiThreadPool {
                     final var task = queue.poll(100, TimeUnit.MILLISECONDS);
                     if (task != null) {
                         metrics.onQueueSize(-1);
+                        metrics.setWorkersActive(1);
                         task.run();
+                        metrics.setWorkersActive(-1);
                         metrics.onTaskCompleted();
-                        log.info("Kiwi thread: [" + this.name + "] task done");
                     }
                 }
+            } catch (KiwiGeneralException ex) {
+                log.severe("Task execution failed, worker [%s], error: %s".formatted(this.name, ex.getMessage()));
+                metrics.onTaskCompleted();
             } catch (Exception ex) {
                 log.severe("Thread [%s] for worker [%s] was interrupted with exception: %s".formatted(
                         Thread.currentThread().getName(), this.name, ex.getMessage()));
                 this.isRunning = false;
                 onError.accept(this.name);
             }
-            onWorkerDone.accept(this.name);
+            if (!isRunning) {
+                onWorkerDone.accept(this.name);
+            }
         }
 
     }
@@ -143,7 +144,7 @@ public class KiwiThreadPool {
     public boolean submit(Runnable task, int timeout) {
         try {
             if (this.isRunning) {
-                final var isAccepted = queue.offer(task, timeout, TimeUnit.MICROSECONDS);
+                final var isAccepted = queue.offer(task, timeout, TimeUnit.SECONDS);
                 updateMetrics(isAccepted);
                 return isAccepted;
             } else {
