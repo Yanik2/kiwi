@@ -17,4 +17,8 @@ public class ObservabilityModule {
     public static StorageMetrics getStorageMetrics() {
         return new StorageMetrics(MetricsRegistry.getInstance());
     }
+
+    public static ThreadPoolMetrics getThreadPoolMetrics(String threadPoolName) {
+        return new ThreadPoolMetrics(MetricsRegistry.getInstance(), threadPoolName);
+    }
 }

@@ -1,5 +1,6 @@
 package com.kiwi;
 
+import com.kiwi.concurrency.ConcurrencyModule;
 import com.kiwi.persistent.PersistentModule;
 import com.kiwi.server.factory.ServerModule;
 import java.io.IOException;
@@ -11,6 +12,7 @@ public class KiwiMain {
     public static void main(String[] args) throws IOException {
         log.info("Starting initialization Kiwi");
         final long start = System.currentTimeMillis();
+        ConcurrencyModule.init();
         final var storage = PersistentModule.create();
         final var server = ServerModule.create(storage);
         final long end = System.currentTimeMillis();

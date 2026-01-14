@@ -13,7 +13,6 @@ import static com.kiwi.server.Method.SET;
 import static com.kiwi.server.Method.TTL;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
-import com.kiwi.server.dispatcher.command.RequestCommandHandler;
 import com.kiwi.server.dispatcher.command.RequestDispatcher;
 import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.server.dto.TCPResponse;
@@ -27,7 +26,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +33,7 @@ import java.util.logging.Logger;
 public class RequestHandler {
     private static final Logger log = Logger.getLogger(RequestHandler.class.getSimpleName());
     //TODO will be moved to properties in phase 5
-    private static final int MAX_CLIENTS = 1;
+    private static final int MAX_CLIENTS = 10000000;
 
     private final RequestDispatcher requestDispatcher;
     private final RequestParser requestParser;
@@ -80,6 +78,10 @@ public class RequestHandler {
         } else {
             refuseConnection(socket);
         }
+    }
+
+    public void refuse(Socket socket) {
+        refuseConnection(socket);
     }
 
     private void acceptConnection(Socket socket) {
