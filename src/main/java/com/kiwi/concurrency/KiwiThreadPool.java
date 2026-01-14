@@ -60,7 +60,6 @@ public class KiwiThreadPool {
                 if (!thread.isInterrupted()) {
                     thread.interrupt();
                 }
-                worker.isRunning = false;
             }
 
             if (this.isRunning) {
@@ -131,7 +130,6 @@ public class KiwiThreadPool {
             } catch (Exception ex) {
                 log.severe("Thread [%s] for worker [%s] was interrupted with exception: %s".formatted(
                         Thread.currentThread().getName(), this.name, ex.getMessage()));
-                this.isRunning = false;
                 onError.accept(this.name);
             }
             if (!isRunning) {
