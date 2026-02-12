@@ -69,7 +69,7 @@ public class ExpireValidator implements RequestValidator {
                 ProtocolErrorCode.VALUE_TOO_LONG);
         }
 
-        return new ExpireRequest(request.getMethod(), request.getKey(),
+        return new ExpireRequest(request.getFlags(), request.getMethod(), request.getKey(),
             isNegative ? -result : result);
     }
 }

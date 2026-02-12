@@ -36,6 +36,7 @@ public final class RequestMetrics {
             case INVALID_SEPARATOR -> metricsRegistry.addInvalidSeparatorError();
             case METHOD_TOO_LONG -> metricsRegistry.addMethodTooLongError();
             case VALUE_TOO_SHORT -> metricsRegistry.addValueTooShort();
+            case INVALID_HEADER -> metricsRegistry.addInvalidHeader();
         }
     }
 

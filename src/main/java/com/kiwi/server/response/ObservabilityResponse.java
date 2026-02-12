@@ -60,6 +60,8 @@ public record ObservabilityResponse(
                 metrics.invalidSeparator() +
                 ", \"proto.err.valuetooshort\": " +
                 metrics.valueTooShort() +
+                ", \"proto.err.invalidheader\": " +
+                metrics.invalidHeader() +
                 ", \"server.start\": " +
                 metrics.serverStart() +
                 ", \"server.uptime\": " +

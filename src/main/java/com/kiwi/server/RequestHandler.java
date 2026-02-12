@@ -36,12 +36,12 @@ public class RequestHandler {
     private static final int MAX_CLIENTS = 10000000;
 
     private final RequestDispatcher requestDispatcher;
-    private final RequestParser requestParser;
+    private final BinaryRequestParser requestParser;
     private final ResponseWriter responseWriter;
     private final RequestMetrics metrics;
     private final Map<Method, RequestValidator> requestValidators;
 
-    private RequestHandler(RequestDispatcher requestDispatcher, RequestParser requestParser,
+    private RequestHandler(RequestDispatcher requestDispatcher, BinaryRequestParser requestParser,
                           ResponseWriter responseWriter, RequestMetrics metrics,
                           Map<Method, RequestValidator> requestValidators) {
         this.requestDispatcher = requestDispatcher;
@@ -51,7 +51,7 @@ public class RequestHandler {
         this.requestValidators = requestValidators;
     }
 
-    public static RequestHandler create(RequestDispatcher requestDispatcher, RequestParser requestParser,
+    public static RequestHandler create(RequestDispatcher requestDispatcher, BinaryRequestParser requestParser,
                                         ResponseWriter responseWriter, RequestMetrics metrics) {
         final var expireValidator = new ExpireValidator();
         final var validators = new EnumMap<Method, RequestValidator>(Method.class);
