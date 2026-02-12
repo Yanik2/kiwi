@@ -22,6 +22,10 @@ public class BinaryRequestParser {
         final var method = getMethod(is.read());
 
         final var keyLen = getLength(is, KEY_HEADER_LEN);
+        if (keyLen < 0) {
+            log.severe("Invalid key header");
+            throw new ProtocolException("Invalid key header", INVALID_HEADER);
+        }
         if (keyLen > MAX_KEY_LENGTH) {
             log.severe("Key length bigger than allowed 4KB: " + keyLen);
             throw new ProtocolException("Key length bigger than allowed 4KB: " + keyLen,

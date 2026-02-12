@@ -170,6 +170,10 @@ final class MetricsRegistry {
         protoErrorCounter.onValueTooShort();
     }
 
+    public void addInvalidHeader() {
+        protoErrorCounter.onInvalidHeader();
+    }
+
     public void addTtlExpiredEviction() {
         storageCounter.onTtlExpiredEviction();
     }
@@ -266,6 +270,10 @@ final class MetricsRegistry {
 
     public long getValueTooShort() {
         return protoErrorCounter.valueTooShort.sum();
+    }
+
+    public long getInvalidHeader() {
+        return protoErrorCounter.invalidHeader.sum();
     }
 
     public long getServerStart() {
@@ -375,6 +383,7 @@ final class MetricsRegistry {
         private final LongAdder invalidSeparatorCounter = new LongAdder();
         private final LongAdder methodTooLongCounter = new LongAdder();
         private final LongAdder valueTooShort = new LongAdder();
+        private final LongAdder invalidHeader = new LongAdder();
 
         private void onUnknownMethod() {
             unknownMethodCounter.increment();
@@ -410,6 +419,10 @@ final class MetricsRegistry {
 
         public void onValueTooShort() {
             valueTooShort.increment();
+        }
+
+        public void onInvalidHeader() {
+            invalidHeader.increment();
         }
     }
 
