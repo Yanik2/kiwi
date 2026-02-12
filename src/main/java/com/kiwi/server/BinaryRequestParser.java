@@ -28,6 +28,10 @@ public class BinaryRequestParser {
                     KEY_TOO_LONG);
         }
         final var valueLen = getLength(is, VALUE_HEADER_LEN);
+        if (valueLen < 0) {
+            log.severe("Invalid value header");
+            throw new ProtocolException("Invalid value header", INVALID_HEADER);
+        }
         if (valueLen > MAX_VALUE_LENGTH) {
             log.severe("Value length bigger than allowed 10MB: " + valueLen);
             throw new ProtocolException("Value length bigger than allowed 10MB: " + valueLen,
@@ -43,11 +47,11 @@ public class BinaryRequestParser {
 
     private Method getMethod(int methodId) {
         final var methods = Method.values();
-        if (methodId >= methods.length) {
+        if (methodId >= 0 && methodId < methods.length) {
+            return methods[methodId];
+        } else {
             log.severe("Invalid method id:[" + methodId + "]");
             throw new ProtocolException("Invalid method id", ProtocolErrorCode.UNKNOWN_METHOD);
-        } else {
-            return methods[methodId];
         }
     }
     private int getLength(InputStreamWrapper is, int headerLength) {
