@@ -6,8 +6,8 @@ public final class ExpireRequest extends TCPRequest {
     private final byte[] key;
     private final long value;
 
-    public ExpireRequest(Method method, byte[] key, long value) {
-        super(method);
+    public ExpireRequest(int flags, Method method, byte[] key, long value) {
+        super(flags, method);
         this.key = key;
         this.value = value;
     }

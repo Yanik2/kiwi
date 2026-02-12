@@ -6,18 +6,18 @@ public final class ParsedRequest extends TCPRequest {
     private final byte[] key;
     private final byte[] value;
 
-    public ParsedRequest(Method method, byte[] key, byte[] value) {
-        super(method);
+    public ParsedRequest(int flags, Method method, byte[] key, byte[] value) {
+        super(flags, method);
         this.key = key;
         this.value = value;
     }
 
-    public ParsedRequest(Method method, byte[] key) {
-        this(method, key, null);
+    public ParsedRequest(int flags, Method method, byte[] key) {
+        this(flags, method, key, null);
     }
 
-    public ParsedRequest(Method method) {
-        this(method, null, null);
+    public ParsedRequest(int flags, Method method) {
+        this(flags, method, null, null);
     }
 
     public byte[] getKey() {
