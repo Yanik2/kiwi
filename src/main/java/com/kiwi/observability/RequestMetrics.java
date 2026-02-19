@@ -37,6 +37,7 @@ public final class RequestMetrics {
             case METHOD_TOO_LONG -> metricsRegistry.addMethodTooLongError();
             case VALUE_TOO_SHORT -> metricsRegistry.addValueTooShort();
             case INVALID_HEADER -> metricsRegistry.addInvalidHeader();
+            case BUFFER_ERROR -> metricsRegistry.addBufferError();
         }
     }
 

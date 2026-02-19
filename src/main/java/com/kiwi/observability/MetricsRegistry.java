@@ -284,6 +284,14 @@ final class MetricsRegistry {
         return storageCounter.ttlExpiredEvictions.sum();
     }
 
+    public void addBufferError() {
+        protoErrorCounter.onBufferError();
+    }
+
+    public long getBufferError() {
+        return protoErrorCounter.bufferError.sum();
+    }
+
     // private classes
 
     private static class MethodCounter {
@@ -384,6 +392,7 @@ final class MetricsRegistry {
         private final LongAdder methodTooLongCounter = new LongAdder();
         private final LongAdder valueTooShort = new LongAdder();
         private final LongAdder invalidHeader = new LongAdder();
+        private final LongAdder bufferError = new LongAdder();
 
         private void onUnknownMethod() {
             unknownMethodCounter.increment();
@@ -423,6 +432,10 @@ final class MetricsRegistry {
 
         public void onInvalidHeader() {
             invalidHeader.increment();
+        }
+
+        public void onBufferError() {
+            bufferError.increment();
         }
     }
 

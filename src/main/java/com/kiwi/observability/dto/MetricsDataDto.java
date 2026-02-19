@@ -29,6 +29,7 @@ public record MetricsDataDto(
     long invalidSeparator,
     long valueTooShort,
     long invalidHeader,
+    long bufferError,
     long serverStart,
     long serverUptime,
     long ttlExpiredEviction,

@@ -26,7 +26,8 @@ public class ResponseParser {
         if (len == 0) {
             return "";
         } else {
-            final var response = new String(is.readNBytes(len));
+            final var responseBytes = is.readNBytes(len);
+            final var response = new String(responseBytes);
             is.readNBytes(2);
             return response;
         }
