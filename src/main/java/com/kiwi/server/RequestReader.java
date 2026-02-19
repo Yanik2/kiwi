@@ -46,7 +46,7 @@ public class RequestReader {
         try {
             final var is = socket.getInputStream();
             while (!socket.isClosed()) {
-                readBuffer.fill2(is);
+                readBuffer.fill(is);
                 cursor.reset();
                 final var parserResults = requestParser.parse2(cursor);
                 if (!parserResults.isEmpty()) {

@@ -19,7 +19,7 @@ public class ReadBuffer {
     private int writePos = 0;
     private int readBytes = 0;
 
-    public void fill2(InputStream is) {
+    public void fill(InputStream is) {
         if (!isFull()) {
             fillBuffer(is);
         } else {
