@@ -20,17 +20,17 @@ public class BinaryRequestParser {
     private static final int MAX_KEY_LENGTH = 4096;
     private static final int MAX_VALUE_LENGTH = 10485760;
 
-    public List<ParserResult<ParsedRequest>> parse2(Cursor cursor) {
+    public List<ParserResult<ParsedRequest>> parse(Cursor cursor) {
         final var results = new LinkedList<ParserResult<ParsedRequest>>();
 
         while (cursor.bytesAvailable() > 0) {
-            results.add(parse(cursor));
+            results.add(parseRequest(cursor));
         }
 
         return results;
     }
 
-    public ParserResult<ParsedRequest> parse(Cursor cursor) {
+    public ParserResult<ParsedRequest> parseRequest(Cursor cursor) {
         final var bytesAvailable = cursor.bytesAvailable();
 
         if (bytesAvailable < 10) {
@@ -56,6 +56,7 @@ public class BinaryRequestParser {
         }
 
         if ((bytesAvailable - 8) < keyLength + valueLength + 2) {
+            cursor.toEnd();
             return new ParserResult<>(NEED_MORE_DATA);
         }
 
@@ -69,7 +70,7 @@ public class BinaryRequestParser {
         for (int i = 0; i < headerSize; i++) {
             final byte b = cursor.pop();
             len = len << 8;
-            len = len | b;
+            len = len | (b & 255);
         }
 
         return len;
@@ -85,6 +86,10 @@ public class BinaryRequestParser {
     }
 
     private ParserResult<ParsedRequest> validateSeparatorAndReturn(Cursor cursor, ParsedRequest request) {
+        if (cursor.bytesAvailable() < 2) {
+            cursor.toEnd();
+            return new ParserResult<>(NEED_MORE_DATA);
+        }
         final var firstByte = cursor.pop();
         final var secondByte = cursor.pop();
         if (SEPARATOR[0] == firstByte && SEPARATOR[1] == secondByte) {

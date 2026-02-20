@@ -19,24 +19,27 @@ public class ReadBuffer {
     private int writePos = 0;
     private int readBytes = 0;
 
-    public void fill(InputStream is) {
+    public int fill(InputStream is) {
         if (!isFull()) {
-            fillBuffer(is);
+            return fillBuffer(is);
         } else {
             log.severe("Trying to fill full buffer");
             throw new ProtocolException("Trying to fill full buffer", ProtocolErrorCode.BUFFER_ERROR);
         }
     }
 
-    private void fillBuffer(InputStream is) {
+    private int fillBuffer(InputStream is) {
+        if (writePos == buf.length) {
+            expandBuffer();
+        }
+
         try {
-            do {
-                if (writePos == buf.length) {
-                    expandBuffer();
-                }
-                buf[writePos++] = (byte) is.read();
-                readBytes++;
-            } while (!isFull() && is.available() > 0);
+            final int bytesRead = is.read(buf, writePos, buf.length - writePos);
+            if (bytesRead > 0) {
+                writePos += bytesRead;
+                readBytes += bytesRead;
+            }
+            return bytesRead;
         } catch (Exception ex) {
             log.severe("Unexpected error in read buffer on reading request: " + ex.getMessage());
             throw new ProtocolException("Unexpected exception in read buffer", ProtocolErrorCode.BUFFER_ERROR);

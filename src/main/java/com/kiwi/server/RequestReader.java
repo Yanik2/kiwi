@@ -39,16 +39,18 @@ public class RequestReader {
     // TODO this method doesn't contain closing socket on EXT command
     // TODO closing connection will be implemented later in multithreading and response writer logic
     public void readRequest(Socket socket) {
-        requestMetrics.onAccept();
         final var readBuffer = new ReadBuffer();
         final var cursor = new Cursor(readBuffer);
 
         try {
             final var is = socket.getInputStream();
             while (!socket.isClosed()) {
-                readBuffer.fill(is);
+                final var bytesRead = readBuffer.fill(is);
+                if (bytesRead == -1) {
+                    break;
+                }
                 cursor.reset();
-                final var parserResults = requestParser.parse2(cursor);
+                final var parserResults = requestParser.parse(cursor);
                 if (!parserResults.isEmpty()) {
                     parserResults.forEach(parserResult -> {
                         switch (parserResult.status()) {
