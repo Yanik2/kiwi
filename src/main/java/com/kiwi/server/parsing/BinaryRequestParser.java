@@ -24,7 +24,11 @@ public class BinaryRequestParser {
         final var results = new LinkedList<ParserResult<ParsedRequest>>();
 
         while (cursor.bytesAvailable() > 0) {
-            results.add(parseRequest(cursor));
+            final var parsedRequest = parseRequest(cursor);
+            results.add(parsedRequest);
+            if (ERROR == parsedRequest.status()) {
+                break;
+            }
         }
 
         return results;
