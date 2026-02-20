@@ -62,6 +62,8 @@ public record ObservabilityResponse(
                 metrics.valueTooShort() +
                 ", \"proto.err.invalidheader\": " +
                 metrics.invalidHeader() +
+                ", \" proto.err.buffererror\": " +
+                metrics.bufferError() +
                 ", \"server.start\": " +
                 metrics.serverStart() +
                 ", \"server.uptime\": " +

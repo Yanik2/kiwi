@@ -2,11 +2,12 @@ package com.kiwi.server.factory;
 
 import com.kiwi.observability.ObservabilityModule;
 import com.kiwi.persistent.Storage;
-import com.kiwi.server.BinaryRequestParser;
+import com.kiwi.server.RequestReader;
 import com.kiwi.server.dispatcher.command.RequestDispatcher;
-import com.kiwi.server.RequestHandler;
+import com.kiwi.server.BaseRequestValidator;
 import com.kiwi.server.ResponseWriter;
 import com.kiwi.server.TCPServer;
+import com.kiwi.server.parsing.BinaryRequestParser;
 
 public class ServerModule {
     public static TCPServer create(Storage storage) {
@@ -17,7 +18,8 @@ public class ServerModule {
             methodMetrics, storage);
         final var responseWriter = new ResponseWriter();
         final var metrics = ObservabilityModule.getRequestMetrics();
-        final var handler = RequestHandler.create(dispatcher, parser, responseWriter, metrics);
-        return new TCPServer(handler);
+        final var requestValidator = new BaseRequestValidator();
+        final var requestReader = new RequestReader(requestValidator, parser, metrics, responseWriter, dispatcher);
+        return new TCPServer(requestReader, metrics);
     }
 }
