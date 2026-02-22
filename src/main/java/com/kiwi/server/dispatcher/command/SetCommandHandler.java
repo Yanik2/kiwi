@@ -5,6 +5,7 @@ import com.kiwi.persistent.dto.StorageRequest;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.NoOpExpiration;
+import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.response.EmptyResponse;
@@ -17,7 +18,7 @@ public class SetCommandHandler extends StorageCommandHandler {
     }
 
     @Override
-    public SerializableValue handle(TCPRequest request) {
+    public SerializableValue handle(TCPRequest request, ConnectionContext context) {
         final var parsedRequest = (ParsedRequest) request;
         final var key = new Key(parsedRequest.getKey());
         final var value = new Value(parsedRequest.getValue(), NoOpExpiration.getInstance());

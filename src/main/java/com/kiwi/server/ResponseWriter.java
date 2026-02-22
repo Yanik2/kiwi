@@ -5,6 +5,7 @@ import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
 import com.kiwi.exception.ResponseWritingException;
+import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.TCPResponse;
 import com.kiwi.server.dto.WriteResponseResult;
 import java.io.ByteArrayOutputStream;
@@ -15,7 +16,19 @@ import java.util.logging.Logger;
 public class ResponseWriter {
     private static final Logger log = Logger.getLogger(ResponseWriter.class.getSimpleName());
 
-    public WriteResponseResult writeResponse(Socket socket, TCPResponse tcpResponse) {
+    public WriteResponseResult write(ConnectionContext context, TCPResponse tcpResponse) {
+        // synchronization will be refactored on WriterProxy implementation
+        synchronized (context) {
+            if (context.isClosed()) {
+                return new WriteResponseResult(0);
+            } else {
+                return writeResponse(context, tcpResponse);
+            }
+        }
+    }
+
+    private WriteResponseResult writeResponse(ConnectionContext context, TCPResponse tcpResponse) {
+        final var socket = context.socket();
         final var prefix = tcpResponse.isSuccess() ? SUCCESS_PREFIX : ERROR_PREFIX;
         final var baos = new ByteArrayOutputStream();
         writeToBaos(baos, prefix, tcpResponse);

@@ -1,4 +1,4 @@
-package com.kiwi.server;
+package com.kiwi.server.validator;
 
 import static com.kiwi.server.Method.DEL;
 import static com.kiwi.server.Method.EXPIRE;
@@ -12,23 +12,19 @@ import static com.kiwi.server.Method.PTTL;
 import static com.kiwi.server.Method.SET;
 import static com.kiwi.server.Method.TTL;
 
-import com.kiwi.server.dto.ParsedRequest;
+import com.kiwi.server.Method;
 import com.kiwi.server.dto.TCPRequest;
-import com.kiwi.server.validator.ExpireValidator;
-import com.kiwi.server.validator.NoOpValidator;
-import com.kiwi.server.validator.RequestValidator;
 
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
-// THIS CLASS WILL BE REFACTORED ON IMPLEMENTING MULTITHREADED PROCESSING
 public class BaseRequestValidator implements RequestValidator {
-    private final Map<Method, com.kiwi.server.validator.RequestValidator> requestValidators;
+    private final Map<Method, RequestValidator> requestValidators;
 
     public BaseRequestValidator() {
         final var expireValidator = new ExpireValidator();
-        final var validators = new EnumMap<Method, com.kiwi.server.validator.RequestValidator>(Method.class);
+        final var validators = new EnumMap<Method, RequestValidator>(Method.class);
 
         validators.put(GET, NoOpValidator.getInstance());
         validators.put(SET, NoOpValidator.getInstance());
@@ -46,7 +42,7 @@ public class BaseRequestValidator implements RequestValidator {
     }
 
     @Override
-    public TCPRequest validate(ParsedRequest request) {
+    public ValidationResult validate(TCPRequest request) {
         return requestValidators.getOrDefault(request.getMethod(), NoOpValidator.getInstance()).validate(request);
     }
 }

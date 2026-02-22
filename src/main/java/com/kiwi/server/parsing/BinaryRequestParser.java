@@ -8,6 +8,7 @@ import com.kiwi.server.dto.ParserResult;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.kiwi.exception.protocol.ProtocolErrorCode.*;
 import static com.kiwi.server.parsing.ParsingStatus.*;
@@ -56,7 +57,7 @@ public class BinaryRequestParser {
         }
 
         if (method.isKeyless()) {
-            return validateSeparatorAndReturn(cursor, new ParsedRequest(flags, method));
+            return validateSeparatorAndReturn(cursor, new ParsedRequest(UUID.randomUUID(), flags, method));
         }
 
         if ((bytesAvailable - 8) < keyLength + valueLength + 2) {
@@ -66,7 +67,7 @@ public class BinaryRequestParser {
 
         final var key = cursor.getBytes(new byte[keyLength], keyLength);
         final var value = cursor.getBytes(new byte[valueLength], valueLength);
-        return validateSeparatorAndReturn(cursor, new ParsedRequest(flags, method, key, value));
+        return validateSeparatorAndReturn(cursor, new ParsedRequest(UUID.randomUUID(), flags, method, key, value));
     }
 
     private int getHeaderLength(Cursor cursor, int headerSize) {
