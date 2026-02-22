@@ -2,6 +2,7 @@ package com.kiwi.server.buffer;
 
 import com.kiwi.exception.protocol.ProtocolErrorCode;
 import com.kiwi.exception.protocol.ProtocolException;
+import com.kiwi.server.context.ConnectionContext;
 
 import java.io.InputStream;
 import java.util.logging.Logger;
@@ -19,16 +20,16 @@ public class ReadBuffer {
     private int writePos = 0;
     private int readBytes = 0;
 
-    public int fill(InputStream is) {
+    public int fill(InputStream is, ConnectionContext context) {
         if (!isFull()) {
-            return fillBuffer(is);
+            return fillBuffer(is, context);
         } else {
-            log.severe("Trying to fill full buffer");
+            log.severe("Trying to fill full buffer, connection id: [" + context.connectionId() + "]");
             throw new ProtocolException("Trying to fill full buffer", ProtocolErrorCode.BUFFER_ERROR);
         }
     }
 
-    private int fillBuffer(InputStream is) {
+    private int fillBuffer(InputStream is, ConnectionContext context) {
         if (writePos == buf.length) {
             expandBuffer();
         }
@@ -41,8 +42,13 @@ public class ReadBuffer {
             }
             return bytesRead;
         } catch (Exception ex) {
-            log.severe("Unexpected error in read buffer on reading request: " + ex.getMessage());
-            throw new ProtocolException("Unexpected exception in read buffer", ProtocolErrorCode.BUFFER_ERROR);
+            if (context.isClosed()) {
+                return 0;
+            } else {
+                log.severe("Unexpected error in read buffer on reading request: " + ex.getMessage() +
+                        ". Connection id: [" + context.connectionId() + "]");
+                throw new ProtocolException("Unexpected exception in read buffer", ProtocolErrorCode.BUFFER_ERROR);
+            }
         }
     }
 

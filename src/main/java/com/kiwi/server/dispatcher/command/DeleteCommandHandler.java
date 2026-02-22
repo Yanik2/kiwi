@@ -3,6 +3,7 @@ package com.kiwi.server.dispatcher.command;
 import com.kiwi.persistent.Storage;
 import com.kiwi.persistent.dto.StorageRequest;
 import com.kiwi.persistent.model.Key;
+import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.response.EmptyResponse;
@@ -14,7 +15,7 @@ public class DeleteCommandHandler extends StorageCommandHandler {
     }
 
     @Override
-    public SerializableValue handle(TCPRequest request) {
+    public SerializableValue handle(TCPRequest request, ConnectionContext context) {
         final var parsedRequest = (ParsedRequest) request;
         storage.delete(new StorageRequest(new Key(parsedRequest.getKey())));
 
