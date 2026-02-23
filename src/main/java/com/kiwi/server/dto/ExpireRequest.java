@@ -2,12 +2,14 @@ package com.kiwi.server.dto;
 
 import com.kiwi.server.Method;
 
+import java.util.UUID;
+
 public final class ExpireRequest extends TCPRequest {
     private final byte[] key;
     private final long value;
 
-    public ExpireRequest(int flags, Method method, byte[] key, long value) {
-        super(flags, method);
+    public ExpireRequest(UUID requestId, int flags, Method method, byte[] key, long value) {
+        super(requestId, flags, method);
         this.key = key;
         this.value = value;
     }

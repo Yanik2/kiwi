@@ -17,6 +17,7 @@ import com.kiwi.observability.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.persistent.Storage;
 import com.kiwi.server.Method;
+import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.dto.TCPResponse;
 import java.util.Collections;
@@ -56,8 +57,8 @@ public class RequestDispatcher {
         return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }
 
-    public TCPResponse dispatch(TCPRequest request) {
-        final var result = commands.get(request.getMethod()).handle(request);
+    public TCPResponse dispatch(TCPRequest request, ConnectionContext context) {
+        final var result = commands.get(request.getMethod()).handle(request, context);
         metrics.onRequest(request.getMethod());
         return new TCPResponse(result, OK_MESSAGE, true);
     }

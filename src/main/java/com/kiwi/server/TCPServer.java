@@ -1,10 +1,14 @@
 package com.kiwi.server;
 
 import com.kiwi.observability.RequestMetrics;
+import com.kiwi.server.context.ConnectionContext;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,11 +19,14 @@ public class TCPServer {
     private static final int SOCKET_PORT = 8090;
     private static final int MAX_CLIENTS = 1000;
 
-    private final RequestReader requestReader;
+    private final ConnectionReader connectionReader;
     private final RequestMetrics requestMetrics;
 
-    public TCPServer(RequestReader requestReader, RequestMetrics requestMetrics) {
-        this.requestReader = requestReader;
+    private final ExecutorService connectionThreadPool = Executors.newCachedThreadPool();
+
+    public TCPServer(ConnectionReader connectionReader,
+                     RequestMetrics requestMetrics) {
+        this.connectionReader = connectionReader;
         this.requestMetrics = requestMetrics;
     }
 
@@ -37,9 +44,12 @@ public class TCPServer {
                 refuseConnection(socket);
             } else {
                 requestMetrics.onAccept();
-                requestReader.readRequest(socket);
+                final var connectionContext = new ConnectionContext(UUID.randomUUID(), socket, false);
+                connectionThreadPool.execute(() -> connectionReader.readConnection(connectionContext));
             }
         }
+
+        // thread pool shutdown will be implemented on graceful shutdown implementation
 
     }
 

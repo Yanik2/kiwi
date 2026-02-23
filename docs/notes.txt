@@ -1,3 +1,6 @@
-ReadBuffer
-    pipeline parsing, parser returns list of results
-    readbuffer reads until available or buffer is not full
+AFTER PHASE 3:
+    - refactor initialization Kiwi, structure more flat, each module factory return module container, with required
+      objects initialized and pass container to next factory (can be decorator or chain)
+    - refactor observability module, instead of direct implementation of each possible metrics class,
+      implement container with several maps (counter, gauge, etc) which holds metrics by name.
+      For adding metrics just call method "onAction(String metric name)" on one singleton instance of metrics
