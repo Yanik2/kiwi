@@ -2,7 +2,6 @@ package com.kiwi.server;
 
 import com.kiwi.observability.RequestMetrics;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.context.ConnectionRegistry;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -22,16 +21,13 @@ public class TCPServer {
 
     private final ConnectionReader connectionReader;
     private final RequestMetrics requestMetrics;
-    private final ConnectionRegistry connectionRegistry;
 
     private final ExecutorService connectionThreadPool = Executors.newCachedThreadPool();
 
     public TCPServer(ConnectionReader connectionReader,
-                     RequestMetrics requestMetrics,
-                     ConnectionRegistry connectionRegistry) {
+                     RequestMetrics requestMetrics) {
         this.connectionReader = connectionReader;
         this.requestMetrics = requestMetrics;
-        this.connectionRegistry = connectionRegistry;
     }
 
     //TODO handle exception
@@ -49,7 +45,6 @@ public class TCPServer {
             } else {
                 requestMetrics.onAccept();
                 final var connectionContext = new ConnectionContext(UUID.randomUUID(), socket, false);
-                connectionRegistry.register(connectionContext);
                 connectionThreadPool.execute(() -> connectionReader.readConnection(connectionContext));
             }
         }

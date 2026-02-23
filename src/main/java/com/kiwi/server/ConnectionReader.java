@@ -50,7 +50,7 @@ public class ConnectionReader {
                     break;
                 }
                 cursor.reset();
-                final var parserResults = requestParser.parse(cursor);
+                final var parserResults = requestParser.parse(cursor, context);
                 if (!parserResults.isEmpty()) {
                     parserResults.forEach(parserResult -> {
                         switch (parserResult.status()) {
@@ -70,7 +70,6 @@ public class ConnectionReader {
             log.severe("Unexpected exception during request processing: " + ex.getMessage());
         } finally {
             try {
-                drainBuffer(cursor, context);
                 if (!socket.isClosed()) {
                     socket.close();
                 }
@@ -81,20 +80,6 @@ public class ConnectionReader {
 
         requestMetrics.onParse(readBuffer.getReadBytes());
         requestMetrics.onClose();
-    }
-
-    private void drainBuffer(Cursor cursor, ConnectionContext context) {
-        final var parserResults = requestParser.parse(cursor);
-        if (!parserResults.isEmpty()) {
-            parserResults.forEach(parserResult -> {
-                switch (parserResult.status()) {
-                    case OK -> delegateTask(context, parserResult.value());
-                    case NEED_MORE_DATA -> {
-                    }
-                    case ERROR -> throw parserResult.error();
-                }
-            });
-        }
     }
 
     private void onError(ProtocolException ex, ConnectionContext context) {

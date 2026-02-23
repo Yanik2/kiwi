@@ -3,15 +3,19 @@ package com.kiwi.server.parsing;
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.server.Method;
 import com.kiwi.server.buffer.Cursor;
+import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.server.dto.ParserResult;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
-import static com.kiwi.exception.protocol.ProtocolErrorCode.*;
-import static com.kiwi.server.parsing.ParsingStatus.*;
+import static com.kiwi.exception.protocol.ProtocolErrorCode.INVALID_HEADER;
+import static com.kiwi.exception.protocol.ProtocolErrorCode.INVALID_SEPARATOR;
+import static com.kiwi.exception.protocol.ProtocolErrorCode.UNKNOWN_METHOD;
+import static com.kiwi.server.parsing.ParsingStatus.ERROR;
+import static com.kiwi.server.parsing.ParsingStatus.NEED_MORE_DATA;
+import static com.kiwi.server.parsing.ParsingStatus.OK;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 
 public class BinaryRequestParser {
@@ -21,11 +25,11 @@ public class BinaryRequestParser {
     private static final int MAX_KEY_LENGTH = 4096;
     private static final int MAX_VALUE_LENGTH = 10485760;
 
-    public List<ParserResult<ParsedRequest>> parse(Cursor cursor) {
+    public List<ParserResult<ParsedRequest>> parse(Cursor cursor, ConnectionContext context) {
         final var results = new LinkedList<ParserResult<ParsedRequest>>();
 
         while (cursor.bytesAvailable() > 0) {
-            final var parsedRequest = parseRequest(cursor);
+            final var parsedRequest = parseRequest(cursor, context);
             results.add(parsedRequest);
             if (ERROR == parsedRequest.status()) {
                 break;
@@ -35,12 +39,12 @@ public class BinaryRequestParser {
         return results;
     }
 
-    public ParserResult<ParsedRequest> parseRequest(Cursor cursor) {
+    private ParserResult<ParsedRequest> parseRequest(Cursor cursor, ConnectionContext context) {
         final var bytesAvailable = cursor.bytesAvailable();
 
         if (bytesAvailable < 10) {
             cursor.toEnd();
-            return new ParserResult<>(ParsingStatus.NEED_MORE_DATA);
+            return new ParserResult<>(NEED_MORE_DATA);
         }
 
         final var flags = cursor.pop();
@@ -57,7 +61,7 @@ public class BinaryRequestParser {
         }
 
         if (method.isKeyless()) {
-            return validateSeparatorAndReturn(cursor, new ParsedRequest(UUID.randomUUID(), flags, method));
+            return validateSeparatorAndReturn(cursor, new ParsedRequest(context.getRequestId(), flags, method));
         }
 
         if ((bytesAvailable - 8) < keyLength + valueLength + 2) {
@@ -67,7 +71,7 @@ public class BinaryRequestParser {
 
         final var key = cursor.getBytes(new byte[keyLength], keyLength);
         final var value = cursor.getBytes(new byte[valueLength], valueLength);
-        return validateSeparatorAndReturn(cursor, new ParsedRequest(UUID.randomUUID(), flags, method, key, value));
+        return validateSeparatorAndReturn(cursor, new ParsedRequest(context.getRequestId(), flags, method, key, value));
     }
 
     private int getHeaderLength(Cursor cursor, int headerSize) {

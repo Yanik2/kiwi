@@ -48,7 +48,6 @@ public class RequestHandler {
         log.severe("Request is rejected: " + context.connectionId());
         requestMetrics.onRefuse();
         context.close();
-        requestMetrics.onClose();
     }
 
     private void onValidationError(List<ProtocolException> errors, ConnectionContext context) {
@@ -62,6 +61,5 @@ public class RequestHandler {
         final var writeResult = responseWriter.write(context, new TCPResponse(ERROR_MESSAGE, false));
         requestMetrics.onWrite(writeResult.writtenBytes());
         context.close();
-        requestMetrics.onClose();
     }
 }

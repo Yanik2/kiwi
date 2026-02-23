@@ -5,7 +5,6 @@ import com.kiwi.observability.ObservabilityModule;
 import com.kiwi.persistent.Storage;
 import com.kiwi.server.ConnectionReader;
 import com.kiwi.server.RequestHandler;
-import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.dispatcher.command.RequestDispatcher;
 import com.kiwi.server.validator.BaseRequestValidator;
 import com.kiwi.server.ResponseWriter;
@@ -31,6 +30,6 @@ public class ServerModule {
         threadPoolExecutor.start();
         final var connectionReader =
                 new ConnectionReader(parser, metrics, responseWriter, threadPoolExecutor, requestHandler);
-        return new TCPServer(connectionReader, metrics, new ConnectionRegistry());
+        return new TCPServer(connectionReader, metrics);
     }
 }
