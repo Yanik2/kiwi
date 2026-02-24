@@ -1,6 +1,4 @@
-package com.kiwi.server.dto;
-
-import com.kiwi.server.response.SerializableValue;
+package com.kiwi.server.response.model;
 
 public record TCPResponse(
     SerializableValue responsePayload,

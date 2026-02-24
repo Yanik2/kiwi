@@ -1,6 +1,6 @@
 package com.kiwi.server.dto;
 
-import com.kiwi.server.Method;
+import com.kiwi.server.request.Method;
 
 public abstract class TCPRequest {
     private final int requestId;

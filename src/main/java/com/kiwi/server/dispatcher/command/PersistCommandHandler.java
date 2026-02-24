@@ -8,7 +8,7 @@ import com.kiwi.persistent.model.Key;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.ParsedRequest;
 import com.kiwi.server.dto.TCPRequest;
-import com.kiwi.server.response.SerializableValue;
+import com.kiwi.server.response.model.SerializableValue;
 
 public class PersistCommandHandler extends StorageCommandHandler {
     public PersistCommandHandler(Storage storage) {

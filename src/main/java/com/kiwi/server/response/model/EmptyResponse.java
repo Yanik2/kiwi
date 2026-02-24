@@ -1,4 +1,4 @@
-package com.kiwi.server.response;
+package com.kiwi.server.response.model;
 
 public final class EmptyResponse implements SerializableValue {
     private static final EmptyResponse instance = new EmptyResponse();

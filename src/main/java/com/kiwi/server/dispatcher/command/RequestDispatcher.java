@@ -1,25 +1,25 @@
 package com.kiwi.server.dispatcher.command;
 
-import static com.kiwi.server.Method.DEL;
-import static com.kiwi.server.Method.EXPIRE;
-import static com.kiwi.server.Method.EXT;
-import static com.kiwi.server.Method.GET;
-import static com.kiwi.server.Method.INF;
-import static com.kiwi.server.Method.PERSIST;
-import static com.kiwi.server.Method.PEXPIRE;
-import static com.kiwi.server.Method.PING;
-import static com.kiwi.server.Method.PTTL;
-import static com.kiwi.server.Method.SET;
-import static com.kiwi.server.Method.TTL;
+import static com.kiwi.server.request.Method.DEL;
+import static com.kiwi.server.request.Method.EXPIRE;
+import static com.kiwi.server.request.Method.EXT;
+import static com.kiwi.server.request.Method.GET;
+import static com.kiwi.server.request.Method.INF;
+import static com.kiwi.server.request.Method.PERSIST;
+import static com.kiwi.server.request.Method.PEXPIRE;
+import static com.kiwi.server.request.Method.PING;
+import static com.kiwi.server.request.Method.PTTL;
+import static com.kiwi.server.request.Method.SET;
+import static com.kiwi.server.request.Method.TTL;
 import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.observability.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.persistent.Storage;
-import com.kiwi.server.Method;
+import com.kiwi.server.request.Method;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.TCPRequest;
-import com.kiwi.server.dto.TCPResponse;
+import com.kiwi.server.response.model.TCPResponse;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;

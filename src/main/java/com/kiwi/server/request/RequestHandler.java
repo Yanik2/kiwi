@@ -1,11 +1,12 @@
-package com.kiwi.server;
+package com.kiwi.server.request;
 
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.observability.RequestMetrics;
+import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.command.RequestDispatcher;
 import com.kiwi.server.dto.TCPRequest;
-import com.kiwi.server.dto.TCPResponse;
+import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.validator.RequestValidator;
 
 import java.util.List;

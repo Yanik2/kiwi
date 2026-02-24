@@ -1,6 +1,6 @@
 package com.kiwi.server.dto;
 
-import com.kiwi.server.Method;
+import com.kiwi.server.request.Method;
 
 import java.util.UUID;
 

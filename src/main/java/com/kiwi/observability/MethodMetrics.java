@@ -1,6 +1,6 @@
 package com.kiwi.observability;
 
-import com.kiwi.server.Method;
+import com.kiwi.server.request.Method;
 
 public final class MethodMetrics {
     private final MetricsRegistry metricsRegistry;
