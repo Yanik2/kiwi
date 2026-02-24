@@ -1,4 +1,4 @@
-package com.kiwi.server.response;
+package com.kiwi.server.response.model;
 
 public class PingResponse implements SerializableValue {
     private static final PingResponse instance  = new PingResponse();

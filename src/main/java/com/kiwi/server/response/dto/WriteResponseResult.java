@@ -1,4 +1,4 @@
-package com.kiwi.server.dto;
+package com.kiwi.server.response.dto;
 
 public record WriteResponseResult(
     int writtenBytes

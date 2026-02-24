@@ -1,4 +1,4 @@
-package com.kiwi.server.response;
+package com.kiwi.server.response.model;
 
 @FunctionalInterface
 public interface SerializableValue {

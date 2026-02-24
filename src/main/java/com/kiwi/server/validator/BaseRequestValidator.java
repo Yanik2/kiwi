@@ -1,18 +1,18 @@
 package com.kiwi.server.validator;
 
-import static com.kiwi.server.Method.DEL;
-import static com.kiwi.server.Method.EXPIRE;
-import static com.kiwi.server.Method.EXT;
-import static com.kiwi.server.Method.GET;
-import static com.kiwi.server.Method.INF;
-import static com.kiwi.server.Method.PERSIST;
-import static com.kiwi.server.Method.PEXPIRE;
-import static com.kiwi.server.Method.PING;
-import static com.kiwi.server.Method.PTTL;
-import static com.kiwi.server.Method.SET;
-import static com.kiwi.server.Method.TTL;
+import static com.kiwi.server.request.Method.DEL;
+import static com.kiwi.server.request.Method.EXPIRE;
+import static com.kiwi.server.request.Method.EXT;
+import static com.kiwi.server.request.Method.GET;
+import static com.kiwi.server.request.Method.INF;
+import static com.kiwi.server.request.Method.PERSIST;
+import static com.kiwi.server.request.Method.PEXPIRE;
+import static com.kiwi.server.request.Method.PING;
+import static com.kiwi.server.request.Method.PTTL;
+import static com.kiwi.server.request.Method.SET;
+import static com.kiwi.server.request.Method.TTL;
 
-import com.kiwi.server.Method;
+import com.kiwi.server.request.Method;
 import com.kiwi.server.dto.TCPRequest;
 
 import java.util.Collections;

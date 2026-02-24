@@ -1,4 +1,4 @@
-package com.kiwi.server.response;
+package com.kiwi.server.response.model;
 
 import java.util.logging.Logger;
 

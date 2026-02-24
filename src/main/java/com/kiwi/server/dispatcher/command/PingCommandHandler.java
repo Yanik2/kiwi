@@ -2,8 +2,8 @@ package com.kiwi.server.dispatcher.command;
 
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.TCPRequest;
-import com.kiwi.server.response.PingResponse;
-import com.kiwi.server.response.SerializableValue;
+import com.kiwi.server.response.model.PingResponse;
+import com.kiwi.server.response.model.SerializableValue;
 
 public class PingCommandHandler implements RequestCommandHandler {
 

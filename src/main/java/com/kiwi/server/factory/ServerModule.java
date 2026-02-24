@@ -3,11 +3,11 @@ package com.kiwi.server.factory;
 import com.kiwi.concurrency.ConcurrencyModule;
 import com.kiwi.observability.ObservabilityModule;
 import com.kiwi.persistent.Storage;
-import com.kiwi.server.ConnectionReader;
-import com.kiwi.server.RequestHandler;
+import com.kiwi.server.request.ConnectionReader;
+import com.kiwi.server.request.RequestHandler;
 import com.kiwi.server.dispatcher.command.RequestDispatcher;
 import com.kiwi.server.validator.BaseRequestValidator;
-import com.kiwi.server.ResponseWriter;
+import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.TCPServer;
 import com.kiwi.server.parsing.BinaryRequestParser;
 

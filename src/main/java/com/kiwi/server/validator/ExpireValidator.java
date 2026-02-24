@@ -4,7 +4,7 @@ package com.kiwi.server.validator;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.NON_DIGIT_IN_NUMERIC_VALUE;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_SHORT;
-import static com.kiwi.server.Method.EXPIRE;
+import static com.kiwi.server.request.Method.EXPIRE;
 
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.server.dto.ExpireRequest;

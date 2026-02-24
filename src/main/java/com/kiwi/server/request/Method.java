@@ -1,4 +1,4 @@
-package com.kiwi.server;
+package com.kiwi.server.request;
 
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package com.kiwi.server;
+package com.kiwi.server.response;
 
 import static com.kiwi.server.util.ServerConstants.ERROR_PREFIX;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
@@ -6,8 +6,9 @@ import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
 import com.kiwi.exception.ResponseWritingException;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dto.TCPResponse;
-import com.kiwi.server.dto.WriteResponseResult;
+import com.kiwi.server.response.dto.WriteResponseResult;
+import com.kiwi.server.response.model.TCPResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
