@@ -2,7 +2,6 @@ package com.kiwi.server.request;
 
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.observability.RequestMetrics;
-import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.command.RequestDispatcher;
 import com.kiwi.server.dto.TCPRequest;
@@ -19,29 +18,33 @@ public class RequestHandler {
     private static final Logger log = Logger.getLogger(RequestHandler.class.getName());
 
     private final RequestDispatcher requestDispatcher;
-    private final ResponseWriter responseWriter;
     private final RequestValidator requestValidator;
     private final RequestMetrics requestMetrics;
 
     public RequestHandler(RequestDispatcher requestDispatcher,
-                          ResponseWriter responseWriter,
                           RequestValidator requestValidator,
                           RequestMetrics requestMetrics) {
         this.requestDispatcher = requestDispatcher;
-        this.responseWriter = responseWriter;
         this.requestValidator = requestValidator;
         this.requestMetrics = requestMetrics;
     }
 
     public void handle(TCPRequest request, ConnectionContext connectionContext) {
         final var validationResult = requestValidator.validate(request);
-        if (!validationResult.errors().isEmpty()) {
-            onValidationError(validationResult.errors(), connectionContext);
-        } else {
+        if (validationResult.errors().isEmpty()) {
             final var validatedRequest = validationResult.request();
-            final var result = requestDispatcher.dispatch(validatedRequest, connectionContext);
-            final var writeResult = responseWriter.write(connectionContext, result);
-            requestMetrics.onWrite(writeResult.writtenBytes());
+
+            TCPResponse result;
+            // PROBABLY BETTER CHOICE TO JUST RETURN TCP RESPONSE, AND EXCEPTION CATCH ON LOWER LEVEL
+            try {
+                result = requestDispatcher.dispatch(validatedRequest, connectionContext);
+            } catch (Exception ex) {
+                log.severe("Error in processing request with id: [" + request.getRequestId() + "}");
+                result = new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false);
+            }
+            connectionContext.addResponse(result);
+        } else {
+            onValidationError(validationResult.errors(), connectionContext, request);
         }
     }
 
@@ -51,7 +54,7 @@ public class RequestHandler {
         context.close();
     }
 
-    private void onValidationError(List<ProtocolException> errors, ConnectionContext context) {
+    private void onValidationError(List<ProtocolException> errors, ConnectionContext context, TCPRequest request) {
         final var errorMessages = errors.stream()
                 .map(Throwable::getMessage)
                 .collect(Collectors.joining("[", ",", "]"));
@@ -59,8 +62,7 @@ public class RequestHandler {
         for (ProtocolException ex : errors) {
             requestMetrics.onProtoError(ex.getProtocolErrorCode());
         }
-        final var writeResult = responseWriter.write(context, new TCPResponse(ERROR_MESSAGE, false));
-        requestMetrics.onWrite(writeResult.writtenBytes());
+        context.addResponse(new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false));
         context.close();
     }
 }

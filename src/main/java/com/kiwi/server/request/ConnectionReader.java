@@ -9,6 +9,7 @@ import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.response.WriterProxy;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
 
@@ -44,6 +45,9 @@ public class ConnectionReader {
         final var cursor = new Cursor(readBuffer);
         final var socket = context.socket();
         try {
+            final var os = socket.getOutputStream();
+            final var writerProxy = new WriterProxy(responseWriter, os, requestMetrics);
+            context.setWriterProxy(writerProxy);
             final var is = socket.getInputStream();
             while (!context.isClosed()) {
                 final var bytesRead = readBuffer.fill(is, context);
@@ -85,9 +89,8 @@ public class ConnectionReader {
 
     private void onError(ProtocolException ex, ConnectionContext context) {
         log.severe("Unexpected error in protocol parsing: " + ex.getMessage());
-        final var writeResult = responseWriter.write(context, new TCPResponse(ERROR_MESSAGE, false));
+        context.addResponse(new TCPResponse(context.getRecentRequestId(), ERROR_MESSAGE, false));
         context.close();
-        requestMetrics.onWrite(writeResult.writtenBytes());
         requestMetrics.onProtoError(ex.getProtocolErrorCode());
     }
 

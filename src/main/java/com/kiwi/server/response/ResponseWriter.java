@@ -5,36 +5,23 @@ import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
 import com.kiwi.exception.ResponseWritingException;
-import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.response.dto.WriteResponseResult;
 import com.kiwi.server.response.model.TCPResponse;
 
 import java.io.ByteArrayOutputStream;
-import java.net.Socket;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 public class ResponseWriter {
     private static final Logger log = Logger.getLogger(ResponseWriter.class.getSimpleName());
 
-    public WriteResponseResult write(ConnectionContext context, TCPResponse tcpResponse) {
-        // synchronization will be refactored on WriterProxy implementation
-        synchronized (context) {
-            if (context.isClosed()) {
-                return new WriteResponseResult(0);
-            } else {
-                return writeResponse(context, tcpResponse);
-            }
-        }
-    }
-
-    private WriteResponseResult writeResponse(ConnectionContext context, TCPResponse tcpResponse) {
-        final var socket = context.socket();
+    public WriteResponseResult writeResponse(OutputStream os, TCPResponse tcpResponse) {
         final var prefix = tcpResponse.isSuccess() ? SUCCESS_PREFIX : ERROR_PREFIX;
         final var baos = new ByteArrayOutputStream();
         writeToBaos(baos, prefix, tcpResponse);
 
-        writeToOs(socket, baos);
+        writeToOs(os, baos);
         return new WriteResponseResult(baos.size());
     }
 
@@ -54,19 +41,18 @@ public class ResponseWriter {
             }
         } catch (Exception ex) {
             log.severe("Unexpected error during writing response to output stream: "
-                + ex.getMessage());
+                    + ex.getMessage());
         }
     }
 
-    private void writeToOs(Socket socket, ByteArrayOutputStream baos) {
+    private void writeToOs(OutputStream os, ByteArrayOutputStream baos) {
         try {
-            final var os = socket.getOutputStream();
             baos.writeTo(os);
         } catch (Exception ex) {
             log.severe("Unexpected exception during writing response to output stream: "
-                + ex.getMessage());
+                    + ex.getMessage());
             throw new ResponseWritingException("Unexpected exception during writing response to "
-            + "output stream");
+                    + "output stream");
         }
     }
 
