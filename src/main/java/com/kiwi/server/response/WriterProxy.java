@@ -23,7 +23,7 @@ public class WriterProxy {
     private final OutputStream outputStream;
     private final RequestMetrics requestMetrics;
     private final AtomicInteger nextToWrite = new AtomicInteger(1);
-    private Thread responseWriterThread;
+    private final Thread responseWriterThread;
     private final ReentrantLock lock;
     private final Condition hasElements;
 
@@ -65,14 +65,6 @@ public class WriterProxy {
         }
         this.responseWriterThread.interrupt();
         this.responseWriterThread.join();
-
-    }
-
-    private void onThreadFailure() {
-        if (this.isActive) {
-            this.responseWriterThread = new Thread(writeResponse());
-            this.responseWriterThread.start();
-        }
     }
 
     private Runnable writeResponse() {
@@ -104,7 +96,6 @@ public class WriterProxy {
                     }
                 } catch (Exception ex) {
                     log.warning("Writer proxy thread exception: " + ex.getMessage());
-                    onThreadFailure();
                 }
             }
 
