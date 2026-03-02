@@ -11,6 +11,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import static com.kiwi.server.response.dto.WriteResponseStatus.OK;
 import static java.util.Comparator.comparingInt;
 
 public class WriterProxy {
@@ -92,8 +93,14 @@ public class WriterProxy {
 
                     if (isActive) {
                         final var writeResult = responseWriter.writeResponse(outputStream, response);
-                        requestMetrics.onWrite(writeResult.writtenBytes());
-                        nextToWrite.incrementAndGet();
+                        if (OK == writeResult.status()) {
+                            requestMetrics.onWrite(writeResult.writtenBytes());
+                            nextToWrite.incrementAndGet();
+                        } else {
+                            if (!addResponse(response)) {
+                                isActive = false;
+                            }
+                        }
                     }
                 } catch (Exception ex) {
                     log.warning("Writer proxy thread exception: " + ex.getMessage());

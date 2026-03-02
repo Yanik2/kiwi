@@ -61,7 +61,9 @@ public final class ConnectionContext {
         if (!this.isClosed() && writerProxy != null) {
             if (!writerProxy.addResponse(tcpResponse)) {
                 log.warning("Trying to add response to context, when writer proxy is not active, " +
-                        "or response queue is full. Response id: [" + tcpResponse.requestId() + "]");
+                        "or response queue is full. Close connection on slow client. " +
+                        "Response id: [" + tcpResponse.requestId() + "]");
+                close();
             }
         }
     }
