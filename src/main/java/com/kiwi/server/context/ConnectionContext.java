@@ -1,15 +1,23 @@
 package com.kiwi.server.context;
 
+import com.kiwi.server.response.WriterProxy;
+import com.kiwi.server.response.model.TCPResponse;
+
 import java.net.Socket;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public final class ConnectionContext {
+    private static final Logger log = Logger.getLogger(ConnectionContext.class.getName());
+
     private final UUID connectionId;
     private final Socket socket;
     private volatile boolean isClosed;
-    private final AtomicInteger requestIdSequence = new AtomicInteger();
+    private final AtomicInteger requestIdSequence = new AtomicInteger(1);
+
+    private WriterProxy writerProxy;
 
     public ConnectionContext(UUID connectionId, Socket socket, boolean closed) {
         this.connectionId = connectionId;
@@ -33,6 +41,7 @@ public final class ConnectionContext {
         if (!isClosed) {
             this.isClosed = true;
             try (socket) {
+                writerProxy.stop(!socket.isClosed());
                 socket.setSoLinger(true, 0);
             } catch (Exception ex) {
                 //ignore if socket already closed
@@ -41,7 +50,22 @@ public final class ConnectionContext {
     }
 
     public int getRequestId() {
-        return requestIdSequence.incrementAndGet();
+        return requestIdSequence.getAndIncrement();
+    }
+
+    public void setWriterProxy(WriterProxy writerProxy) {
+        this.writerProxy = writerProxy;
+    }
+
+    public void addResponse(TCPResponse tcpResponse) {
+        if (!this.isClosed() && writerProxy != null) {
+            if (!writerProxy.addResponse(tcpResponse)) {
+                log.warning("Trying to add response to context, when writer proxy is not active, " +
+                        "or response queue is full. Close connection on slow client. " +
+                        "Response id: [" + tcpResponse.requestId() + "]");
+                close();
+            }
+        }
     }
 
     @Override

@@ -1,73 +1,51 @@
 package com.kiwi.server.response;
 
+import static com.kiwi.server.response.dto.WriteResponseStatus.ERROR;
+import static com.kiwi.server.response.dto.WriteResponseStatus.OK;
 import static com.kiwi.server.util.ServerConstants.ERROR_PREFIX;
 import static com.kiwi.server.util.ServerConstants.SEPARATOR;
 import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
-import com.kiwi.exception.ResponseWritingException;
-import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.response.dto.WriteResponseResult;
 import com.kiwi.server.response.model.TCPResponse;
 
 import java.io.ByteArrayOutputStream;
-import java.net.Socket;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 public class ResponseWriter {
     private static final Logger log = Logger.getLogger(ResponseWriter.class.getSimpleName());
 
-    public WriteResponseResult write(ConnectionContext context, TCPResponse tcpResponse) {
-        // synchronization will be refactored on WriterProxy implementation
-        synchronized (context) {
-            if (context.isClosed()) {
-                return new WriteResponseResult(0);
-            } else {
-                return writeResponse(context, tcpResponse);
-            }
-        }
-    }
-
-    private WriteResponseResult writeResponse(ConnectionContext context, TCPResponse tcpResponse) {
-        final var socket = context.socket();
+    public WriteResponseResult writeResponse(OutputStream os, TCPResponse tcpResponse) {
         final var prefix = tcpResponse.isSuccess() ? SUCCESS_PREFIX : ERROR_PREFIX;
         final var baos = new ByteArrayOutputStream();
-        writeToBaos(baos, prefix, tcpResponse);
 
-        writeToOs(socket, baos);
-        return new WriteResponseResult(baos.size());
-    }
-
-    private void writeToBaos(ByteArrayOutputStream baos, byte prefix, TCPResponse tcpResponse) {
         try {
-            baos.write(prefix);
-            baos.write(tcpResponse.message().getBytes(StandardCharsets.UTF_8));
-            baos.write(SEPARATOR);
-
-            final byte[] responsePayload = tcpResponse.responsePayload().serialize();
-
-            writePayloadLength(responsePayload.length, baos);
-            baos.write(SEPARATOR);
-            if (responsePayload.length > 0) {
-                baos.write(responsePayload);
-                baos.write(SEPARATOR);
-            }
-        } catch (Exception ex) {
-            log.severe("Unexpected error during writing response to output stream: "
-                + ex.getMessage());
-        }
-    }
-
-    private void writeToOs(Socket socket, ByteArrayOutputStream baos) {
-        try {
-            final var os = socket.getOutputStream();
+            writeToBaos(baos, prefix, tcpResponse);
             baos.writeTo(os);
-        } catch (Exception ex) {
-            log.severe("Unexpected exception during writing response to output stream: "
-                + ex.getMessage());
-            throw new ResponseWritingException("Unexpected exception during writing response to "
-            + "output stream");
+            return new WriteResponseResult(baos.size(), OK);
+        } catch (IOException ex) {
+            log.severe("Error during writing to output stream: " + ex.getMessage());
+            return new WriteResponseResult(0, ERROR);
         }
+    }
+
+    private void writeToBaos(ByteArrayOutputStream baos, byte prefix, TCPResponse tcpResponse) throws IOException {
+        baos.write(prefix);
+        baos.write(tcpResponse.message().getBytes(StandardCharsets.UTF_8));
+        baos.write(SEPARATOR);
+
+        final byte[] responsePayload = tcpResponse.responsePayload().serialize();
+
+        writePayloadLength(responsePayload.length, baos);
+        baos.write(SEPARATOR);
+        if (responsePayload.length > 0) {
+            baos.write(responsePayload);
+            baos.write(SEPARATOR);
+        }
+
     }
 
     private void writePayloadLength(int len, ByteArrayOutputStream baos) {

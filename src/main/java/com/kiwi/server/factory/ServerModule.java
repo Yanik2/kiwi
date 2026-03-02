@@ -24,7 +24,7 @@ public class ServerModule {
         final var responseWriter = new ResponseWriter();
         final var metrics = ObservabilityModule.getRequestMetrics();
         final var requestValidator = new BaseRequestValidator();
-        final var requestHandler = new RequestHandler(dispatcher, responseWriter, requestValidator, metrics);
+        final var requestHandler = new RequestHandler(dispatcher, requestValidator, metrics);
         final var threadPoolExecutor = ConcurrencyModule.createExecutor(
                 THREAD_POOL_EXECUTOR_NAME, THREAD_POOL_NAME, 100, 100);
         threadPoolExecutor.start();

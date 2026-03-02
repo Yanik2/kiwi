@@ -1,15 +1,13 @@
 package com.kiwi.server.response.model;
 
 public record TCPResponse(
-    SerializableValue responsePayload,
-    String message,
-    boolean isSuccess
+        int requestId,
+        SerializableValue responsePayload,
+        String message,
+        boolean isSuccess
 ) {
-    public TCPResponse(String message) {
-        this(() -> new byte[0], message, true);
-    }
 
-    public TCPResponse(String message, boolean isSuccess) {
-        this(() -> new byte[0], message, isSuccess);
+    public TCPResponse(int requestId, String message, boolean isSuccess) {
+        this(requestId, () -> new byte[0], message, isSuccess);
     }
 }

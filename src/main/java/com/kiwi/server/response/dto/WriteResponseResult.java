@@ -1,6 +1,7 @@
 package com.kiwi.server.response.dto;
 
 public record WriteResponseResult(
-    int writtenBytes
+    int writtenBytes,
+    WriteResponseStatus status
 ) {
 }

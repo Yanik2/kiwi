@@ -60,6 +60,6 @@ public class RequestDispatcher {
     public TCPResponse dispatch(TCPRequest request, ConnectionContext context) {
         final var result = commands.get(request.getMethod()).handle(request, context);
         metrics.onRequest(request.getMethod());
-        return new TCPResponse(result, OK_MESSAGE, true);
+        return new TCPResponse(request.getRequestId(), result, OK_MESSAGE, true);
     }
 }
