@@ -85,12 +85,12 @@ public class WriterProxy {
                                 || response.requestId() != nextToWrite.get()) && isActive) {
                             hasElements.await();
                         }
+                        responseQueue.poll();
                     } finally {
                         lock.unlock();
                     }
 
                     if (isActive) {
-                        responseQueue.poll();
                         final var writeResult = responseWriter.writeResponse(outputStream, response);
                         requestMetrics.onWrite(writeResult.writtenBytes());
                         nextToWrite.incrementAndGet();
@@ -98,8 +98,6 @@ public class WriterProxy {
                 } catch (Exception ex) {
                     log.warning("Writer proxy thread exception: " + ex.getMessage());
                     onThreadFailure();
-                } finally {
-                    lock.unlock();
                 }
             }
 

@@ -83,6 +83,7 @@ public class ConnectionReader {
             }
         }
 
+        context.close();
         requestMetrics.onParse(readBuffer.getReadBytes());
         requestMetrics.onClose();
     }
