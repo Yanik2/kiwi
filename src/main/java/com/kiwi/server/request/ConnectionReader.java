@@ -89,7 +89,7 @@ public class ConnectionReader {
 
     private void onError(ProtocolException ex, ConnectionContext context) {
         log.severe("Unexpected error in protocol parsing: " + ex.getMessage());
-        context.addResponse(new TCPResponse(context.getRecentRequestId(), ERROR_MESSAGE, false));
+        context.addResponse(new TCPResponse(context.getRequestId(), ERROR_MESSAGE, false));
         context.close();
         requestMetrics.onProtoError(ex.getProtocolErrorCode());
     }

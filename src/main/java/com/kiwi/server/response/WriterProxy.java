@@ -30,7 +30,6 @@ public class WriterProxy {
 
     private volatile boolean isActive;
     private volatile boolean drainMode;
-    private volatile boolean isDrained;
 
     public WriterProxy(ResponseWriter responseWriter, OutputStream outputStream, RequestMetrics requestMetrics) {
         this.responseWriter = responseWriter;
@@ -39,38 +38,33 @@ public class WriterProxy {
         this.responseWriterThread = new Thread(writeResponse());
         this.lock = new ReentrantLock();
         this.hasElements = this.lock.newCondition();
-        this.responseWriterThread.start();
         this.isActive = true;
+        this.responseWriterThread.start();
     }
 
     public boolean addResponse(TCPResponse response) {
-        if (isActive && responseQueue.size() < RESPONSE_QUEUE_MAX_SIZE) {
-            lock.lock();
-            responseQueue.add(response);
-            hasElements.signal();
+        lock.lock();
+        try {
+            if (isActive && responseQueue.size() < RESPONSE_QUEUE_MAX_SIZE) {
+                responseQueue.add(response);
+                hasElements.signal();
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
             lock.unlock();
-            return true;
-        } else {
-            return false;
         }
     }
 
-    public void start() {
-        this.isActive = true;
-        this.responseWriterThread.start();
-    }
-
-    public void stop(boolean drain) {
+    public void stop(boolean drain) throws InterruptedException {
         this.isActive = false;
         if (drain) {
             drainMode = true;
-        } else {
-            this.responseWriterThread.interrupt();
         }
-    }
+        this.responseWriterThread.interrupt();
+        this.responseWriterThread.join();
 
-    public boolean isDrained() {
-        return this.isDrained;
     }
 
     private void onThreadFailure() {
@@ -86,13 +80,17 @@ public class WriterProxy {
                 try {
                     TCPResponse response;
                     lock.lock();
-                    while ((response = responseQueue.peek()) == null || response.requestId() != nextToWrite.get()) {
-                        hasElements.await();
+                    try {
+                        while (((response = responseQueue.peek()) == null
+                                || response.requestId() != nextToWrite.get()) && isActive) {
+                            hasElements.await();
+                        }
+                    } finally {
+                        lock.unlock();
                     }
-                    responseQueue.poll();
-                    lock.unlock();
 
                     if (isActive) {
+                        responseQueue.poll();
                         final var writeResult = responseWriter.writeResponse(outputStream, response);
                         requestMetrics.onWrite(writeResult.writtenBytes());
                         nextToWrite.incrementAndGet();
@@ -100,18 +98,23 @@ public class WriterProxy {
                 } catch (Exception ex) {
                     log.warning("Writer proxy thread exception: " + ex.getMessage());
                     onThreadFailure();
+                } finally {
+                    lock.unlock();
                 }
             }
 
             if (drainMode) {
                 lock.lock();
-                responseQueue.forEach(v -> {
-                    final var writerResult = responseWriter.writeResponse(outputStream, v);
-                    requestMetrics.onWrite(writerResult.writtenBytes());
-                });
-                lock.unlock();
+                try {
+                    while (!responseQueue.isEmpty()) {
+                        final var response = responseQueue.poll();
+                        final var writerResult = responseWriter.writeResponse(outputStream, response);
+                        requestMetrics.onWrite(writerResult.writtenBytes());
+                    }
+                } finally {
+                    lock.unlock();
+                }
                 drainMode = false;
-                isDrained = true;
             }
         };
     }

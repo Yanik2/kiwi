@@ -15,7 +15,7 @@ public final class ConnectionContext {
     private final UUID connectionId;
     private final Socket socket;
     private volatile boolean isClosed;
-    private final AtomicInteger requestIdSequence = new AtomicInteger();
+    private final AtomicInteger requestIdSequence = new AtomicInteger(1);
 
     private WriterProxy writerProxy;
 
@@ -42,7 +42,6 @@ public final class ConnectionContext {
             this.isClosed = true;
             try (socket) {
                 writerProxy.stop(!socket.isClosed());
-                while (!writerProxy.isDrained()) {}
                 socket.setSoLinger(true, 0);
             } catch (Exception ex) {
                 //ignore if socket already closed
@@ -51,11 +50,7 @@ public final class ConnectionContext {
     }
 
     public int getRequestId() {
-        return requestIdSequence.incrementAndGet();
-    }
-
-    public int getRecentRequestId() {
-        return requestIdSequence.get();
+        return requestIdSequence.getAndIncrement();
     }
 
     public void setWriterProxy(WriterProxy writerProxy) {

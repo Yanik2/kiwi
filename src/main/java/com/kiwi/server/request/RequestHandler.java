@@ -50,6 +50,7 @@ public class RequestHandler {
 
     public void reject(TCPRequest request, ConnectionContext context) {
         log.severe("Request is rejected: " + context.connectionId());
+        context.addResponse(new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false));
         requestMetrics.onRefuse();
         context.close();
     }
