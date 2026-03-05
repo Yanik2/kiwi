@@ -8,7 +8,6 @@ public record ThreadPoolCountersDto(
     long taskCompleted,
     long taskRejected,
     int bpPaused,
-    long bpPauses,
-    long bpRejectClose
+    long bpPauses
 ) {
 }

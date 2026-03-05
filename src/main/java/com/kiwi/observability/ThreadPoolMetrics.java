@@ -9,10 +9,6 @@ public class ThreadPoolMetrics {
         this.threadPoolName = threadPoolName;
     }
 
-    public String getThreadPoolName() {
-        return threadPoolName;
-    }
-
     public void registerMetrics() {
         metricsRegistry.registerThreadPool(threadPoolName);
     }
@@ -47,10 +43,6 @@ public class ThreadPoolMetrics {
 
     public void onBpPauses() {
         metricsRegistry.addBackPressurePause(threadPoolName);
-    }
-
-    public void onBpRejectClose() {
-        metricsRegistry.addBackPressureRejectClose(threadPoolName);
     }
 
 }
