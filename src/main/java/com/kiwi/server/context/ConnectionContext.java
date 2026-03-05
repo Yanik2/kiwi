@@ -1,5 +1,6 @@
 package com.kiwi.server.context;
 
+import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.response.WriterProxy;
 import com.kiwi.server.response.model.TCPResponse;
 
@@ -14,15 +15,21 @@ public final class ConnectionContext {
 
     private final UUID connectionId;
     private final Socket socket;
+    private final BackPressureGate backPressureGate;
     private volatile boolean isClosed;
     private final AtomicInteger requestIdSequence = new AtomicInteger(1);
+    private final WriterProxy writerProxy;
 
-    private WriterProxy writerProxy;
-
-    public ConnectionContext(UUID connectionId, Socket socket, boolean closed) {
+    public ConnectionContext(UUID connectionId,
+                             Socket socket,
+                             BackPressureGate backPressureGate,
+                             boolean closed,
+                             WriterProxy writerProxy) {
         this.connectionId = connectionId;
         this.socket = socket;
+        this.backPressureGate = backPressureGate;
         this.isClosed = closed;
+        this.writerProxy = writerProxy;
     }
 
     public UUID connectionId() {
@@ -42,7 +49,6 @@ public final class ConnectionContext {
             this.isClosed = true;
             try (socket) {
                 writerProxy.stop(!socket.isClosed());
-                socket.setSoLinger(true, 0);
             } catch (Exception ex) {
                 //ignore if socket already closed
             }
@@ -53,19 +59,22 @@ public final class ConnectionContext {
         return requestIdSequence.getAndIncrement();
     }
 
-    public void setWriterProxy(WriterProxy writerProxy) {
-        this.writerProxy = writerProxy;
-    }
-
     public void addResponse(TCPResponse tcpResponse) {
+        this.backPressureGate.signalIfBelowLow();
         if (!this.isClosed() && writerProxy != null) {
             if (!writerProxy.addResponse(tcpResponse)) {
                 log.warning("Trying to add response to context, when writer proxy is not active, " +
                         "or response queue is full. Close connection on slow client. " +
-                        "Response id: [" + tcpResponse.requestId() + "]");
+                        "Response id: [" + tcpResponse.requestId() + "], Connection id: [" + connectionId + "]");
                 close();
+            } else {
+
             }
         }
+    }
+
+    public void awaitIfOverload() throws InterruptedException {
+        this.backPressureGate.awaitIfOverloaded();
     }
 
     @Override

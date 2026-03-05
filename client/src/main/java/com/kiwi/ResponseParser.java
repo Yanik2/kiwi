@@ -9,7 +9,11 @@ public class ResponseParser {
         final var firstByte = is.read();
 
         if (firstByte != 43) {
-            return "error in response";
+            if (firstByte == -1) {
+                return "end of stream";
+            } else {
+                return "error in response";
+            }
         }
 
         is.readNBytes(4);
