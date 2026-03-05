@@ -37,6 +37,9 @@ public class BackPressureGate {
                 overloaded.await();
                 tpMetrics.onBpPaused(-1);
             }
+        } catch (InterruptedException ex) {
+            tpMetrics.onBpPaused(-1);
+            throw ex;
         } finally {
             lock.unlock();
         }

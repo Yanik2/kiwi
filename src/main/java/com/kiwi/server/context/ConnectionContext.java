@@ -49,7 +49,6 @@ public final class ConnectionContext {
             this.isClosed = true;
             try (socket) {
                 writerProxy.stop(!socket.isClosed());
-                socket.setSoLinger(true, 0);
             } catch (Exception ex) {
                 //ignore if socket already closed
             }
