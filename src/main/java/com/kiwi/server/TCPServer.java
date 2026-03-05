@@ -1,8 +1,11 @@
 package com.kiwi.server;
 
 import com.kiwi.observability.RequestMetrics;
+import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.request.ConnectionReader;
+import com.kiwi.server.response.ResponseWriter;
+import com.kiwi.server.response.WriterProxy;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -21,14 +24,18 @@ public class TCPServer {
     private static final int MAX_CLIENTS = 1000;
 
     private final ConnectionReader connectionReader;
+    private final ResponseWriter responseWriter;
     private final RequestMetrics requestMetrics;
+    private final BackPressureGate backPressureGate;
 
     private final ExecutorService connectionThreadPool = Executors.newCachedThreadPool();
 
-    public TCPServer(ConnectionReader connectionReader,
-                     RequestMetrics requestMetrics) {
+    public TCPServer(ConnectionReader connectionReader, ResponseWriter responseWriter,
+                     RequestMetrics requestMetrics, BackPressureGate backPressureGate) {
         this.connectionReader = connectionReader;
+        this.responseWriter = responseWriter;
         this.requestMetrics = requestMetrics;
+        this.backPressureGate = backPressureGate;
     }
 
     //TODO handle exception
@@ -45,7 +52,9 @@ public class TCPServer {
                 refuseConnection(socket);
             } else {
                 requestMetrics.onAccept();
-                final var connectionContext = new ConnectionContext(UUID.randomUUID(), socket, false);
+                final var writerProxy = new WriterProxy(responseWriter, socket.getOutputStream(), requestMetrics);
+                final var connectionContext =
+                        new ConnectionContext(UUID.randomUUID(), socket, backPressureGate, false, writerProxy);
                 connectionThreadPool.execute(() -> connectionReader.readConnection(connectionContext));
             }
         }

@@ -41,4 +41,16 @@ public class ThreadPoolMetrics {
         metricsRegistry.addTaskRejected(threadPoolName);
     }
 
+    public void onBpPaused(int delta) {
+        metricsRegistry.addBackPressurePaused(threadPoolName, delta);
+    }
+
+    public void onBpPauses() {
+        metricsRegistry.addBackPressurePause(threadPoolName);
+    }
+
+    public void onBpRejectClose() {
+        metricsRegistry.addBackPressureRejectClose(threadPoolName);
+    }
+
 }

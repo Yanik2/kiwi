@@ -1,6 +1,7 @@
 package com.kiwi.concurrency;
 
 import com.kiwi.observability.ObservabilityModule;
+import com.kiwi.observability.ThreadPoolMetrics;
 
 import static com.kiwi.concurrency.util.Constants.THREAD_NAME_PREFIX;
 
@@ -11,8 +12,8 @@ public final class ConcurrencyModule {
     public static KiwiThreadPoolExecutor createExecutor(String threadPoolExecutorName,
                                                         String threadPoolName,
                                                         int threadPoolSize,
-                                                        int queueCapacity) {
-        final var metrics = ObservabilityModule.getThreadPoolMetrics(threadPoolName);
+                                                        int queueCapacity,
+                                                        ThreadPoolMetrics metrics) {
         final var threadFactory = new KiwiThreadFactory(threadPoolName);
         final var executor = new KiwiThreadPoolExecutor(
                 threadPoolExecutorName,

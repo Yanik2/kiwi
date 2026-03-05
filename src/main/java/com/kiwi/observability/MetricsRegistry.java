@@ -72,10 +72,25 @@ final class MetricsRegistry {
                                         e.getValue().queueSize.get(),
                                         e.getValue().tasksEnqueued.sum(),
                                         e.getValue().tasksCompleted.sum(),
-                                        e.getValue().tasksRejected.sum()
+                                        e.getValue().tasksRejected.sum(),
+                                        e.getValue().bpPausedReaders.get(),
+                                        e.getValue().bpPauseCount.sum(),
+                                        e.getValue().bpRejectClose.sum()
                                 )
                         )
                 );
+    }
+
+    public void addBackPressurePaused(String name, int delta) {
+        threadPoolsCounters.onBpPausedCount(name, delta);
+    }
+
+    public void addBackPressurePause(String name) {
+        threadPoolsCounters.onBpPauseCount(name);
+    }
+
+    public void addBackPressureRejectClose(String name) {
+        threadPoolsCounters.onBpRejectClose(name);
     }
 
     public void addAcceptConnection() {
@@ -461,6 +476,9 @@ final class MetricsRegistry {
             private final LongAdder tasksEnqueued = new LongAdder();
             private final LongAdder tasksCompleted = new LongAdder();
             private final LongAdder tasksRejected = new LongAdder();
+            private final AtomicInteger bpPausedReaders = new AtomicInteger();
+            private final LongAdder bpPauseCount = new LongAdder();
+            private final LongAdder bpRejectClose = new LongAdder();
 
             private ThreadPoolCounters() {
             }
@@ -487,6 +505,18 @@ final class MetricsRegistry {
 
             private void onTasksRejected() {
                 tasksRejected.increment();
+            }
+
+            private void onBpPausedCount(int delta) {
+                bpPausedReaders.addAndGet(delta);
+            }
+
+            private void onBpPauseCount() {
+                bpPauseCount.increment();
+            }
+
+            private void onBpRejectClose() {
+                bpRejectClose.increment();
             }
         }
 
@@ -552,6 +582,33 @@ final class MetricsRegistry {
                 logger.info(LOG_MESSAGE_PATTERN.formatted(name));
             } else {
                 threadCounter.onTasksRejected();
+            }
+        }
+
+        public void onBpPausedCount(String name, int delta) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onBpPausedCount(delta);
+            }
+        }
+
+        public void onBpPauseCount(String name) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onBpPauseCount();
+            }
+        }
+
+        public void onBpRejectClose(String name) {
+            final var threadCounter = threadPoolCounters.get(name);
+            if (threadCounter == null) {
+                logger.info(LOG_MESSAGE_PATTERN.formatted(name));
+            } else {
+                threadCounter.onBpRejectClose();
             }
         }
     }

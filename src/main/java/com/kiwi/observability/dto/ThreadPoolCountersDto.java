@@ -6,6 +6,9 @@ public record ThreadPoolCountersDto(
     int queueSize,
     long taskEnqueued,
     long taskCompleted,
-    long taskRejected
+    long taskRejected,
+    int bpPaused,
+    long bpPauses,
+    long bpRejectClose
 ) {
 }

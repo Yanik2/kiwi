@@ -20,6 +20,7 @@ public class KiwiThreadPool {
     private final ThreadFactory threadFactory;
     private final String name;
     private final ThreadPoolMetrics metrics;
+    private final int queueCap;
     private volatile boolean isRunning;
 
     public KiwiThreadPool(ThreadFactory threadFactory, String threadPoolName, int poolSize, int queueSize,
@@ -28,6 +29,7 @@ public class KiwiThreadPool {
         this.size = poolSize;
         this.name = threadPoolName;
         this.queue = new ArrayBlockingQueue<>(queueSize);
+        this.queueCap = queueSize;
         this.metrics = metrics;
         createThreads();
     }
@@ -154,6 +156,10 @@ public class KiwiThreadPool {
             + "ThreadPool: [" + this.name + "]");
             return false;
         }
+    }
+
+    public double getLoadFactor() {
+        return (double) this.queue.size() / this.queueCap;
     }
 
     private void updateMetrics(boolean isAccepted) {

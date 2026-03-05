@@ -4,12 +4,10 @@ import com.kiwi.concurrency.KiwiThreadPoolExecutor;
 import com.kiwi.concurrency.task.ConnectionTask;
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.observability.RequestMetrics;
-import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dto.TCPRequest;
-import com.kiwi.server.response.WriterProxy;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
 
@@ -24,18 +22,15 @@ public class ConnectionReader {
 
     private final BinaryRequestParser requestParser;
     private final RequestMetrics requestMetrics;
-    private final ResponseWriter responseWriter;
     private final KiwiThreadPoolExecutor taskExecutor;
     private final RequestHandler requestHandler;
 
     public ConnectionReader(BinaryRequestParser binaryRequestParser,
                             RequestMetrics requestMetrics,
-                            ResponseWriter responseWriter,
                             KiwiThreadPoolExecutor taskExecutor,
                             RequestHandler requestHandler) {
         this.requestParser = binaryRequestParser;
         this.requestMetrics = requestMetrics;
-        this.responseWriter = responseWriter;
         this.taskExecutor = taskExecutor;
         this.requestHandler = requestHandler;
     }
@@ -45,11 +40,9 @@ public class ConnectionReader {
         final var cursor = new Cursor(readBuffer);
         final var socket = context.socket();
         try {
-            final var os = socket.getOutputStream();
-            final var writerProxy = new WriterProxy(responseWriter, os, requestMetrics);
-            context.setWriterProxy(writerProxy);
             final var is = socket.getInputStream();
             while (!context.isClosed()) {
+                context.awaitIfOverload();
                 final var bytesRead = readBuffer.fill(is, context);
                 if (bytesRead == -1) {
                     break;

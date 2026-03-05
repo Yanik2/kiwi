@@ -17,7 +17,7 @@ import static java.util.Comparator.comparingInt;
 public class WriterProxy {
     private static final Logger log = Logger.getLogger(WriterProxy.class.getName());
     // will be moved to configuration
-    private static final int RESPONSE_QUEUE_MAX_SIZE = 100;
+    private static final int RESPONSE_QUEUE_MAX_SIZE = 1000;
 
     private final ResponseWriter responseWriter;
     private final OutputStream outputStream;
@@ -89,13 +89,15 @@ public class WriterProxy {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
                         } else {
-                            if (!addResponse(response)) {
-                                isActive = false;
-                            }
+                            isActive = false;
                         }
                     }
                 } catch (Exception ex) {
-                    log.warning("Writer proxy thread exception: " + ex.getMessage());
+                    if (ex instanceof InterruptedException iex && !isActive) {
+                        log.info("Writer proxy interrupted and not active");
+                    } else {
+                        log.warning("Writer proxy thread exception: " + ex.getMessage());
+                    }
                 }
             }
 
