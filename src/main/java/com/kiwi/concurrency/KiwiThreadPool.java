@@ -42,10 +42,14 @@ public class KiwiThreadPool {
         metrics.onWorkersMax(workers.size());
     }
 
-    public void stop() {
+    public void stop() throws InterruptedException {
         this.isRunning = false;
         for (Map.Entry<String, Worker> entry : workers.entrySet()) {
            entry.getValue().isRunning = false;
+        }
+
+        for (Thread t : threads.values()) {
+            t.join(10000);
         }
     }
 
@@ -133,9 +137,10 @@ public class KiwiThreadPool {
                 log.severe("Thread [%s] for worker [%s] was interrupted with exception: %s".formatted(
                         Thread.currentThread().getName(), this.name, ex.getMessage()));
                 onError.accept(this.name);
-            }
-            if (!isRunning) {
-                onWorkerDone.accept(this.name);
+            } finally {
+                if (!isRunning) {
+                    onWorkerDone.accept(this.name);
+                }
             }
         }
 
