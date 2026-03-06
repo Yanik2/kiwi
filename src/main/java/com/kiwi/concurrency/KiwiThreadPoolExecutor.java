@@ -45,4 +45,13 @@ public class KiwiThreadPoolExecutor {
     public double getLoadFactor() {
         return this.executionThreadPool.getLoadFactor();
     }
+
+    public void shutdown() {
+        try {
+            executionThreadPool.stop();
+            rejectionThreadPool.stop();
+        } catch (Exception ex) {
+            logger.warning("Exception during stop thread pools");
+        }
+    }
 }

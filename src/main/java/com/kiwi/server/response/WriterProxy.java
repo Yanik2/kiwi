@@ -64,7 +64,12 @@ public class WriterProxy {
             drainMode = true;
         }
         this.responseWriterThread.interrupt();
-        this.responseWriterThread.join();
+        this.responseWriterThread.join(10000);
+
+        if (drain) {
+            this.responseWriterThread.interrupt();
+            this.drainMode = false;
+        }
     }
 
     private Runnable writeResponse() {
@@ -104,7 +109,7 @@ public class WriterProxy {
             if (drainMode) {
                 lock.lock();
                 try {
-                    while (!responseQueue.isEmpty()) {
+                    while (!responseQueue.isEmpty() && drainMode) {
                         final var response = responseQueue.poll();
                         final var writerResult = responseWriter.writeResponse(outputStream, response);
                         requestMetrics.onWrite(writerResult.writtenBytes());

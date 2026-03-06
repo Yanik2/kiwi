@@ -7,6 +7,7 @@ import com.kiwi.observability.RequestMetrics;
 import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
 import com.kiwi.server.context.ConnectionContext;
+import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.dto.TCPRequest;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
@@ -24,15 +25,18 @@ public class ConnectionReader {
     private final RequestMetrics requestMetrics;
     private final KiwiThreadPoolExecutor taskExecutor;
     private final RequestHandler requestHandler;
+    private final ConnectionRegistry connectionRegistry;
 
     public ConnectionReader(BinaryRequestParser binaryRequestParser,
                             RequestMetrics requestMetrics,
                             KiwiThreadPoolExecutor taskExecutor,
-                            RequestHandler requestHandler) {
+                            RequestHandler requestHandler,
+                            ConnectionRegistry connectionRegistry) {
         this.requestParser = binaryRequestParser;
         this.requestMetrics = requestMetrics;
         this.taskExecutor = taskExecutor;
         this.requestHandler = requestHandler;
+        this.connectionRegistry = connectionRegistry;
     }
 
     public void readConnection(ConnectionContext context) {
@@ -67,16 +71,9 @@ public class ConnectionReader {
         } catch (Exception ex) {
             log.severe("Unexpected exception during request processing: " + ex.getMessage());
         } finally {
-            try {
-                if (!socket.isClosed()) {
-                    socket.close();
-                }
-            } catch (Exception ex) {
-                // ignore
-            }
+            connectionRegistry.unregister(context);
         }
 
-        context.close();
         requestMetrics.onParse(readBuffer.getReadBytes());
         requestMetrics.onClose();
     }
@@ -84,7 +81,6 @@ public class ConnectionReader {
     private void onError(ProtocolException ex, ConnectionContext context) {
         log.severe("Unexpected error in protocol parsing: " + ex.getMessage());
         context.addResponse(new TCPResponse(context.getRequestId(), ERROR_MESSAGE, false));
-        context.close();
         requestMetrics.onProtoError(ex.getProtocolErrorCode());
     }
 
