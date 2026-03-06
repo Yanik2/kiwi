@@ -12,7 +12,6 @@ public class ConnectionRegistry {
     }
 
     public void unregister(ConnectionContext context) {
-        context.close();
         registry.remove(context.connectionId());
     }
 

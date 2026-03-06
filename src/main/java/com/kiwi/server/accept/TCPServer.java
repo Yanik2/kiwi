@@ -93,6 +93,7 @@ public class TCPServer {
 
         }
 
+        connectionThreadPool.shutdown();
         if (!connectionThreadPool.awaitTermination(10, SECONDS)) {
             log.warning("Timeout elapsed on readers threads stop, will be stopped immediately");
             connectionThreadPool.shutdownNow();

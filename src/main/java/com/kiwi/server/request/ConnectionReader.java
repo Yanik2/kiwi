@@ -71,11 +71,11 @@ public class ConnectionReader {
         } catch (Exception ex) {
             log.severe("Unexpected exception during request processing: " + ex.getMessage());
         } finally {
+            context.close();
             connectionRegistry.unregister(context);
+            requestMetrics.onParse(readBuffer.getReadBytes());
+            requestMetrics.onClose();
         }
-
-        requestMetrics.onParse(readBuffer.getReadBytes());
-        requestMetrics.onClose();
     }
 
     private void onError(ProtocolException ex, ConnectionContext context) {
