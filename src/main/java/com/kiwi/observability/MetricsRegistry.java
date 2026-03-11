@@ -33,7 +33,6 @@ final class MetricsRegistry {
     public void registerThreadPool(String threadPoolName) {
         if (threadPoolsCounters.isCountersExists(threadPoolName)) {
             logger.info("Thread pool metrics with name: [" + threadPoolName + "] already exists");
-            // todo maybe need to reset and archive old, will be implemented later
         } else {
             threadPoolsCounters.registerCounter(threadPoolName);
         }
@@ -86,6 +85,22 @@ final class MetricsRegistry {
 
     public void addBackPressurePause(String name) {
         threadPoolsCounters.onBpPauseCount(name);
+    }
+
+    public void addDrainTimeout() {
+        connectionCounter.onDrainTimeout();
+    }
+
+    public void addPendingResponse(int delta) {
+        connectionCounter.onPendingResponse(delta);
+    }
+
+    public void addReadersThreadActive(int delta) {
+        connectionCounter.onReaderThreads(delta);
+    }
+
+    public void addConnection() {
+        connectionCounter.onConnection();
     }
 
     public void addAcceptConnection() {
@@ -189,6 +204,22 @@ final class MetricsRegistry {
     }
 
     // getters
+
+    public int getDrainTimeouts() {
+        return connectionCounter.drainTimeouts.get();
+    }
+
+    public int getPendingResponses() {
+        return connectionCounter.pendingResponses.get();
+    }
+
+    public int getReadersThreadsActive() {
+        return connectionCounter.readerThreadsActive.get();
+    }
+
+    public long getTotalConnections() {
+        return connectionCounter.totalConnections.sum();
+    }
 
     public long getAcceptedConnections() {
         return connectionCounter.connectionsAccepted.sum();
@@ -370,6 +401,22 @@ final class MetricsRegistry {
         private final LongAdder connectionsAccepted = new LongAdder();
         private final LongAdder connectionsClosed = new LongAdder();
         private final LongAdder connectionRefused = new LongAdder();
+        private final LongAdder totalConnections = new LongAdder();
+        private final AtomicInteger readerThreadsActive = new AtomicInteger(0);
+        private final AtomicInteger pendingResponses = new AtomicInteger(0);
+        private final AtomicInteger drainTimeouts = new AtomicInteger(0);
+
+        private void onDrainTimeout() {
+            drainTimeouts.incrementAndGet();
+        }
+
+        private void onReaderThreads(int delta) {
+            readerThreadsActive.addAndGet(delta);
+        }
+
+        private void onConnection() {
+            totalConnections.increment();
+        }
 
         private void onAccepted() {
             connectionsAccepted.increment();
@@ -388,6 +435,10 @@ final class MetricsRegistry {
 
         private void onRefused() {
             connectionRefused.increment();
+        }
+
+        public void onPendingResponse(int delta) {
+            pendingResponses.addAndGet(delta);
         }
     }
 

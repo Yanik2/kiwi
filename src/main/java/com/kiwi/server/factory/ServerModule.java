@@ -3,7 +3,7 @@ package com.kiwi.server.factory;
 import com.kiwi.concurrency.ConcurrencyModule;
 import com.kiwi.observability.ObservabilityModule;
 import com.kiwi.persistent.Storage;
-import com.kiwi.server.ShutdownHook;
+import com.kiwi.server.hook.ShutdownHook;
 import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.request.ConnectionReader;

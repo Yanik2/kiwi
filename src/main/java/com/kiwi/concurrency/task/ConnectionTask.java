@@ -2,7 +2,7 @@ package com.kiwi.concurrency.task;
 
 import com.kiwi.server.request.RequestHandler;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.TCPRequest;
 
 public class ConnectionTask implements Task {
     private final RequestHandler requestHandler;

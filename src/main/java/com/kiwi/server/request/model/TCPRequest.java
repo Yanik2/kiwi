@@ -1,4 +1,4 @@
-package com.kiwi.server.dto;
+package com.kiwi.server.request.model;
 
 import com.kiwi.server.request.Method;
 

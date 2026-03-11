@@ -1,6 +1,6 @@
 package com.kiwi.server.validator;
 
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.TCPRequest;
 
 import java.util.List;
 

@@ -60,6 +60,7 @@ public class TCPServer {
             Socket socket = null;
             try {
                 socket = serverSocket.accept();
+                requestMetrics.onConnection();
 
                 //for testing purposes timeout for 10 min
                 socket.setSoTimeout(600000);

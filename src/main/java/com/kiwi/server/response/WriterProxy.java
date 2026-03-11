@@ -49,6 +49,7 @@ public class WriterProxy {
             if (isActive && responseQueue.size() < RESPONSE_QUEUE_MAX_SIZE) {
                 responseQueue.add(response);
                 hasElements.signal();
+                requestMetrics.onPendingResponse(1);
                 return true;
             } else {
                 return false;
@@ -69,6 +70,7 @@ public class WriterProxy {
         if (drain) {
             this.responseWriterThread.interrupt();
             this.drainMode = false;
+            requestMetrics.onDrainTimeout();
         }
     }
 
@@ -93,12 +95,13 @@ public class WriterProxy {
                         if (OK == writeResult.status()) {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
+                            requestMetrics.onPendingResponse(-1);
                         } else {
                             isActive = false;
                         }
                     }
                 } catch (Exception ex) {
-                    if (ex instanceof InterruptedException iex && !isActive) {
+                    if (ex instanceof InterruptedException && !isActive) {
                         log.info("Writer proxy interrupted and not active");
                     } else {
                         log.warning("Writer proxy thread exception: " + ex.getMessage());

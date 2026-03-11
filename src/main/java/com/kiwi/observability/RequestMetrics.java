@@ -13,6 +13,22 @@ public final class RequestMetrics {
         metricsRegistry.addAcceptConnection();
     }
 
+    public void onDrainTimeout() {
+        metricsRegistry.addDrainTimeout();
+    }
+
+    public void onPendingResponse(int delta) {
+        metricsRegistry.addPendingResponse(delta);
+    }
+
+    public void onConnection() {
+        metricsRegistry.addConnection();
+    }
+
+    public void onReaderThreadActive(int delta) {
+        metricsRegistry.addReadersThreadActive(delta);
+    }
+
     public void onClose() {
         metricsRegistry.addCloseConnection();
     }
