@@ -10,7 +10,15 @@ public record ObservabilityResponse(
     @Override
     public byte[] serialize() {
         return ("{ " +
-                "\"con.accepted\": " +
+                "\"con.draintimeouts\": " +
+                metrics.drainTimeouts() +
+                ", \"con.pendingresponses\": " +
+                metrics.pendingResponses() +
+                ", \"con.readerthreadactive\": " +
+                metrics.readerThreadActive() +
+                ", \"con.totalconnections\": " +
+                metrics.totalConnections() +
+                ", \"con.accepted\": " +
                 metrics.acceptedConnections() +
                 ", \"con.closed\": " +
                 metrics.closedConnections() +

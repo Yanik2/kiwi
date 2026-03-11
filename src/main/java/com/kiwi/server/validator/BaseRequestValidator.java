@@ -13,7 +13,7 @@ import static com.kiwi.server.request.Method.SET;
 import static com.kiwi.server.request.Method.TTL;
 
 import com.kiwi.server.request.Method;
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.TCPRequest;
 
 import java.util.Collections;
 import java.util.EnumMap;

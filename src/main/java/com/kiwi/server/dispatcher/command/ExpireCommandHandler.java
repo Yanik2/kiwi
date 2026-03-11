@@ -7,8 +7,8 @@ import com.kiwi.persistent.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.expiration.HasTtlExpiration;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dto.ExpireRequest;
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.ExpireRequest;
+import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.SerializableValue;
 
 public class ExpireCommandHandler extends StorageCommandHandler {

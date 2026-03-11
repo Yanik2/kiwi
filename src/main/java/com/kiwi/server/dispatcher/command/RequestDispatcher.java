@@ -18,7 +18,7 @@ import com.kiwi.observability.MetricsProvider;
 import com.kiwi.persistent.Storage;
 import com.kiwi.server.request.Method;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.TCPResponse;
 import java.util.Collections;
 import java.util.EnumMap;

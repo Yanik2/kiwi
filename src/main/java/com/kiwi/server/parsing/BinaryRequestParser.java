@@ -4,8 +4,8 @@ import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.server.request.Method;
 import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dto.ParsedRequest;
-import com.kiwi.server.dto.ParserResult;
+import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.ParserResult;
 
 import java.util.LinkedList;
 import java.util.List;

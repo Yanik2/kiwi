@@ -13,3 +13,4 @@ AFTER PHASE 3:
     - handle exception in accept loop
     - implement timeouts on requests, response, everywhere where thread might be blocked
     - test socket with different options (buffer size, latency, bandwidth)
+    - move all config constants from classes to one class in config module, until config properties implemented

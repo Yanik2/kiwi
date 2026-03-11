@@ -14,6 +14,10 @@ public class MetricsProvider {
         return new MetricsDataDto(
                 ProtocolProperties.PROTOCOL_VERSION,
                 ProtocolProperties.INFO_SCHEMA_VERSION,
+                metricsRegistry.getDrainTimeouts(),
+                metricsRegistry.getPendingResponses(),
+                metricsRegistry.getReadersThreadsActive(),
+                metricsRegistry.getTotalConnections(),
                 metricsRegistry.getAcceptedConnections(),
                 metricsRegistry.getClosedConnections(),
                 metricsRegistry.getRefusedConnections(),

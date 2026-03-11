@@ -8,7 +8,7 @@ import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
 
@@ -40,6 +40,7 @@ public class ConnectionReader {
     }
 
     public void readConnection(ConnectionContext context) {
+        requestMetrics.onReaderThreadActive(1);
         final var readBuffer = new ReadBuffer();
         final var cursor = new Cursor(readBuffer);
         final var socket = context.socket();
@@ -75,6 +76,7 @@ public class ConnectionReader {
             connectionRegistry.unregister(context);
             requestMetrics.onParse(readBuffer.getReadBytes());
             requestMetrics.onClose();
+            requestMetrics.onReaderThreadActive(-1);
         }
     }
 

@@ -5,6 +5,10 @@ import java.util.Map;
 public record MetricsDataDto(
     String protocolVersion,
     String infoSchemaVersion,
+    int drainTimeouts,
+    long pendingResponses,
+    long readerThreadActive,
+    long totalConnections,
     long acceptedConnections,
     long closedConnections,
     long refusedConnections,

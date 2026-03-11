@@ -5,8 +5,8 @@ import static com.kiwi.server.request.Method.TTL;
 import com.kiwi.persistent.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dto.ParsedRequest;
-import com.kiwi.server.dto.TCPRequest;
+import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.SerializableValue;
 import com.kiwi.server.response.model.TtlResponse;
 
