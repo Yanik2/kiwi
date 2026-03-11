@@ -12,13 +12,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import static com.kiwi.config.properties.Properties.RESPONSE_QUEUE_MAX_SIZE;
 import static com.kiwi.server.response.dto.WriteResponseStatus.OK;
 import static java.util.Comparator.comparingInt;
 
 public class WriterProxy {
     private static final Logger log = Logger.getLogger(WriterProxy.class.getName());
-    // will be moved to configuration
-    private static final int RESPONSE_QUEUE_MAX_SIZE = 1000;
 
     private final ResponseWriter responseWriter;
     private final OutputStream outputStream;
