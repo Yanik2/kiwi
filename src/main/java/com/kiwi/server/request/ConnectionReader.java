@@ -8,6 +8,8 @@ import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;
+import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.ParserResult;
 import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
@@ -55,13 +57,13 @@ public class ConnectionReader {
                 cursor.reset();
                 final var parserResults = requestParser.parse(cursor, context);
                 if (!parserResults.isEmpty()) {
-                    parserResults.forEach(parserResult -> {
+                    for (ParserResult<ParsedRequest> parserResult : parserResults) {
                         switch (parserResult.status()) {
                             case OK -> delegateTask(context, parserResult.value());
                             case NEED_MORE_DATA -> {}
                             case ERROR -> throw parserResult.error();
                         }
-                    });
+                    }
                 }
 
             }
@@ -86,7 +88,8 @@ public class ConnectionReader {
         requestMetrics.onProtoError(ex.getProtocolErrorCode());
     }
 
-    private void delegateTask(ConnectionContext context, TCPRequest tcpRequest) {
+    private void delegateTask(ConnectionContext context, TCPRequest tcpRequest) throws InterruptedException {
+        context.awaitInflight();
         final var task = new ConnectionTask(requestHandler, context, tcpRequest, 5);
         taskExecutor.submit(task);
     }
