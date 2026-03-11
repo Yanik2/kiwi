@@ -1,6 +1,7 @@
 package com.kiwi.server.response;
 
 import com.kiwi.observability.RequestMetrics;
+import com.kiwi.server.request.RequestInflightLock;
 import com.kiwi.server.response.model.TCPResponse;
 
 import java.io.OutputStream;
@@ -11,13 +12,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import static com.kiwi.config.properties.Properties.RESPONSE_QUEUE_MAX_SIZE;
 import static com.kiwi.server.response.dto.WriteResponseStatus.OK;
 import static java.util.Comparator.comparingInt;
 
 public class WriterProxy {
     private static final Logger log = Logger.getLogger(WriterProxy.class.getName());
-    // will be moved to configuration
-    private static final int RESPONSE_QUEUE_MAX_SIZE = 1000;
 
     private final ResponseWriter responseWriter;
     private final OutputStream outputStream;
@@ -26,13 +26,15 @@ public class WriterProxy {
     private final Thread responseWriterThread;
     private final ReentrantLock lock;
     private final Condition hasElements;
+    private final RequestInflightLock requestInflightLock;
 
     private final Queue<TCPResponse> responseQueue = new PriorityQueue<>(comparingInt(TCPResponse::requestId));
 
     private volatile boolean isActive;
     private volatile boolean drainMode;
 
-    public WriterProxy(ResponseWriter responseWriter, OutputStream outputStream, RequestMetrics requestMetrics) {
+    public WriterProxy(ResponseWriter responseWriter, OutputStream outputStream, RequestMetrics requestMetrics,
+                       RequestInflightLock requestInflightLock) {
         this.responseWriter = responseWriter;
         this.outputStream = outputStream;
         this.requestMetrics = requestMetrics;
@@ -41,6 +43,7 @@ public class WriterProxy {
         this.hasElements = this.lock.newCondition();
         this.isActive = true;
         this.responseWriterThread.start();
+        this.requestInflightLock = requestInflightLock;
     }
 
     public boolean addResponse(TCPResponse response) {
@@ -96,6 +99,8 @@ public class WriterProxy {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
                             requestMetrics.onPendingResponse(-1);
+                            requestInflightLock.onResponse();
+                            requestInflightLock.notifyInflight();
                         } else {
                             isActive = false;
                         }
@@ -121,6 +126,7 @@ public class WriterProxy {
                 } finally {
                     lock.unlock();
                     drainMode = false;
+                    requestInflightLock.notifyInflight();
                 }
             }
         };

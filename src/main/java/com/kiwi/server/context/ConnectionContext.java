@@ -1,6 +1,7 @@
 package com.kiwi.server.context;
 
 import com.kiwi.server.backpressure.BackPressureGate;
+import com.kiwi.server.request.RequestInflightLock;
 import com.kiwi.server.response.WriterProxy;
 import com.kiwi.server.response.model.TCPResponse;
 
@@ -19,17 +20,20 @@ public final class ConnectionContext {
     private volatile boolean isClosed;
     private final AtomicInteger requestIdSequence = new AtomicInteger(1);
     private final WriterProxy writerProxy;
+    private final RequestInflightLock requestInflightLock;
 
     public ConnectionContext(UUID connectionId,
                              Socket socket,
                              BackPressureGate backPressureGate,
                              boolean closed,
-                             WriterProxy writerProxy) {
+                             WriterProxy writerProxy,
+                             RequestInflightLock requestInflightLock) {
         this.connectionId = connectionId;
         this.socket = socket;
         this.backPressureGate = backPressureGate;
         this.isClosed = closed;
         this.writerProxy = writerProxy;
+        this.requestInflightLock = requestInflightLock;
     }
 
     public UUID connectionId() {
@@ -67,14 +71,20 @@ public final class ConnectionContext {
                         "or response queue is full. Close connection on slow client. " +
                         "Response id: [" + tcpResponse.requestId() + "], Connection id: [" + connectionId + "]");
                 close();
-            } else {
-
             }
         }
     }
 
     public void awaitIfOverload() throws InterruptedException {
         this.backPressureGate.awaitIfOverloaded();
+    }
+
+    public void awaitInflight() throws InterruptedException {
+        this.requestInflightLock.awaitInflightLevel();
+    }
+
+    public void inflightRequest() {
+        this.requestInflightLock.onRequest();
     }
 
     @Override

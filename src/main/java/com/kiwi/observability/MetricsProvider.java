@@ -1,6 +1,6 @@
 package com.kiwi.observability;
 
-import com.kiwi.config.properties.ProtocolProperties;
+import com.kiwi.config.properties.Properties;
 import com.kiwi.observability.dto.MetricsDataDto;
 
 public class MetricsProvider {
@@ -12,8 +12,8 @@ public class MetricsProvider {
 
     public MetricsDataDto getMetricsInfo() {
         return new MetricsDataDto(
-                ProtocolProperties.PROTOCOL_VERSION,
-                ProtocolProperties.INFO_SCHEMA_VERSION,
+                Properties.PROTOCOL_VERSION,
+                Properties.INFO_SCHEMA_VERSION,
                 metricsRegistry.getDrainTimeouts(),
                 metricsRegistry.getPendingResponses(),
                 metricsRegistry.getReadersThreadsActive(),

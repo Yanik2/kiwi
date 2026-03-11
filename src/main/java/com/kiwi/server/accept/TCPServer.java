@@ -5,6 +5,7 @@ import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.request.ConnectionReader;
+import com.kiwi.server.request.RequestInflightLock;
 import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.response.WriterProxy;
 
@@ -51,7 +52,6 @@ public class TCPServer {
         this.connectionRegistry = connectionRegistry;
     }
 
-    //TODO handle exception
     public void start() throws Exception {
         serverSocket = new ServerSocket(SOCKET_PORT);
         this.status = RUNNING;
@@ -70,9 +70,13 @@ public class TCPServer {
                     refuseConnection(socket);
                 } else {
                     requestMetrics.onAccept();
-                    final var writerProxy = new WriterProxy(responseWriter, socket.getOutputStream(), requestMetrics);
+                    final var requestInflightLock = new RequestInflightLock();
+                    final var writerProxy = new WriterProxy(
+                            responseWriter, socket.getOutputStream(), requestMetrics, requestInflightLock);
                     final var connectionContext =
-                            new ConnectionContext(UUID.randomUUID(), socket, backPressureGate, false, writerProxy);
+                            new ConnectionContext(
+                                    UUID.randomUUID(), socket, backPressureGate, false, writerProxy, requestInflightLock
+                            );
                     connectionRegistry.register(connectionContext);
                     connectionThreadPool.execute(() -> connectionReader.readConnection(connectionContext));
                 }
