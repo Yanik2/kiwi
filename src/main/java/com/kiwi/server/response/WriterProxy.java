@@ -115,12 +115,13 @@ public class WriterProxy {
                     while (!responseQueue.isEmpty() && drainMode) {
                         final var response = responseQueue.poll();
                         final var writerResult = responseWriter.writeResponse(outputStream, response);
+                        requestMetrics.onPendingResponse(-1);
                         requestMetrics.onWrite(writerResult.writtenBytes());
                     }
                 } finally {
                     lock.unlock();
+                    drainMode = false;
                 }
-                drainMode = false;
             }
         };
     }
