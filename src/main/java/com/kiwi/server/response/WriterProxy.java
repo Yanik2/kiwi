@@ -99,6 +99,7 @@ public class WriterProxy {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
                             requestMetrics.onPendingResponse(-1);
+                            requestInflightLock.onResponse();
                             requestInflightLock.notifyInflight();
                         } else {
                             isActive = false;
@@ -125,6 +126,7 @@ public class WriterProxy {
                 } finally {
                     lock.unlock();
                     drainMode = false;
+                    requestInflightLock.notifyInflight();
                 }
             }
         };

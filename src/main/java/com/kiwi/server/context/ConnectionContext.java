@@ -83,6 +83,10 @@ public final class ConnectionContext {
         this.requestInflightLock.awaitInflightLevel();
     }
 
+    public void inflightRequest() {
+        this.requestInflightLock.onRequest();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;

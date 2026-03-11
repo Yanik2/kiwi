@@ -92,5 +92,6 @@ public class ConnectionReader {
         context.awaitInflight();
         final var task = new ConnectionTask(requestHandler, context, tcpRequest, 5);
         taskExecutor.submit(task);
+        context.inflightRequest();
     }
 }
