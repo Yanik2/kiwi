@@ -58,6 +58,6 @@ public final class MetricKeys {
     public static final String TP_TASK_REJECTED = ".task_rejected";
 
     // backpressure metrics
-    public static final String BP_PAUSE_COUNT = "bp.pause_count";
-    public static final String BP_PAUSED_COUNT = "bp.paused_count";
+    public static final String BP_PAUSE_COUNT = ".bp.pause_count";
+    public static final String BP_PAUSED_COUNT = ".bp.paused_count";
 }

@@ -58,11 +58,11 @@ public class TCPServer {
             Socket socket = null;
             try {
                 socket = serverSocket.accept();
-                requestMetrics.onConnection();
 
                 //for testing purposes timeout for 10 min
                 socket.setSoTimeout(600000);
 
+                requestMetrics.onConnection();
                 if (requestMetrics.getCurrentClients() > MAX_CLIENTS) {
                     requestMetrics.onRefuse();
                     refuseConnection(socket);
