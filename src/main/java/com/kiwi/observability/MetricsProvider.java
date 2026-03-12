@@ -11,42 +11,16 @@ public class MetricsProvider {
     private final MetricsRegistry metricsRegistry;
 
     public MetricsDataDto getMetricsInfo() {
+        final var gauges = metricsRegistry.getGauges();
+        final var counters = metricsRegistry.getCounters();
+
         return new MetricsDataDto(
                 Properties.PROTOCOL_VERSION,
                 Properties.INFO_SCHEMA_VERSION,
-                metricsRegistry.getDrainTimeouts(),
-                metricsRegistry.getPendingResponses(),
-                metricsRegistry.getReadersThreadsActive(),
-                metricsRegistry.getTotalConnections(),
-                metricsRegistry.getAcceptedConnections(),
-                metricsRegistry.getClosedConnections(),
-                metricsRegistry.getRefusedConnections(),
-                metricsRegistry.getCurrentClients(),
-                metricsRegistry.getBytesIn(),
-                metricsRegistry.getBytesOut(),
-                metricsRegistry.getGetRequests(),
-                metricsRegistry.getSetRequests(),
-                metricsRegistry.getDeleteRequests(),
-                metricsRegistry.getExitRequests(),
-                metricsRegistry.getInfoRequests(),
-                metricsRegistry.getPingRequests(),
-                metricsRegistry.getExpireRequests(),
-                metricsRegistry.getPexpireRequests(),
-                metricsRegistry.getPersistRequests(),
-                metricsRegistry.getUnknownMethods(),
-                metricsRegistry.getHeaderTooLong(),
-                metricsRegistry.getValueTooLong(),
-                metricsRegistry.getKeyTooLong(),
-                metricsRegistry.getUnexpectedEndOfFile(),
-                metricsRegistry.getNonDigitInLength(),
-                metricsRegistry.getInvalidSeparator(),
-                metricsRegistry.getValueTooShort(),
-                metricsRegistry.getInvalidHeader(),
-                metricsRegistry.getBufferError(),
+                gauges,
+                counters,
                 metricsRegistry.getServerStart(),
-                System.currentTimeMillis() - metricsRegistry.getServerStart(),
-                metricsRegistry.getTtlExpiredEviction(),
-                metricsRegistry.getThreadPoolsCounters()
+                System.currentTimeMillis() - metricsRegistry.getServerStart()
         );
     }
 }

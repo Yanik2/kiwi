@@ -1,7 +1,4 @@
 AFTER PHASE 3:
-    - refactor observability module, instead of direct implementation of each possible metrics class,
-      implement container with several maps (counter, gauge, etc) which holds metrics by name.
-      For adding metrics just call method "onAction(String metric name)" on one singleton instance of metrics
     - implement read buffer shrink
     - implement buffer for writing response (currently every time response is written new byte array stream is created)
       also with shrink
