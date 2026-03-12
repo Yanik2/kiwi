@@ -7,9 +7,6 @@ public class ThreadPoolMetrics {
     public ThreadPoolMetrics(MetricsRegistry metricsRegistry, String threadPoolName) {
         this.metricsRegistry = metricsRegistry;
         this.threadPoolName = threadPoolName;
-    }
-
-    public void registerMetrics() {
         metricsRegistry.registerThreadPool(threadPoolName);
     }
 

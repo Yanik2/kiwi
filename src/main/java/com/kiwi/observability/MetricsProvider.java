@@ -4,7 +4,7 @@ import com.kiwi.config.properties.Properties;
 import com.kiwi.observability.dto.MetricsDataDto;
 
 public class MetricsProvider {
-    MetricsProvider(MetricsRegistry metricsRegistry) {
+    public MetricsProvider(MetricsRegistry metricsRegistry) {
         this.metricsRegistry = metricsRegistry;
     }
 

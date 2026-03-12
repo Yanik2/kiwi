@@ -5,7 +5,7 @@ import com.kiwi.exception.protocol.ProtocolErrorCode;
 public final class RequestMetrics {
     private final MetricsRegistry metricsRegistry;
 
-    RequestMetrics(MetricsRegistry metricsRegistry) {
+    public RequestMetrics(MetricsRegistry metricsRegistry) {
         this.metricsRegistry = metricsRegistry;
     }
 

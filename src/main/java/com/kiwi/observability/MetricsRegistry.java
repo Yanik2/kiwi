@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-final class MetricsRegistry {
+public final class MetricsRegistry {
     private static final Logger logger = Logger.getLogger(MetricsRegistry.class.getName());
     private static final MetricsRegistry instance = new MetricsRegistry();
 
