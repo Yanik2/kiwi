@@ -10,7 +10,7 @@ public record ObservabilityResponse(
     @Override
     public byte[] serialize() {
         final var sb = new StringBuilder("{ \"proto.version\": " + metrics.protocolVersion() +
-                ", \"proto.schemaversion\": " + metrics.infoSchemaVersion());
+                ", \"proto.infoschemaversion\": " + metrics.infoSchemaVersion());
 
         metrics.gauges().forEach((k, v) -> sb.append(", \"")
                 .append(k)

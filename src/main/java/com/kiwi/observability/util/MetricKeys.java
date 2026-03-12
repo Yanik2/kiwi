@@ -50,12 +50,12 @@ public final class MetricKeys {
     public static final String STORAGE_TTL_EXPIRED_EVICTION = "storage.ttl.expired.eviction";
 
     // thread pool metrics
-    public static final String TP_WORKERS_MAX = "tp.workers_max";
-    public static final String TP_WORKERS_ACTIVE = "tp.workers_active";
-    public static final String TP_QUEUE_SIZE = "tp.queue_size";
-    public static final String TP_TASK_ENQUEUED = "tp.task_enqueued";
-    public static final String TP_TASK_COMPLETED = "tp.task_completed";
-    public static final String TP_TASK_REJECTED = "tp.task_rejected";
+    public static final String TP_WORKERS_MAX = ".workers_max";
+    public static final String TP_WORKERS_ACTIVE = ".workers_active";
+    public static final String TP_QUEUE_SIZE = ".queue_size";
+    public static final String TP_TASK_ENQUEUED = ".task_enqueued";
+    public static final String TP_TASK_COMPLETED = ".task_completed";
+    public static final String TP_TASK_REJECTED = ".task_rejected";
 
     // backpressure metrics
     public static final String BP_PAUSE_COUNT = "bp.pause_count";

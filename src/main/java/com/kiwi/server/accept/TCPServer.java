@@ -63,7 +63,7 @@ public class TCPServer {
                 //for testing purposes timeout for 10 min
                 socket.setSoTimeout(600000);
 
-                if (requestMetrics.getCurrentClients() >= MAX_CLIENTS) {
+                if (requestMetrics.getCurrentClients() > MAX_CLIENTS) {
                     requestMetrics.onRefuse();
                     refuseConnection(socket);
                 } else {
