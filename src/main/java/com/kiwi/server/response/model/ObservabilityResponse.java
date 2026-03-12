@@ -2,110 +2,30 @@ package com.kiwi.server.response.model;
 
 import com.kiwi.observability.dto.MetricsDataDto;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public record ObservabilityResponse(
         MetricsDataDto metrics
 ) implements SerializableValue {
     @Override
     public byte[] serialize() {
-        return ("{ " +
-                "\"con.draintimeouts\": " +
-                metrics.drainTimeouts() +
-                ", \"con.pendingresponses\": " +
-                metrics.pendingResponses() +
-                ", \"con.readerthreadactive\": " +
-                metrics.readerThreadActive() +
-                ", \"con.totalconnections\": " +
-                metrics.totalConnections() +
-                ", \"con.accepted\": " +
-                metrics.acceptedConnections() +
-                ", \"con.closed\": " +
-                metrics.closedConnections() +
-                ", \"con.refused\": " +
-                metrics.refusedConnections() +
-                ", \"con.current\": " +
-                metrics.currentClients() +
-                ", \"bytes.in\": " +
-                metrics.bytesIn() +
-                ", \"bytes.out\": " +
-                metrics.bytesOut() +
-                ", \"cmd.get\": " +
-                metrics.getRequests() +
-                ", \"cmd.set\": " +
-                metrics.setRequests() +
-                ", \"cmd.del\": " +
-                metrics.deleteRequests() +
-                ", \"cmd.ext\": " +
-                metrics.exitRequests() +
-                ", \"cmd.inf\": " +
-                metrics.infoRequests() +
-                ", \"cmd.ping\": " +
-                metrics.pingRequests() +
-                ", \"cmd.expire\": " +
-                metrics.expireRequests() +
-                ", \"cmd.pexpire\": " +
-                metrics.pexpireRequests() +
-                ", \"cmd.persist\": " +
-                metrics.persistRequests() +
-                ", \"proto.version\": " +
-                metrics.protocolVersion() +
-                ", \"proto.infoschemaversion\": " +
-                metrics.infoSchemaVersion() +
-                ", \"proto.err.unknown\": " +
-                metrics.unknownMethod() +
-                ", \"proto.err.headerlen\": " +
-                metrics.headerTooLong() +
-                ", \"proto.err.valuelen\": " +
-                metrics.valueTooLong() +
-                ", \"proto.err.keylen\": " +
-                metrics.keyTooLong() +
-                ", \"proto.err.eof\": " +
-                metrics.unexpectedEndOfFile() +
-                ", \"proto.err.nondigitlen\": " +
-                metrics.nonDigitInLength() +
-                ", \"proto.err.invalidseparator\": " +
-                metrics.invalidSeparator() +
-                ", \"proto.err.valuetooshort\": " +
-                metrics.valueTooShort() +
-                ", \"proto.err.invalidheader\": " +
-                metrics.invalidHeader() +
-                ", \" proto.err.buffererror\": " +
-                metrics.bufferError() +
-                ", \"server.start\": " +
-                metrics.serverStart() +
-                ", \"server.uptime\": " +
-                metrics.serverUptime() +
-                ", \"storage.ttl.expired.eviction\": " +
-                metrics.ttlExpiredEviction() +
-                serializeThreadPoolMetrics() +
-                " }")
-                .getBytes(StandardCharsets.UTF_8);
-    }
+        final var sb = new StringBuilder("{ \"proto.version\": " + metrics.protocolVersion() +
+                ", \"proto.schemaversion\": " + metrics.infoSchemaVersion());
 
-    private String serializeThreadPoolMetrics() {
-        final var sb = new StringBuilder();
-        metrics.threadPoolsMetrics().forEach((k, v) -> {
-            final var prefix = ", \"tp." + k;
-            sb.append(prefix)
-                    .append(".workers_max\": ")
-                    .append(v.workersMax())
-                    .append(prefix)
-                    .append(".workers_active\": ")
-                    .append(v.workersActive())
-                    .append(prefix)
-                    .append(".queue_size\": ")
-                    .append(v.queueSize())
-                    .append(prefix)
-                    .append(".task_enqueued\": ")
-                    .append(v.taskEnqueued())
-                    .append(prefix)
-                    .append(".task_completed\": ")
-                    .append(v.taskCompleted())
-                    .append(prefix)
-                    .append(".task_rejected\": ")
-                    .append(v.taskRejected());
-        });
-        return sb.toString();
+        metrics.gauges().forEach((k, v) -> sb.append(", \"")
+                .append(k)
+                .append("\": ")
+                .append(v));
+        metrics.counters().forEach((k, v) -> sb.append(", \"")
+                .append(k)
+                .append("\": ")
+                .append(v));
+        return sb.append(", \"server.start\": ")
+                .append(metrics.serverStart())
+                .append(", \"server.uptime\": ")
+                .append(metrics.serverUptime())
+                .append(" }")
+                .toString()
+                .getBytes(UTF_8);
     }
 }

@@ -15,4 +15,7 @@ public class Properties {
     public static final int REJECTION_QUEUE_SIZE = 100;
     public static final int SERVER_THREAD_POOL_SIZE = 9;
     public static final int SERVER_THREAD_POOL_QUEUE_CAP = 1000;
+
+    public static final int SOCKET_PORT = 8090;
+    public static final int MAX_CLIENTS = 1000;
 }

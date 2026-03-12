@@ -18,6 +18,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.kiwi.config.properties.Properties.MAX_CLIENTS;
+import static com.kiwi.config.properties.Properties.SOCKET_PORT;
 import static com.kiwi.server.accept.ServerStatus.RUNNING;
 import static com.kiwi.server.accept.ServerStatus.STOPPED;
 import static com.kiwi.server.accept.ServerStatus.STOPPING;
@@ -25,10 +27,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class TCPServer {
     private static final Logger log = Logger.getLogger(TCPServer.class.getName());
-
-    //TODO will be moved to properties in phase 5
-    private static final int SOCKET_PORT = 8090;
-    private static final int MAX_CLIENTS = 1000;
 
     private final ConnectionReader connectionReader;
     private final ResponseWriter responseWriter;
