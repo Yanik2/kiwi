@@ -40,6 +40,7 @@ public class KiwiThreadPoolExecutor {
 
     public void start() {
         executionThreadPool.start();
+        rejectionThreadPool.start();
     }
 
     public double getLoadFactor() {
