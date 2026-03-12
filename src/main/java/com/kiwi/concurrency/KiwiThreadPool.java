@@ -35,6 +35,9 @@ public class KiwiThreadPool {
     }
 
     public void start() {
+        if (isRunning) {
+            return;
+        }
         for (Map.Entry<String, Thread> entry : threads.entrySet()) {
             entry.getValue().start();
         }

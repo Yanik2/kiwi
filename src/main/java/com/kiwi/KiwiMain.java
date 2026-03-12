@@ -1,6 +1,8 @@
 package com.kiwi;
 
-import com.kiwi.persistent.PersistentModule;
+import com.kiwi.concurrency.factory.ConcurrencyModule;
+import com.kiwi.observability.factory.ObservabilityModule;
+import com.kiwi.persistent.factory.PersistentModule;
 import com.kiwi.server.factory.ServerModule;
 import java.util.logging.Logger;
 
@@ -10,10 +12,12 @@ public class KiwiMain {
     public static void main(String[] args) throws Exception {
         log.info("Starting initialization Kiwi");
         final long start = System.currentTimeMillis();
-        final var storage = PersistentModule.create();
-        final var server = ServerModule.create(storage);
+        final var observabilityContainer = ObservabilityModule.create();
+        final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
+        final var persistentContainer = PersistentModule.create(observabilityContainer);
+        final var serverContainer = ServerModule.create(observabilityContainer, persistentContainer, concurrencyContainer);
         final long end = System.currentTimeMillis();
         log.info("Kiwi initialized in [" + (end - start) + "]ms, starting server");
-        server.start();
+        serverContainer.start();
     }
 }

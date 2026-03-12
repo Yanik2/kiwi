@@ -5,7 +5,7 @@ import com.kiwi.server.request.Method;
 public final class MethodMetrics {
     private final MetricsRegistry metricsRegistry;
 
-    MethodMetrics(MetricsRegistry metricsRegistry) {
+    public MethodMetrics(MetricsRegistry metricsRegistry) {
         this.metricsRegistry = metricsRegistry;
     }
 
