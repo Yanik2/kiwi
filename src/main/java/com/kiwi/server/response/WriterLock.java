@@ -1,10 +1,13 @@
 package com.kiwi.server.response;
 
+import com.kiwi.exception.TimeoutException;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.kiwi.config.properties.Properties.MAX_INFLIGHT_PER_CONNECTION;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class WriterLock {
     private final ReentrantLock lock = new ReentrantLock();
@@ -15,7 +18,9 @@ public class WriterLock {
     public void awaitWriterDone() throws InterruptedException {
         lock.lock();
         try {
-            writerDone.await();
+            if (!writerDone.await(10, SECONDS)) {
+                throw new TimeoutException("Await writer done timeout");
+            }
         } finally {
             lock.unlock();
         }
@@ -34,7 +39,7 @@ public class WriterLock {
         lock.lock();
         try {
             while (inflight.get() >= MAX_INFLIGHT_PER_CONNECTION) {
-                inflightLevel.await();
+                inflightLevel.await(10, SECONDS);
             }
         } finally {
             lock.unlock();

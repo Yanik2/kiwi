@@ -18,4 +18,11 @@ public class Properties {
 
     public static final int SOCKET_PORT = 8090;
     public static final int MAX_CLIENTS = 1000;
+
+    public static final double BP_HIGH_LOAD_WATERMARK = 0.8;
+    public static final double BP_LOW_LOAD_WATERMARK = 0.5;
+
+    public static final int BUFFER_INITIAL_CAP = 8192;
+    public static final int BUFFER_MAX_CAP = 10489864;
+    public static final int BUFFER_EXPAND_RATIO = 2;
 }

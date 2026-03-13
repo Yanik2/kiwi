@@ -7,14 +7,14 @@ import com.kiwi.server.context.ConnectionContext;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
+import static com.kiwi.config.properties.Properties.BUFFER_EXPAND_RATIO;
+import static com.kiwi.config.properties.Properties.BUFFER_INITIAL_CAP;
+import static com.kiwi.config.properties.Properties.BUFFER_MAX_CAP;
+
 public class ReadBuffer {
     private static final Logger log = Logger.getLogger(ReadBuffer.class.getName());
 
-    private static final int INITIAL_CAP = 8192;
-    private static final int MAX_CAP = 10489864;
-    private static final int EXPAND_RATIO = 2;
-
-    private byte[] buf = new byte[INITIAL_CAP];
+    private byte[] buf = new byte[BUFFER_INITIAL_CAP];
 
     private int readPos = 0;
     private int writePos = 0;
@@ -54,7 +54,7 @@ public class ReadBuffer {
     }
 
     private void shrinkBuffer() {
-        final var newSize = Math.max((writePos - readPos) * 2, INITIAL_CAP);
+        final var newSize = Math.max((writePos - readPos) * 2, BUFFER_INITIAL_CAP);
         if (newSize <= buf.length / 2) {
             final var newBuf = new byte[newSize];
             for (int i = 0; i < writePos - readPos; i++) {
@@ -72,7 +72,7 @@ public class ReadBuffer {
         if (writePos < buf.length - 1) {
             return;
         }
-        final var newSize = Math.min(buf.length * EXPAND_RATIO, MAX_CAP);
+        final var newSize = Math.min(buf.length * BUFFER_EXPAND_RATIO, BUFFER_MAX_CAP);
         final var newBuffer = new byte[newSize];
 
         for (int i = 0; i < buf.length; i++) {
@@ -124,6 +124,6 @@ public class ReadBuffer {
     }
 
     private boolean isFull() {
-        return readPos == 0 && writePos == MAX_CAP;
+        return readPos == 0 && writePos == BUFFER_MAX_CAP;
     }
 }

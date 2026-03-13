@@ -1,8 +1,2 @@
-AFTER PHASE 3:
-    - update logic on EXT command. Stop parsing any requests after parsed EXT. ConnectionContext and WriterProxy aware
-      of EXT request id, and close connection only after EXT will be written to outputstream (unless some error didn't
-      occure earlier which makes close connection before)
-    - handle exception in accept loop
-    - implement timeouts on requests, response, everywhere where thread might be blocked
+AFTER PHASE 4:
     - test socket with different options (buffer size, latency, bandwidth)
-    - move all config constants from classes to one class in config module, until config properties implemented
