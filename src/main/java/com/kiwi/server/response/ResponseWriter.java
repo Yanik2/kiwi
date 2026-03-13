@@ -18,9 +18,8 @@ import java.util.logging.Logger;
 public class ResponseWriter {
     private static final Logger log = Logger.getLogger(ResponseWriter.class.getSimpleName());
 
-    public WriteResponseResult writeResponse(OutputStream os, TCPResponse tcpResponse) {
+    public WriteResponseResult writeResponse(OutputStream os, TCPResponse tcpResponse, ByteArrayOutputStream baos) {
         final var prefix = tcpResponse.isSuccess() ? SUCCESS_PREFIX : ERROR_PREFIX;
-        final var baos = new ByteArrayOutputStream();
 
         try {
             writeToBaos(baos, prefix, tcpResponse);

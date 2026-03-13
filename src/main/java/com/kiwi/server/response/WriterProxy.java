@@ -4,6 +4,7 @@ import com.kiwi.observability.RequestMetrics;
 import com.kiwi.server.request.RequestInflightLock;
 import com.kiwi.server.response.model.TCPResponse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -32,6 +33,8 @@ public class WriterProxy {
 
     private volatile boolean isActive;
     private volatile boolean drainMode;
+
+    private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
     public WriterProxy(ResponseWriter responseWriter, OutputStream outputStream, RequestMetrics requestMetrics,
                        RequestInflightLock requestInflightLock) {
@@ -94,7 +97,8 @@ public class WriterProxy {
                     }
 
                     if (isActive) {
-                        final var writeResult = responseWriter.writeResponse(outputStream, response);
+                        baos.reset();
+                        final var writeResult = responseWriter.writeResponse(outputStream, response, baos);
                         if (OK == writeResult.status()) {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
@@ -119,7 +123,8 @@ public class WriterProxy {
                 try {
                     while (!responseQueue.isEmpty() && drainMode) {
                         final var response = responseQueue.poll();
-                        final var writerResult = responseWriter.writeResponse(outputStream, response);
+                        baos.reset();
+                        final var writerResult = responseWriter.writeResponse(outputStream, response, baos);
                         requestMetrics.onPendingResponse(-1);
                         requestMetrics.onWrite(writerResult.writtenBytes());
                     }
