@@ -1,7 +1,6 @@
 package com.kiwi.server.response;
 
 import com.kiwi.observability.RequestMetrics;
-import com.kiwi.server.request.WriterLock;
 import com.kiwi.server.response.model.TCPResponse;
 
 import java.io.OutputStream;
@@ -68,6 +67,9 @@ public class WriterProxy {
     }
 
     public void stop(boolean drain) throws InterruptedException {
+        if (!isActive) {
+            return;
+        }
         this.isActive = false;
         if (drain) {
             drainMode = true;
@@ -75,7 +77,7 @@ public class WriterProxy {
         this.responseWriterThread.interrupt();
         this.responseWriterThread.join(10000);
 
-        if (drain) {
+        if (drainMode) {
             this.responseWriterThread.interrupt();
             this.drainMode = false;
             requestMetrics.onDrainTimeout();
@@ -123,6 +125,7 @@ public class WriterProxy {
             }
 
             if (drainMode) {
+                System.out.println("In drain mode");
                 lock.lock();
                 try {
                     while (!responseQueue.isEmpty() && drainMode) {
@@ -138,6 +141,7 @@ public class WriterProxy {
                 }
             }
 
+            System.out.println("Left drain mode");
             writerLock.notifyWriterDone();
         };
     }

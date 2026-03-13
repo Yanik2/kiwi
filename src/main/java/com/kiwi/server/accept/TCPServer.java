@@ -5,7 +5,7 @@ import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.request.ConnectionReader;
-import com.kiwi.server.request.WriterLock;
+import com.kiwi.server.response.WriterLock;
 import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.response.WriterProxy;
 

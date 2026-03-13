@@ -1,7 +1,7 @@
 package com.kiwi.server.context;
 
 import com.kiwi.server.backpressure.BackPressureGate;
-import com.kiwi.server.request.WriterLock;
+import com.kiwi.server.response.WriterLock;
 import com.kiwi.server.response.WriterProxy;
 import com.kiwi.server.response.model.TCPResponse;
 

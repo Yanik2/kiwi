@@ -1,4 +1,4 @@
-package com.kiwi.server.request;
+package com.kiwi.server.response;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
