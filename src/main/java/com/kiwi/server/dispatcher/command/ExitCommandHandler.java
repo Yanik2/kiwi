@@ -9,7 +9,6 @@ public class ExitCommandHandler implements RequestCommandHandler {
 
     @Override
     public SerializableValue handle(TCPRequest request, ConnectionContext context) {
-        context.close();
         return EmptyResponse.getInstance();
     }
 }
