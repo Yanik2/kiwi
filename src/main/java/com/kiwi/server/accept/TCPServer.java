@@ -5,7 +5,7 @@ import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.request.ConnectionReader;
-import com.kiwi.server.request.RequestInflightLock;
+import com.kiwi.server.request.WriterLock;
 import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.response.WriterProxy;
 
@@ -68,7 +68,7 @@ public class TCPServer {
                     refuseConnection(socket);
                 } else {
                     requestMetrics.onAccept();
-                    final var requestInflightLock = new RequestInflightLock();
+                    final var requestInflightLock = new WriterLock();
                     final var writerProxy = new WriterProxy(
                             responseWriter, socket.getOutputStream(), requestMetrics, requestInflightLock);
                     final var connectionContext =

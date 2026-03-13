@@ -1,7 +1,7 @@
 package com.kiwi.server.response;
 
 import com.kiwi.observability.RequestMetrics;
-import com.kiwi.server.request.RequestInflightLock;
+import com.kiwi.server.request.WriterLock;
 import com.kiwi.server.response.model.TCPResponse;
 
 import java.io.OutputStream;
@@ -26,15 +26,16 @@ public class WriterProxy {
     private final Thread responseWriterThread;
     private final ReentrantLock lock;
     private final Condition hasElements;
-    private final RequestInflightLock requestInflightLock;
+    private final WriterLock writerLock;
 
     private final Queue<TCPResponse> responseQueue = new PriorityQueue<>(comparingInt(TCPResponse::requestId));
 
     private volatile boolean isActive;
     private volatile boolean drainMode;
+    private volatile int lastResponseId = -1;
 
     public WriterProxy(ResponseWriter responseWriter, OutputStream outputStream, RequestMetrics requestMetrics,
-                       RequestInflightLock requestInflightLock) {
+                       WriterLock writerLock) {
         this.responseWriter = responseWriter;
         this.outputStream = outputStream;
         this.requestMetrics = requestMetrics;
@@ -43,7 +44,11 @@ public class WriterProxy {
         this.hasElements = this.lock.newCondition();
         this.isActive = true;
         this.responseWriterThread.start();
-        this.requestInflightLock = requestInflightLock;
+        this.writerLock = writerLock;
+    }
+
+    public void setLastResponseId(int id) {
+        this.lastResponseId = id;
     }
 
     public boolean addResponse(TCPResponse response) {
@@ -99,8 +104,11 @@ public class WriterProxy {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
                             requestMetrics.onPendingResponse(-1);
-                            requestInflightLock.onResponse();
-                            requestInflightLock.notifyInflight();
+                            writerLock.onResponse();
+                            writerLock.notifyInflight();
+                            if (lastResponseId == response.requestId()) {
+                                isActive = false;
+                            }
                         } else {
                             isActive = false;
                         }
@@ -126,9 +134,11 @@ public class WriterProxy {
                 } finally {
                     lock.unlock();
                     drainMode = false;
-                    requestInflightLock.notifyInflight();
+                    writerLock.notifyInflight();
                 }
             }
+
+            writerLock.notifyWriterDone();
         };
     }
 }

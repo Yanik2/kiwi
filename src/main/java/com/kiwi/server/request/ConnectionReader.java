@@ -15,9 +15,11 @@ import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
 
 import java.net.SocketTimeoutException;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.kiwi.server.request.Method.EXT;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
 public class ConnectionReader {
@@ -63,6 +65,9 @@ public class ConnectionReader {
                             case NEED_MORE_DATA -> {}
                             case ERROR -> throw parserResult.error();
                         }
+                        if (context.isClosed()) {
+                            break;
+                        }
                     }
                 }
 
@@ -89,9 +94,17 @@ public class ConnectionReader {
     }
 
     private void delegateTask(ConnectionContext context, TCPRequest tcpRequest) throws InterruptedException {
+        if (EXT.equals(tcpRequest.getMethod())) {
+            context.closeAfter(tcpRequest.getRequestId());
+        }
         context.awaitInflight();
         final var task = new ConnectionTask(requestHandler, context, tcpRequest, 5);
         taskExecutor.submit(task);
         context.inflightRequest();
+
+        if (EXT.equals(tcpRequest.getMethod())) {
+            context.awaitWriterDone();
+            context.close();
+        }
     }
 }

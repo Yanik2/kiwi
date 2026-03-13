@@ -1,7 +1,4 @@
 AFTER PHASE 3:
-    - implement read buffer shrink
-    - implement buffer for writing response (currently every time response is written new byte array stream is created)
-      also with shrink
     - update logic on EXT command. Stop parsing any requests after parsed EXT. ConnectionContext and WriterProxy aware
       of EXT request id, and close connection only after EXT will be written to outputstream (unless some error didn't
       occure earlier which makes close connection before)

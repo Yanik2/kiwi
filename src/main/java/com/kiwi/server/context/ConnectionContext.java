@@ -1,7 +1,7 @@
 package com.kiwi.server.context;
 
 import com.kiwi.server.backpressure.BackPressureGate;
-import com.kiwi.server.request.RequestInflightLock;
+import com.kiwi.server.request.WriterLock;
 import com.kiwi.server.response.WriterProxy;
 import com.kiwi.server.response.model.TCPResponse;
 
@@ -20,20 +20,22 @@ public final class ConnectionContext {
     private volatile boolean isClosed;
     private final AtomicInteger requestIdSequence = new AtomicInteger(1);
     private final WriterProxy writerProxy;
-    private final RequestInflightLock requestInflightLock;
+    private final WriterLock writerLock;
+
+    private volatile int closeAfter = -1;
 
     public ConnectionContext(UUID connectionId,
                              Socket socket,
                              BackPressureGate backPressureGate,
                              boolean closed,
                              WriterProxy writerProxy,
-                             RequestInflightLock requestInflightLock) {
+                             WriterLock writerLock) {
         this.connectionId = connectionId;
         this.socket = socket;
         this.backPressureGate = backPressureGate;
         this.isClosed = closed;
         this.writerProxy = writerProxy;
-        this.requestInflightLock = requestInflightLock;
+        this.writerLock = writerLock;
     }
 
     public UUID connectionId() {
@@ -73,6 +75,10 @@ public final class ConnectionContext {
                 close();
             }
         }
+
+        if (closeAfter == tcpResponse.requestId()) {
+            this.isClosed = false;
+        }
     }
 
     public void awaitIfOverload() throws InterruptedException {
@@ -80,11 +86,20 @@ public final class ConnectionContext {
     }
 
     public void awaitInflight() throws InterruptedException {
-        this.requestInflightLock.awaitInflightLevel();
+        this.writerLock.awaitInflightLevel();
     }
 
     public void inflightRequest() {
-        this.requestInflightLock.onRequest();
+        this.writerLock.onRequest();
+    }
+
+    public void closeAfter(int requestId) {
+        this.closeAfter = requestId;
+        this.writerProxy.setLastResponseId(requestId);
+    }
+
+    public void awaitWriterDone() throws InterruptedException {
+        writerLock.awaitWriterDone();
     }
 
     @Override
