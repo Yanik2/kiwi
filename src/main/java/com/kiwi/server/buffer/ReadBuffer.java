@@ -39,6 +39,7 @@ public class ReadBuffer {
             if (bytesRead > 0) {
                 writePos += bytesRead;
                 readBytes += bytesRead;
+                shrinkBuffer();
             }
             return bytesRead;
         } catch (Exception ex) {
@@ -49,6 +50,20 @@ public class ReadBuffer {
                         ". Connection id: [" + context.connectionId() + "]");
                 throw new ProtocolException("Unexpected exception in read buffer", ProtocolErrorCode.BUFFER_ERROR);
             }
+        }
+    }
+
+    private void shrinkBuffer() {
+        final var newSize = Math.max((writePos - readPos) * 2, INITIAL_CAP);
+        if (newSize <= buf.length / 2) {
+            final var newBuf = new byte[newSize];
+            for (int i = 0; i < writePos - readPos; i++) {
+                newBuf[i] = buf[readPos + i];
+            }
+
+            writePos -= readPos;
+            readPos = 0;
+            this.buf = newBuf;
         }
     }
 
