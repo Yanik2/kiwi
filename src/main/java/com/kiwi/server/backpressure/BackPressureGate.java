@@ -7,10 +7,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.kiwi.config.properties.Properties.BP_HIGH_LOAD_WATERMARK;
+import static com.kiwi.config.properties.Properties.BP_LOW_LOAD_WATERMARK;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 public class BackPressureGate {
-    // will be moved to config in phase 5
-    private static final double HIGH_LOAD_WATERMARK = 0.8;
-    private static final double LOW_LOAD_WATERMARK = 0.5;
 
     private final Lock lock = new ReentrantLock();
     private final Condition overloaded;
@@ -28,13 +29,13 @@ public class BackPressureGate {
     public void awaitIfOverloaded() throws InterruptedException {
         lock.lock();
         try {
-            if (this.threadPoolExecutor.getLoadFactor() >= HIGH_LOAD_WATERMARK) {
+            if (this.threadPoolExecutor.getLoadFactor() >= BP_HIGH_LOAD_WATERMARK) {
                 this.closed = true;
             }
             while (closed) {
                 tpMetrics.onBpPaused(1);
                 tpMetrics.onBpPauses();
-                overloaded.await();
+                overloaded.await(10, SECONDS);
                 tpMetrics.onBpPaused(-1);
             }
         } catch (InterruptedException ex) {
@@ -47,7 +48,7 @@ public class BackPressureGate {
 
     public void signalIfBelowLow() {
         lock.lock();
-        if (closed && this.threadPoolExecutor.getLoadFactor() <= LOW_LOAD_WATERMARK) {
+        if (closed && this.threadPoolExecutor.getLoadFactor() <= BP_LOW_LOAD_WATERMARK) {
             this.closed = false;
             overloaded.signalAll();
         }
