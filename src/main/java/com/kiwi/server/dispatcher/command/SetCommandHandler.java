@@ -1,7 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.Storage;
-import com.kiwi.persistent.dto.StorageRequest;
+import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.NoOpExpiration;
@@ -13,8 +12,8 @@ import com.kiwi.server.response.model.SerializableValue;
 
 public class SetCommandHandler extends StorageCommandHandler {
 
-    public SetCommandHandler(Storage storage) {
-        super(storage);
+    public SetCommandHandler(StorageFacade storageFacade) {
+        super(storageFacade);
     }
 
     @Override
@@ -23,8 +22,7 @@ public class SetCommandHandler extends StorageCommandHandler {
         final var key = new Key(parsedRequest.getKey());
         final var value = new Value(parsedRequest.getValue(), NoOpExpiration.getInstance());
 
-        storage.save(new StorageRequest(key, value));
-
+        storageFacade.write(key, value);
         return EmptyResponse.getInstance();
     }
 

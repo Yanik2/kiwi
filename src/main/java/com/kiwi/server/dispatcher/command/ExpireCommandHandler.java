@@ -3,9 +3,11 @@ package com.kiwi.server.dispatcher.command;
 import static com.kiwi.server.dispatcher.command.CommandConstants.BAD_RESPONSE;
 import static com.kiwi.server.dispatcher.command.CommandConstants.SUCCESS_RESPONSE;
 
-import com.kiwi.persistent.Storage;
+import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
+import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.HasTtlExpiration;
+import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.request.model.ExpireRequest;
 import com.kiwi.server.request.model.TCPRequest;
@@ -13,8 +15,8 @@ import com.kiwi.server.response.model.SerializableValue;
 
 public class ExpireCommandHandler extends StorageCommandHandler {
 
-    public ExpireCommandHandler(Storage storage) {
-        super(storage);
+    public ExpireCommandHandler(StorageFacade storageFacade) {
+        super(storageFacade);
     }
 
     @Override
@@ -22,12 +24,22 @@ public class ExpireCommandHandler extends StorageCommandHandler {
         final var expireRequest = (ExpireRequest) request;
         final var expirationTime = expireRequest.getValue() < 0 ? -1 : expireRequest.getValue();
         final var expiration = System.currentTimeMillis() + expirationTime;
+        final var key = new Key(expireRequest.getKey());
+        final var expiryPolicy = new HasTtlExpiration(expiration < 0 ? Long.MAX_VALUE : expiration);
 
+        final var mutationResult = storageFacade.mutate(key, state -> {
+            if (!state.exists()) {
+                return new MutationDecision.Error();
+            }
 
-        final var result = storage.updateExpiration(new Key(expireRequest.getKey()),
-                new HasTtlExpiration(expiration < 0 ? Long.MAX_VALUE : expiration));
+            if (expiryPolicy.hasTtl() && expiryPolicy.remainingTime(System.currentTimeMillis()) <= 0) {
+                return new MutationDecision.Delete();
+            }
 
-        return result ? SUCCESS_RESPONSE : BAD_RESPONSE;
+            return new MutationDecision.Write(new Value(state.value().getValue(), expiryPolicy));
+        });
+
+        return mutationResult.success() ? SUCCESS_RESPONSE : BAD_RESPONSE;
     }
 
 }

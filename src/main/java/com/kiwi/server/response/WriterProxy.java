@@ -141,7 +141,6 @@ public class WriterProxy {
                 }
             }
 
-            System.out.println("Left drain mode");
             writerLock.notifyWriterDone();
         };
     }
