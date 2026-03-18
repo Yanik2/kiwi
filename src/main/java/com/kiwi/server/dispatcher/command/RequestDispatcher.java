@@ -15,7 +15,7 @@ import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.observability.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
-import com.kiwi.persistent.Storage;
+import com.kiwi.persistent.StorageFacade;
 import com.kiwi.server.request.Method;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.request.model.TCPRequest;
@@ -37,20 +37,20 @@ public class RequestDispatcher {
 
     public static RequestDispatcher create(MetricsProvider metricsProvider,
                                            MethodMetrics metrics,
-                                           Storage storage) {
-        final var expireCommandHandler = new ExpireCommandHandler(storage);
-        final var ttlCommandHandler = new TtlCommandHandler(storage);
+                                           StorageFacade storageFacade) {
+        final var expireCommandHandler = new ExpireCommandHandler(storageFacade);
+        final var ttlCommandHandler = new TtlCommandHandler(storageFacade);
         final var commands = new EnumMap<Method, RequestCommandHandler>(Method.class);
 
-        commands.put(GET, new GetCommandHandler(storage));
-        commands.put(SET, new SetCommandHandler(storage));
-        commands.put(DEL, new DeleteCommandHandler(storage));
+        commands.put(GET, new GetCommandHandler(storageFacade));
+        commands.put(SET, new SetCommandHandler(storageFacade));
+        commands.put(DEL, new DeleteCommandHandler(storageFacade));
         commands.put(EXT, new ExitCommandHandler());
         commands.put(INF, new InfoCommandHandler(metricsProvider));
         commands.put(PING, new PingCommandHandler());
         commands.put(EXPIRE, expireCommandHandler);
         commands.put(PEXPIRE, expireCommandHandler);
-        commands.put(PERSIST, new PersistCommandHandler(storage));
+        commands.put(PERSIST, new PersistCommandHandler(storageFacade));
         commands.put(TTL, ttlCommandHandler);
         commands.put(PTTL, ttlCommandHandler);
 

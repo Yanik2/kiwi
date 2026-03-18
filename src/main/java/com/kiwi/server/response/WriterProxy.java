@@ -125,7 +125,6 @@ public class WriterProxy {
             }
 
             if (drainMode) {
-                System.out.println("In drain mode");
                 lock.lock();
                 try {
                     while (!responseQueue.isEmpty() && drainMode) {
@@ -141,7 +140,6 @@ public class WriterProxy {
                 }
             }
 
-            System.out.println("Left drain mode");
             writerLock.notifyWriterDone();
         };
     }
