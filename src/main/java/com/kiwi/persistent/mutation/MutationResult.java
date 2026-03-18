@@ -8,7 +8,7 @@ public record MutationResult(
         Value value,
         boolean success
 ) {
-    MutationResult(Key key, boolean success) {
+    public MutationResult(Key key, boolean success) {
         this(key, null, success);
     }
 }

@@ -5,6 +5,7 @@ import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.mutation.CurrentState;
 import com.kiwi.persistent.mutation.Mutation;
+import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.persistent.mutation.MutationResult;
 
 import java.util.HashMap;
@@ -48,7 +49,18 @@ public class StorageFacade {
             final var value = expirationGate(key);
             final var state = new CurrentState(value.isPresent(), value.orElse(null));
             final var mutationDecision = mutation.apply(state);
-            return mutationDecision.applyDecision(inMemoryStorage, key);
+            return switch (mutationDecision) {
+                case MutationDecision.Write w -> {
+                    inMemoryStorage.put(key, w.value());
+                    yield new MutationResult(key, w.value(), true);
+                }
+                case MutationDecision.Delete d -> {
+                    inMemoryStorage.remove(key);
+                    yield new MutationResult(key, true);
+                }
+                case MutationDecision.NoOp n -> new MutationResult(key, true);
+                case MutationDecision.Error e -> new MutationResult(key, false);
+            };
         } finally {
             lock.unlock();
         }
