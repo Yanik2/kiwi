@@ -28,6 +28,9 @@ public final class MetricKeys {
     public static final String CMD_EXPIRE = "cmd.expire";
     public static final String CMD_PEXPIRE = "cmd.pexpire";
     public static final String CMD_PERSIST = "cmd.persist";
+    public static final String CMD_EXISTS = "cmd.exists";
+    public static final String CMD_SETNX = "cmd.setnx";
+    public static final String CMD_GETSET = "cmd.getset";
 
     // protocol metrics
     public static final String PROTO_VERSION = "proto.version";

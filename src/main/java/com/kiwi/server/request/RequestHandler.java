@@ -3,7 +3,7 @@ package com.kiwi.server.request;
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.observability.RequestMetrics;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.dispatcher.command.RequestDispatcher;
+import com.kiwi.server.dispatcher.RequestDispatcher;
 import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.validator.RequestValidator;
