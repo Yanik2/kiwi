@@ -52,7 +52,7 @@ public class StorageFacade {
             return switch (mutationDecision) {
                 case MutationDecision.Write w -> {
                     inMemoryStorage.put(key, w.value());
-                    yield new MutationResult(key, Optional.of(w.returnValue()), w.success());
+                    yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
                 }
                 case MutationDecision.Delete d -> {
                     inMemoryStorage.remove(key);

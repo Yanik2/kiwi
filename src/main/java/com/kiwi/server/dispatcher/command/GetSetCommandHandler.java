@@ -3,6 +3,7 @@ package com.kiwi.server.dispatcher.command;
 import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
+import com.kiwi.persistent.model.expiration.NoOpExpiration;
 import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.request.model.ParsedRequest;
@@ -21,9 +22,11 @@ public class GetSetCommandHandler extends StorageCommandHandler {
         final var parsedRequest = (ParsedRequest) request;
         final var mutationResult = storageFacade.mutate(new Key(parsedRequest.getKey()), state -> {
             if (state.exists()) {
-                return new MutationDecision.Write(true, new Value(parsedRequest.getValue()), state.value());
+                return new MutationDecision.Write(true,
+                        new Value(parsedRequest.getValue(), NoOpExpiration.getInstance()), state.value());
             } else {
-                return new MutationDecision.Write(true, new Value(parsedRequest.getValue()), null);
+                return new MutationDecision.Write(true,
+                        new Value(parsedRequest.getValue(), NoOpExpiration.getInstance()), null);
             }
         });
 

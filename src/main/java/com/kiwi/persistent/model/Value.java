@@ -1,6 +1,8 @@
 package com.kiwi.persistent.model;
 
 import com.kiwi.persistent.model.expiration.ExpiryPolicy;
+import com.kiwi.persistent.model.expiration.NoOpExpiration;
+
 import java.util.Arrays;
 
 public class Value {
@@ -8,7 +10,7 @@ public class Value {
     private ExpiryPolicy expiryPolicy;
 
     public Value(byte[] value) {
-        this(value, null);
+        this(value, NoOpExpiration.getInstance());
     }
 
     public Value(byte[] value, ExpiryPolicy expiryPolicy) {
