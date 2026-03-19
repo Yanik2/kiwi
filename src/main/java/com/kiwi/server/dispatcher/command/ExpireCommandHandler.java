@@ -1,7 +1,7 @@
 package com.kiwi.server.dispatcher.command;
 
-import static com.kiwi.server.dispatcher.command.CommandConstants.BAD_RESPONSE;
-import static com.kiwi.server.dispatcher.command.CommandConstants.SUCCESS_RESPONSE;
+import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
+import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
 
 import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
@@ -33,13 +33,13 @@ public class ExpireCommandHandler extends StorageCommandHandler {
             }
 
             if (expiryPolicy.hasTtl() && expiryPolicy.remainingTime(System.currentTimeMillis()) <= 0) {
-                return new MutationDecision.Delete();
+                return new MutationDecision.Delete(true);
             }
 
-            return new MutationDecision.Write(new Value(state.value().getValue(), expiryPolicy));
+            return new MutationDecision.Write(true, new Value(state.value().getValue(), expiryPolicy));
         });
 
-        return mutationResult.success() ? SUCCESS_RESPONSE : BAD_RESPONSE;
+        return mutationResult.success() ? SUCCESS.getValue() : FAIL.getValue();
     }
 
 }

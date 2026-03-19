@@ -52,14 +52,14 @@ public class StorageFacade {
             return switch (mutationDecision) {
                 case MutationDecision.Write w -> {
                     inMemoryStorage.put(key, w.value());
-                    yield new MutationResult(key, w.value(), true);
+                    yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
                 }
                 case MutationDecision.Delete d -> {
                     inMemoryStorage.remove(key);
-                    yield new MutationResult(key, true);
+                    yield new MutationResult(key, Optional.empty(), d.success());
                 }
-                case MutationDecision.NoOp n -> new MutationResult(key, true);
-                case MutationDecision.Error e -> new MutationResult(key, false);
+                case MutationDecision.NoOp n -> new MutationResult(key, Optional.empty(), n.success());
+                case MutationDecision.Error e -> new MutationResult(key, Optional.empty(), false);
             };
         } finally {
             lock.unlock();

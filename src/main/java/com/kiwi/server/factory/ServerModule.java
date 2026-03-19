@@ -8,7 +8,7 @@ import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.request.ConnectionReader;
 import com.kiwi.server.request.RequestHandler;
-import com.kiwi.server.dispatcher.command.RequestDispatcher;
+import com.kiwi.server.dispatcher.RequestDispatcher;
 import com.kiwi.server.validator.BaseRequestValidator;
 import com.kiwi.server.response.ResponseWriter;
 import com.kiwi.server.accept.TCPServer;

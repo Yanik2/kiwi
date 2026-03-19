@@ -1,8 +1,5 @@
 package com.kiwi.server.dispatcher.command;
 
-import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
-import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
-
 import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
@@ -11,10 +8,12 @@ import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.request.model.ParsedRequest;
 import com.kiwi.server.request.model.TCPRequest;
+import com.kiwi.server.response.model.DataResponse;
+import com.kiwi.server.response.model.EmptyResponse;
 import com.kiwi.server.response.model.SerializableValue;
 
-public class PersistCommandHandler extends StorageCommandHandler {
-    public PersistCommandHandler(StorageFacade storageFacade) {
+public class GetSetCommandHandler extends StorageCommandHandler {
+    public GetSetCommandHandler(StorageFacade storageFacade) {
         super(storageFacade);
     }
 
@@ -22,12 +21,17 @@ public class PersistCommandHandler extends StorageCommandHandler {
     public SerializableValue handle(TCPRequest request, ConnectionContext context) {
         final var parsedRequest = (ParsedRequest) request;
         final var mutationResult = storageFacade.mutate(new Key(parsedRequest.getKey()), state -> {
-            if (!state.exists()) {
-                return new MutationDecision.Error();
+            if (state.exists()) {
+                return new MutationDecision.Write(true,
+                        new Value(parsedRequest.getValue(), NoOpExpiration.getInstance()), state.value());
+            } else {
+                return new MutationDecision.Write(true,
+                        new Value(parsedRequest.getValue(), NoOpExpiration.getInstance()), null);
             }
-
-            return new MutationDecision.Write(true, new Value(state.value().getValue(), NoOpExpiration.getInstance()));
         });
-        return mutationResult.success() ? SUCCESS.getValue() : FAIL.getValue();
+
+        return mutationResult.value().isPresent()
+                ? new DataResponse(mutationResult.value().get())
+                : EmptyResponse.getInstance();
     }
 }
