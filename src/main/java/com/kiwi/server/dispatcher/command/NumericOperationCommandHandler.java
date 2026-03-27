@@ -65,14 +65,13 @@ public class NumericOperationCommandHandler extends StorageCommandHandler {
         final boolean isNegative = value < 0;
         int counter = isNegative ? 1 : 0;
         int index = 19;
-        value = isNegative ? -value : value;
 
         do {
             byte tmp = (byte) (value % 10);
-            buf[--index] = tmp;
+            buf[--index] = tmp < 0 ? (byte)-tmp : tmp;
             counter++;
             value /= 10;
-        } while (value > 0);
+        } while (value != 0);
 
         final var result = new byte[counter];
         int startIndex = 0;
@@ -88,10 +87,10 @@ public class NumericOperationCommandHandler extends StorageCommandHandler {
     }
 
     private ParseResult parseValue(byte[] byteValue) {
-        if (byteValue.length > 19) {
+        final var maxLength = byteValue[0] == 45 ? 20 : 19;
+        if (byteValue.length > maxLength) {
             return new ParseResult(false, 0);
         }
-
 
         final boolean isNegative = byteValue[0] == 45;
         if (isNegative && byteValue.length < 2) {
@@ -102,8 +101,11 @@ public class NumericOperationCommandHandler extends StorageCommandHandler {
         long result = 0;
         for (; index < byteValue.length; index++) {
             result *= 10;
-            final byte delta = byteValue[index];
-            if (delta < 48 || delta > 57) {
+            final byte delta = (byte) (byteValue[index] - 48);
+            if (delta < 0 || delta > 9) {
+                return new ParseResult(false, 0);
+            }
+            if ((result + delta) < result) {
                 return new ParseResult(false, 0);
             }
             result += delta - 48;

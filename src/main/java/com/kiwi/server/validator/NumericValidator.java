@@ -8,6 +8,7 @@ import com.kiwi.server.request.model.TCPRequest;
 import java.util.List;
 
 import static com.kiwi.exception.protocol.ProtocolErrorCode.NON_DIGIT_IN_NUMERIC_VALUE;
+import static com.kiwi.exception.protocol.ProtocolErrorCode.NUMERIC_VALUE_IS_TOO_BIG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_SHORT;
 import static com.kiwi.server.request.Method.EXPIRE;
@@ -59,6 +60,11 @@ public class NumericValidator implements RequestValidator {
                             new ProtocolException("Non digit in value for expiration request", NON_DIGIT_IN_NUMERIC_VALUE)));
                 }
 
+                if ((result + digit) < result) {
+                    return new ValidationResult(parsedRequest, List.of(
+                            new ProtocolException("Overflow in request numeric value", NUMERIC_VALUE_IS_TOO_BIG)
+                    ));
+                }
                 result += digit;
             }
 

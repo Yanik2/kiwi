@@ -46,6 +46,7 @@ public final class MetricKeys {
     public static final String PROTO_ERR_NON_DIGIT_LEN = "proto.err.nondigitlen";
     public static final String PROTO_ERR_INVALID_SEPARATOR = "proto.err.invalidseparator";
     public static final String PROTO_ERR_VALUE_TOO_SHORT = "proto.err.valuetooshort";
+    public static final String PROTO_ERR_NUMERIC_VALUE_OVERFLOW = "proto.err.numericvalueoverflow";
     public static final String PROTO_ERR_INVALID_HEADER = "proto.err.invalidheader";
     public static final String PROTO_ERR_BUFFER_ERROR = "proto.err.buffererror";
 
