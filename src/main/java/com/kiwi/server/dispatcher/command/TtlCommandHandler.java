@@ -5,9 +5,9 @@ import static com.kiwi.server.request.Method.TTL;
 import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.server.context.ConnectionContext;
+import com.kiwi.server.dispatcher.OperationResult;
 import com.kiwi.server.request.model.ParsedRequest;
 import com.kiwi.server.request.model.TCPRequest;
-import com.kiwi.server.response.model.SerializableValue;
 import com.kiwi.server.response.model.TtlResponse;
 
 public class TtlCommandHandler extends StorageCommandHandler {
@@ -19,12 +19,12 @@ public class TtlCommandHandler extends StorageCommandHandler {
     }
 
     @Override
-    public SerializableValue handle(TCPRequest request, ConnectionContext context) {
+    public OperationResult handle(TCPRequest request, ConnectionContext context) {
         final var parsedRequest = (ParsedRequest) request;
         final var value = storageFacade.read(new Key(parsedRequest.getKey()));
 
         if (value.isEmpty()) {
-            return new TtlResponse(TTL_RESPONSE_NOT_FOUND);
+            return new OperationResult(new TtlResponse(TTL_RESPONSE_NOT_FOUND), true);
         }
         final var expiryPolicy = value.get().getExpiryPolicy();
 
@@ -35,6 +35,6 @@ public class TtlCommandHandler extends StorageCommandHandler {
         if (TTL.equals(parsedRequest.getMethod()) && ttl > 0) {
             ttl /= 1000;
         }
-        return new TtlResponse(ttl);
+        return new OperationResult(new TtlResponse(ttl), true);
     }
 }

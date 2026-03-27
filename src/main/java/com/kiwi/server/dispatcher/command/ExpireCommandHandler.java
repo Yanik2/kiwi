@@ -1,5 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
+import static com.kiwi.persistent.mutation.ErrorType.NOT_EXISTS;
 import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
 import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
 
@@ -9,9 +10,9 @@ import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.HasTtlExpiration;
 import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.request.model.ExpireRequest;
+import com.kiwi.server.dispatcher.OperationResult;
+import com.kiwi.server.request.model.NumericRequest;
 import com.kiwi.server.request.model.TCPRequest;
-import com.kiwi.server.response.model.SerializableValue;
 
 public class ExpireCommandHandler extends StorageCommandHandler {
 
@@ -20,8 +21,8 @@ public class ExpireCommandHandler extends StorageCommandHandler {
     }
 
     @Override
-    public SerializableValue handle(TCPRequest request, ConnectionContext context) {
-        final var expireRequest = (ExpireRequest) request;
+    public OperationResult handle(TCPRequest request, ConnectionContext context) {
+        final var expireRequest = (NumericRequest) request;
         final var expirationTime = expireRequest.getValue() < 0 ? -1 : expireRequest.getValue();
         final var expiration = System.currentTimeMillis() + expirationTime;
         final var key = new Key(expireRequest.getKey());
@@ -29,7 +30,7 @@ public class ExpireCommandHandler extends StorageCommandHandler {
 
         final var mutationResult = storageFacade.mutate(key, state -> {
             if (!state.exists()) {
-                return new MutationDecision.Error();
+                return new MutationDecision.Error(NOT_EXISTS);
             }
 
             if (expiryPolicy.hasTtl() && expiryPolicy.remainingTime(System.currentTimeMillis()) <= 0) {
@@ -39,7 +40,8 @@ public class ExpireCommandHandler extends StorageCommandHandler {
             return new MutationDecision.Write(true, new Value(state.value().getValue(), expiryPolicy));
         });
 
-        return mutationResult.success() ? SUCCESS.getValue() : FAIL.getValue();
+        return new OperationResult(mutationResult.success() ? SUCCESS.getValue() : FAIL.getValue(),
+                mutationResult.success());
     }
 
 }

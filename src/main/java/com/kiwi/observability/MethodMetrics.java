@@ -2,12 +2,16 @@ package com.kiwi.observability;
 
 import com.kiwi.server.request.Method;
 
+import static com.kiwi.observability.util.MetricKeys.CMD_DECR;
+import static com.kiwi.observability.util.MetricKeys.CMD_DECRBY;
 import static com.kiwi.observability.util.MetricKeys.CMD_DEL;
 import static com.kiwi.observability.util.MetricKeys.CMD_EXISTS;
 import static com.kiwi.observability.util.MetricKeys.CMD_EXPIRE;
 import static com.kiwi.observability.util.MetricKeys.CMD_EXT;
 import static com.kiwi.observability.util.MetricKeys.CMD_GET;
 import static com.kiwi.observability.util.MetricKeys.CMD_GETSET;
+import static com.kiwi.observability.util.MetricKeys.CMD_INCR;
+import static com.kiwi.observability.util.MetricKeys.CMD_INCRBY;
 import static com.kiwi.observability.util.MetricKeys.CMD_INF;
 import static com.kiwi.observability.util.MetricKeys.CMD_PERSIST;
 import static com.kiwi.observability.util.MetricKeys.CMD_PEXPIRE;
@@ -33,7 +37,10 @@ public final class MethodMetrics {
         metricsRegistry.registerCounter(CMD_EXISTS);
         metricsRegistry.registerCounter(CMD_SETNX);
         metricsRegistry.registerCounter(CMD_GETSET);
-
+        metricsRegistry.registerCounter(CMD_INCR);
+        metricsRegistry.registerCounter(CMD_DECR);
+        metricsRegistry.registerCounter(CMD_INCRBY);
+        metricsRegistry.registerCounter(CMD_DECRBY);
     }
 
     public void onRequest(Method method) {
@@ -50,6 +57,10 @@ public final class MethodMetrics {
             case EXISTS -> metricsRegistry.updateCounter(CMD_EXISTS);
             case SETNX -> metricsRegistry.updateCounter(CMD_SETNX);
             case GETSET -> metricsRegistry.updateCounter(CMD_GETSET);
+            case INCR -> metricsRegistry.updateCounter(CMD_INCR);
+            case DECR -> metricsRegistry.updateCounter(CMD_DECR);
+            case INCRBY -> metricsRegistry.updateCounter(CMD_INCRBY);
+            case DECRBY -> metricsRegistry.updateCounter(CMD_DECRBY);
         }
     }
 }
