@@ -1,11 +1,15 @@
 package com.kiwi.server.dispatcher;
 
+import static com.kiwi.server.request.Method.DECR;
+import static com.kiwi.server.request.Method.DECRBY;
 import static com.kiwi.server.request.Method.DEL;
 import static com.kiwi.server.request.Method.EXISTS;
 import static com.kiwi.server.request.Method.EXPIRE;
 import static com.kiwi.server.request.Method.EXT;
 import static com.kiwi.server.request.Method.GET;
 import static com.kiwi.server.request.Method.GETSET;
+import static com.kiwi.server.request.Method.INCR;
+import static com.kiwi.server.request.Method.INCRBY;
 import static com.kiwi.server.request.Method.INF;
 import static com.kiwi.server.request.Method.PERSIST;
 import static com.kiwi.server.request.Method.PEXPIRE;
@@ -14,6 +18,7 @@ import static com.kiwi.server.request.Method.PTTL;
 import static com.kiwi.server.request.Method.SET;
 import static com.kiwi.server.request.Method.SETNX;
 import static com.kiwi.server.request.Method.TTL;
+import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.observability.MethodMetrics;
@@ -26,6 +31,7 @@ import com.kiwi.server.dispatcher.command.ExpireCommandHandler;
 import com.kiwi.server.dispatcher.command.GetCommandHandler;
 import com.kiwi.server.dispatcher.command.GetSetCommandHandler;
 import com.kiwi.server.dispatcher.command.InfoCommandHandler;
+import com.kiwi.server.dispatcher.command.NumericOperationCommandHandler;
 import com.kiwi.server.dispatcher.command.PersistCommandHandler;
 import com.kiwi.server.dispatcher.command.PingCommandHandler;
 import com.kiwi.server.dispatcher.command.RequestCommandHandler;
@@ -56,6 +62,7 @@ public class RequestDispatcher {
                                            StorageFacade storageFacade) {
         final var expireCommandHandler = new ExpireCommandHandler(storageFacade);
         final var ttlCommandHandler = new TtlCommandHandler(storageFacade);
+        final var numericCommandHandler = new NumericOperationCommandHandler(storageFacade);
         final var commands = new EnumMap<Method, RequestCommandHandler>(Method.class);
 
         commands.put(GET, new GetCommandHandler(storageFacade));
@@ -72,6 +79,10 @@ public class RequestDispatcher {
         commands.put(EXISTS, new ExistsCommandHandler(storageFacade));
         commands.put(SETNX, new SetNxCommandHandler(storageFacade));
         commands.put(GETSET, new GetSetCommandHandler(storageFacade));
+        commands.put(INCR, numericCommandHandler);
+        commands.put(INCRBY, numericCommandHandler);
+        commands.put(DECR, numericCommandHandler);
+        commands.put(DECRBY, numericCommandHandler);
 
         return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }
@@ -79,6 +90,7 @@ public class RequestDispatcher {
     public TCPResponse dispatch(TCPRequest request, ConnectionContext context) {
         final var result = commands.get(request.getMethod()).handle(request, context);
         metrics.onRequest(request.getMethod());
-        return new TCPResponse(request.getRequestId(), result, OK_MESSAGE, true);
+        return new TCPResponse(request.getRequestId(), result.value(),
+                result.success() ? OK_MESSAGE : ERROR_MESSAGE, result.success());
     }
 }

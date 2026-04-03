@@ -15,10 +15,17 @@ public enum Method {
     PERSIST,
     TTL,
     PTTL,
+    EXISTS,
+    SETNX,
+    GETSET,
+    INCR,
+    DECR,
+    INCRBY,
+    DECRBY,
     QUIT;
 
     private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING);
-    private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE);
+    private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE, SETNX, GETSET, INCRBY, DECRBY);
 
     public boolean isKeyless() {
         return keyLessMethods.contains(this);

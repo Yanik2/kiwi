@@ -59,7 +59,9 @@ public class StorageFacade {
                     yield new MutationResult(key, Optional.empty(), d.success());
                 }
                 case MutationDecision.NoOp n -> new MutationResult(key, Optional.empty(), n.success());
-                case MutationDecision.Error e -> new MutationResult(key, Optional.empty(), false);
+                case MutationDecision.Error e -> new MutationResult(key, Optional.of(
+                        new Value(e.errorType().name().getBytes())
+                ), false);
             };
         } finally {
             lock.unlock();

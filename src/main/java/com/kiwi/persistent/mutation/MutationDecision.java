@@ -16,6 +16,6 @@ public sealed interface MutationDecision {
     record NoOp(boolean success) implements MutationDecision {
     }
 
-    record Error() implements MutationDecision {
+    record Error(ErrorType errorType) implements MutationDecision {
     }
 }

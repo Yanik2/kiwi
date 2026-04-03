@@ -17,6 +17,7 @@ import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_EOF;
 import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_INVALID_HEADER;
 import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_INVALID_SEPARATOR;
 import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_NON_DIGIT_LEN;
+import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_NUMERIC_VALUE_OVERFLOW;
 import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_UNKNOWN;
 import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_VALUE_LEN;
 import static com.kiwi.observability.util.MetricKeys.PROTO_ERR_VALUE_TOO_SHORT;
@@ -43,6 +44,7 @@ public final class RequestMetrics {
         metricsRegistry.registerCounter(PROTO_ERR_VALUE_TOO_SHORT);
         metricsRegistry.registerCounter(PROTO_ERR_INVALID_HEADER);
         metricsRegistry.registerCounter(PROTO_ERR_BUFFER_ERROR);
+        metricsRegistry.registerCounter(PROTO_ERR_NUMERIC_VALUE_OVERFLOW);
         metricsRegistry.registerCounter(CON_REFUSED);
         metricsRegistry.registerGauge(CON_CURRENT);
     }
@@ -89,6 +91,7 @@ public final class RequestMetrics {
             case NON_DIGIT_IN_NUMERIC_VALUE -> metricsRegistry.updateCounter(PROTO_ERR_NON_DIGIT_LEN);
             case INVALID_SEPARATOR -> metricsRegistry.updateCounter(PROTO_ERR_INVALID_SEPARATOR);
             case VALUE_TOO_SHORT -> metricsRegistry.updateCounter(PROTO_ERR_VALUE_TOO_SHORT);
+            case NUMERIC_VALUE_IS_TOO_BIG -> metricsRegistry.updateCounter(PROTO_ERR_NUMERIC_VALUE_OVERFLOW);
             case INVALID_HEADER -> metricsRegistry.updateCounter(PROTO_ERR_INVALID_HEADER);
             case BUFFER_ERROR -> metricsRegistry.updateCounter(PROTO_ERR_BUFFER_ERROR);
         }

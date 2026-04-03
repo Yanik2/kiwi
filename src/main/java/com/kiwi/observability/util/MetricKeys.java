@@ -31,6 +31,10 @@ public final class MetricKeys {
     public static final String CMD_EXISTS = "cmd.exists";
     public static final String CMD_SETNX = "cmd.setnx";
     public static final String CMD_GETSET = "cmd.getset";
+    public static final String CMD_INCR = "cmd.incr";
+    public static final String CMD_DECR = "cmd.decr";
+    public static final String CMD_INCRBY = "cmd.incrby";
+    public static final String CMD_DECRBY = "cmd.decrby";
 
     // protocol metrics
     public static final String PROTO_VERSION = "proto.version";
@@ -42,6 +46,7 @@ public final class MetricKeys {
     public static final String PROTO_ERR_NON_DIGIT_LEN = "proto.err.nondigitlen";
     public static final String PROTO_ERR_INVALID_SEPARATOR = "proto.err.invalidseparator";
     public static final String PROTO_ERR_VALUE_TOO_SHORT = "proto.err.valuetooshort";
+    public static final String PROTO_ERR_NUMERIC_VALUE_OVERFLOW = "proto.err.numericvalueoverflow";
     public static final String PROTO_ERR_INVALID_HEADER = "proto.err.invalidheader";
     public static final String PROTO_ERR_BUFFER_ERROR = "proto.err.buffererror";
 

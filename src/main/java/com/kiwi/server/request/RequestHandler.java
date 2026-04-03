@@ -39,7 +39,7 @@ public class RequestHandler {
             try {
                 result = requestDispatcher.dispatch(validatedRequest, connectionContext);
             } catch (Exception ex) {
-                log.severe("Error in processing request with id: [" + request.getRequestId() + "}");
+                log.severe("Error in processing request with id: [" + request.getRequestId() + "], " + ex.getMessage());
                 result = new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false);
             }
             connectionContext.addResponse(result);

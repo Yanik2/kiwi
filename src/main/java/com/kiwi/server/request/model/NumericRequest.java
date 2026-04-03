@@ -2,11 +2,11 @@ package com.kiwi.server.request.model;
 
 import com.kiwi.server.request.Method;
 
-public final class ExpireRequest extends TCPRequest {
+public final class NumericRequest extends TCPRequest {
     private final byte[] key;
     private final long value;
 
-    public ExpireRequest(int requestId, int flags, Method method, byte[] key, long value) {
+    public NumericRequest(int requestId, int flags, byte[] key, long value, Method method) {
         super(requestId, flags, method);
         this.key = key;
         this.value = value;
