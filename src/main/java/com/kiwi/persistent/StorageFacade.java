@@ -9,6 +9,8 @@ import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.persistent.mutation.MutationResult;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -76,6 +78,23 @@ public class StorageFacade {
                 storageMetrics.onTtlExpiredEviction();
             }
             inMemoryStorage.remove(key);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int size() {
+        lock.lock();
+        try {
+            int size = inMemoryStorage.size();
+            final var keyList = new LinkedList<>(inMemoryStorage.keySet());
+            for (Key k : keyList) {
+                if (expirationGate(k).isEmpty()) {
+                    size--;
+                }
+            }
+
+            return size;
         } finally {
             lock.unlock();
         }

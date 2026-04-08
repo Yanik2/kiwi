@@ -20,10 +20,13 @@ public enum Method {
     INCR,
     DECR,
     INCRBY,
-    DECRBY;
+    DECRBY,
+    MGET,
+    MSET,
+    DBSIZE;
 
-    private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING);
-    private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE, SETNX, GETSET, INCRBY, DECRBY);
+    private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING, DBSIZE);
+    private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE, SETNX, GETSET, INCRBY, DECRBY, MSET);
 
     public boolean isKeyless() {
         return keyLessMethods.contains(this);

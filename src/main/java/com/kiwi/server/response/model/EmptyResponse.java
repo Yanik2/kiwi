@@ -1,9 +1,9 @@
 package com.kiwi.server.response.model;
 
+import static com.kiwi.server.response.ResponseValueConstants.EMPTY_RESPONSE;
+
 public final class EmptyResponse implements SerializableValue {
     private static final EmptyResponse instance = new EmptyResponse();
-
-    private final byte[] emptyValue = new byte[0];
 
     private EmptyResponse() {}
 
@@ -13,6 +13,6 @@ public final class EmptyResponse implements SerializableValue {
 
     @Override
     public byte[] serialize() {
-        return emptyValue;
+        return EMPTY_RESPONSE;
     }
 }

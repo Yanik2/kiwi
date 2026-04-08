@@ -30,6 +30,10 @@ public class Value {
         this.expiryPolicy = expiryPolicy;
     }
 
+    public int size() {
+        return value.length;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

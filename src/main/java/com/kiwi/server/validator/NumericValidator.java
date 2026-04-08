@@ -13,13 +13,18 @@ import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_LONG;
 import static com.kiwi.exception.protocol.ProtocolErrorCode.VALUE_TOO_SHORT;
 import static com.kiwi.server.request.Method.EXPIRE;
 
-public class NumericValidator implements RequestValidator {
+public class NumericValidator extends SingleKeyValidator {
     private static final int EXPIRE_MAX_VALUE_LENGTH = 16;
     private static final int NUMERIC_LONG_MAX_VALUE_LENGTH = 19;
     private static final short ZERO_ASCII = 48;
 
     @Override
     public ValidationResult validate(TCPRequest request) {
+        final var singleKeyValidation = super.validate(request);
+        if (!singleKeyValidation.errors().isEmpty()) {
+            return singleKeyValidation;
+        }
+
         final var parsedRequest = (ParsedRequest) request;
         long result = 1;
         if (parsedRequest.getMethod().withValue()) {

@@ -22,10 +22,14 @@ public enum Method {
     DECR,
     INCRBY,
     DECRBY,
+    MGET,
+    MSET,
+    DBSIZE,
     QUIT;
 
-    private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING);
-    private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE, SETNX, GETSET, INCRBY, DECRBY);
+    private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING, DBSIZE);
+    private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE, SETNX, GETSET, INCRBY, DECRBY, MSET);
+    private static final Set<Method> multiKeyMethods = Set.of(MGET, MSET);
 
     public boolean isKeyless() {
         return keyLessMethods.contains(this);
@@ -33,5 +37,9 @@ public enum Method {
 
     public boolean withValue() {
         return withValueMethods.contains(this);
+    }
+
+    public boolean isMultiKey() {
+        return multiKeyMethods.contains(this);
     }
 }

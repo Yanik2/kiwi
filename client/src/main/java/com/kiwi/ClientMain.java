@@ -35,9 +35,35 @@ public class ClientMain {
             os.write(flags);
             os.write(method.ordinal());
             if (method.isKeyless()) {
-                os.write(new byte[]{0, 0, 0, 0, 0, 0, 13, 10});
+                os.write(new byte[]{0, 1, 0, 0, 0, 0, 0, 0, 13, 10});
+                os.flush();
+            } else if (method.isMultiKey()) {
+                if (method.withValue()) {
+                    final var keyAmount = (tokens.length - 1) / 2;
+                    os.write(new byte[]{0, (byte) keyAmount});
+                    for (int i = 1; i < tokens.length; i += 2) {
+                        final var key = tokens[i].trim();
+                        final var value = tokens[i + 1].trim();
+                        os.write(payloadLength(key, 2));
+                        os.write(payloadLength(value, 4));
+                        os.write(key.getBytes());
+                        os.write(value.getBytes());
+                    }
+                } else {
+                    final var keyAmount = tokens.length - 1;
+                    os.write(new byte[]{0, (byte) keyAmount});
+                    for (int i = 1; i < tokens.length; i++) {
+                        final var key = tokens[i].trim();
+                        os.write(payloadLength(key, 2));
+                        os.write(new byte[]{0, 0, 0, 0});
+                        os.write(key.getBytes());
+                    }
+                }
+
+                os.write(new byte[]{13, 10});
                 os.flush();
             } else {
+                os.write(new byte[]{0,1});
 
                 os.write(payloadLength(tokens[1].trim(), 2));
                 if (method.withValue()) {

@@ -1,5 +1,6 @@
 package com.kiwi.server.dispatcher;
 
+import static com.kiwi.server.request.Method.DBSIZE;
 import static com.kiwi.server.request.Method.DECR;
 import static com.kiwi.server.request.Method.DECRBY;
 import static com.kiwi.server.request.Method.DEL;
@@ -11,6 +12,8 @@ import static com.kiwi.server.request.Method.GETSET;
 import static com.kiwi.server.request.Method.INCR;
 import static com.kiwi.server.request.Method.INCRBY;
 import static com.kiwi.server.request.Method.INF;
+import static com.kiwi.server.request.Method.MGET;
+import static com.kiwi.server.request.Method.MSET;
 import static com.kiwi.server.request.Method.PERSIST;
 import static com.kiwi.server.request.Method.PEXPIRE;
 import static com.kiwi.server.request.Method.PING;
@@ -24,6 +27,7 @@ import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 import com.kiwi.observability.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.persistent.StorageFacade;
+import com.kiwi.server.dispatcher.command.DbSizeCommandHandler;
 import com.kiwi.server.dispatcher.command.DeleteCommandHandler;
 import com.kiwi.server.dispatcher.command.ExistsCommandHandler;
 import com.kiwi.server.dispatcher.command.ExitCommandHandler;
@@ -31,6 +35,8 @@ import com.kiwi.server.dispatcher.command.ExpireCommandHandler;
 import com.kiwi.server.dispatcher.command.GetCommandHandler;
 import com.kiwi.server.dispatcher.command.GetSetCommandHandler;
 import com.kiwi.server.dispatcher.command.InfoCommandHandler;
+import com.kiwi.server.dispatcher.command.MultiGetCommandHandler;
+import com.kiwi.server.dispatcher.command.MultiSetCommandHandler;
 import com.kiwi.server.dispatcher.command.NumericOperationCommandHandler;
 import com.kiwi.server.dispatcher.command.PersistCommandHandler;
 import com.kiwi.server.dispatcher.command.PingCommandHandler;
@@ -83,6 +89,9 @@ public class RequestDispatcher {
         commands.put(INCRBY, numericCommandHandler);
         commands.put(DECR, numericCommandHandler);
         commands.put(DECRBY, numericCommandHandler);
+        commands.put(MGET, new MultiGetCommandHandler(storageFacade));
+        commands.put(MSET, new MultiSetCommandHandler(storageFacade));
+        commands.put(DBSIZE, new DbSizeCommandHandler(storageFacade));
 
         return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }
