@@ -51,7 +51,6 @@ public class WriterLock {
         try {
             if (inflight.get() < MAX_INFLIGHT_PER_CONNECTION) {
                 inflightLevel.signalAll();
-
             }
         } finally {
             lock.unlock();

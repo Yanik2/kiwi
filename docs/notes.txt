@@ -1,2 +1,7 @@
 AFTER PHASE 4:
     - test socket with different options (buffer size, latency, bandwidth)
+    - extract common util for parsing ascii long from byte array
+    - implement lock stripping on storage (initial 16 locks, each lock for key computed by hash)
+      resize locks (think about max amount), one common lock mechanism for resize locks operation
+      OR think about mutex for each key, based on some marker is key currently in use (if possible implement without
+      spin lock)

@@ -2,25 +2,61 @@ package com.kiwi.server.request.model;
 
 import com.kiwi.server.request.Method;
 
-public final class ParsedRequest extends TCPRequest {
-    private final byte[] key;
-    private final byte[] value;
+import java.util.Collections;
+import java.util.List;
 
-    public ParsedRequest(int requestId, int flags, Method method, byte[] key, byte[] value) {
+public final class ParsedRequest extends TCPRequest {
+    private final List<KeyValuePair> keyValuePairs;
+
+    public ParsedRequest(int requestId,
+                         int flags,
+                         Method method,
+                         List<KeyValuePair> keyValuePairs) {
         super(requestId, flags, method);
-        this.key = key;
-        this.value = value;
+        this.keyValuePairs = keyValuePairs;
     }
 
     public ParsedRequest(int requestId, int flags, Method method) {
-        this(requestId, flags, method, null, null);
+        this(requestId, flags, method, null);
     }
 
     public byte[] getKey() {
-        return this.key;
+        return this.keyValuePairs.getFirst().key;
     }
 
     public byte[] getValue() {
-        return this.value;
+        return this.keyValuePairs.getFirst().value;
+    }
+
+    public List<byte[]> getKeys() {
+        return keyValuePairs.stream()
+                .map(p -> p.key)
+                .toList();
+    }
+
+    public List<KeyValuePair> getKeyValues() {
+        return Collections.unmodifiableList(keyValuePairs);
+    }
+
+    public int size() {
+        return keyValuePairs == null ? 0 : keyValuePairs.size();
+    }
+
+    public static class KeyValuePair {
+        private final byte[] key;
+        private final byte[] value;
+
+        public KeyValuePair(byte[] key, byte[] value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public byte[] getKey() {
+            return key;
+        }
+
+        public byte[] getValue() {
+            return value;
+        }
     }
 }

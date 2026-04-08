@@ -9,5 +9,6 @@ public enum ProtocolErrorCode {
     NON_DIGIT_IN_NUMERIC_VALUE,
     INVALID_SEPARATOR,
     INVALID_HEADER,
-    BUFFER_ERROR
+    BUFFER_ERROR,
+    SINGLE_KEY_ERROR
 }

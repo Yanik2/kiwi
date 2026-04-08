@@ -2,6 +2,7 @@ package com.kiwi.observability;
 
 import com.kiwi.server.request.Method;
 
+import static com.kiwi.observability.util.MetricKeys.CMD_DBSIZE;
 import static com.kiwi.observability.util.MetricKeys.CMD_DECR;
 import static com.kiwi.observability.util.MetricKeys.CMD_DECRBY;
 import static com.kiwi.observability.util.MetricKeys.CMD_DEL;
@@ -13,6 +14,8 @@ import static com.kiwi.observability.util.MetricKeys.CMD_GETSET;
 import static com.kiwi.observability.util.MetricKeys.CMD_INCR;
 import static com.kiwi.observability.util.MetricKeys.CMD_INCRBY;
 import static com.kiwi.observability.util.MetricKeys.CMD_INF;
+import static com.kiwi.observability.util.MetricKeys.CMD_MGET;
+import static com.kiwi.observability.util.MetricKeys.CMD_MSET;
 import static com.kiwi.observability.util.MetricKeys.CMD_PERSIST;
 import static com.kiwi.observability.util.MetricKeys.CMD_PEXPIRE;
 import static com.kiwi.observability.util.MetricKeys.CMD_PING;
@@ -41,6 +44,9 @@ public final class MethodMetrics {
         metricsRegistry.registerCounter(CMD_DECR);
         metricsRegistry.registerCounter(CMD_INCRBY);
         metricsRegistry.registerCounter(CMD_DECRBY);
+        metricsRegistry.registerCounter(CMD_MGET);
+        metricsRegistry.registerCounter(CMD_MSET);
+        metricsRegistry.registerCounter(CMD_DBSIZE);
     }
 
     public void onRequest(Method method) {
@@ -61,6 +67,9 @@ public final class MethodMetrics {
             case DECR -> metricsRegistry.updateCounter(CMD_DECR);
             case INCRBY -> metricsRegistry.updateCounter(CMD_INCRBY);
             case DECRBY -> metricsRegistry.updateCounter(CMD_DECRBY);
+            case MGET -> metricsRegistry.updateCounter(CMD_MGET);
+            case MSET -> metricsRegistry.updateCounter(CMD_MSET);
+            case DBSIZE -> metricsRegistry.updateCounter(CMD_DBSIZE);
         }
     }
 }

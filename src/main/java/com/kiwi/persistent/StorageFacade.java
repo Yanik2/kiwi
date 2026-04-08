@@ -81,6 +81,22 @@ public class StorageFacade {
         }
     }
 
+    public int size() {
+        lock.lock();
+        try {
+            int size = inMemoryStorage.size();
+            for (Key k : inMemoryStorage.keySet()) {
+                if (expirationGate(k).isEmpty()) {
+                    size--;
+                }
+            }
+
+            return size;
+        } finally {
+            lock.unlock();
+        }
+    }
+
     private Optional<Value> expirationGate(Key key) {
         final var value = inMemoryStorage.get(key);
         if (value == null) {
