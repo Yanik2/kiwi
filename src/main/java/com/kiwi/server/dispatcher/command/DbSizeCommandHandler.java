@@ -15,9 +15,9 @@ public class DbSizeCommandHandler extends StorageCommandHandler {
         final var storageSize = storageFacade.size();
         return new OperationResult(() -> {
             final byte[] result = new byte[4];
-            result[0] = (byte) (storageSize >> 3);
-            result[1] = (byte) (storageSize >> 2);
-            result[2] = (byte) (storageSize >> 1);
+            result[0] = (byte) (storageSize >> 24);
+            result[1] = (byte) (storageSize >> 16);
+            result[2] = (byte) (storageSize >> 8);
             result[3] = (byte) (storageSize);
             return result;
         }, true);

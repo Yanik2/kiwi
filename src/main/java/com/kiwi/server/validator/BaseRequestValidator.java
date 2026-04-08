@@ -3,6 +3,7 @@ package com.kiwi.server.validator;
 import static com.kiwi.server.request.Method.DECR;
 import static com.kiwi.server.request.Method.DECRBY;
 import static com.kiwi.server.request.Method.DEL;
+import static com.kiwi.server.request.Method.EXISTS;
 import static com.kiwi.server.request.Method.EXPIRE;
 import static com.kiwi.server.request.Method.GET;
 import static com.kiwi.server.request.Method.GETSET;
@@ -44,6 +45,7 @@ public class BaseRequestValidator implements RequestValidator {
         validators.put(PTTL, singleKeyValidator);
         validators.put(SETNX, singleKeyValidator);
         validators.put(GETSET, singleKeyValidator);
+        validators.put(EXISTS, singleKeyValidator);
 
         this.requestValidators = Collections.unmodifiableMap(validators);
     }

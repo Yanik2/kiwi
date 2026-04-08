@@ -9,6 +9,8 @@ import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.persistent.mutation.MutationResult;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -85,7 +87,8 @@ public class StorageFacade {
         lock.lock();
         try {
             int size = inMemoryStorage.size();
-            for (Key k : inMemoryStorage.keySet()) {
+            final var keyList = new LinkedList<>(inMemoryStorage.keySet());
+            for (Key k : keyList) {
                 if (expirationGate(k).isEmpty()) {
                     size--;
                 }
