@@ -54,6 +54,11 @@ public final class MetricKeys {
     public static final String PROTO_ERR_BUFFER_ERROR = "proto.err.buffererror";
     public static final String PROTO_ERR_SINGLE_KEY = "proto.err.singlekey";
 
+    // operation error metrics
+    public static final String OP_WRONG_TYPE = "op.err.wrongtype";
+    public static final String OP_RANGE_ERROR = "op.err.range";
+    public static final String OP_NOT_EXISTS = "op.err.notexists";
+
     // server metrics
     public static final String SERVER_START = "server.start";
     public static final String SERVER_UPTIME = "server.uptime";

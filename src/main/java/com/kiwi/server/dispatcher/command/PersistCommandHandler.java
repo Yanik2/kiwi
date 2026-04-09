@@ -4,6 +4,7 @@ import static com.kiwi.persistent.mutation.ErrorType.NOT_EXISTS;
 import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
 import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
 
+import com.kiwi.observability.OperationErrorMetrics;
 import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
@@ -15,8 +16,11 @@ import com.kiwi.server.request.model.ParsedRequest;
 import com.kiwi.server.request.model.TCPRequest;
 
 public class PersistCommandHandler extends StorageCommandHandler {
-    public PersistCommandHandler(StorageFacade storageFacade) {
+    private final OperationErrorMetrics operationErrorMetrics;
+
+    public PersistCommandHandler(StorageFacade storageFacade, OperationErrorMetrics operationErrorMetrics) {
         super(storageFacade);
+        this.operationErrorMetrics = operationErrorMetrics;
     }
 
     @Override
@@ -24,6 +28,7 @@ public class PersistCommandHandler extends StorageCommandHandler {
         final var parsedRequest = (ParsedRequest) request;
         final var mutationResult = storageFacade.mutate(new Key(parsedRequest.getKey()), state -> {
             if (!state.exists()) {
+                operationErrorMetrics.onError(NOT_EXISTS);
                 return new MutationDecision.Error(NOT_EXISTS);
             }
 

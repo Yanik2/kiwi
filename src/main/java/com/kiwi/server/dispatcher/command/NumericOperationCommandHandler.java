@@ -1,5 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
+import com.kiwi.observability.OperationErrorMetrics;
 import com.kiwi.persistent.StorageFacade;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
@@ -17,8 +18,11 @@ import static com.kiwi.server.request.Method.DECR;
 import static com.kiwi.server.request.Method.DECRBY;
 
 public class NumericOperationCommandHandler extends StorageCommandHandler {
-    public NumericOperationCommandHandler(StorageFacade storageFacade) {
+    private final OperationErrorMetrics operationErrorMetrics;
+
+    public NumericOperationCommandHandler(StorageFacade storageFacade, OperationErrorMetrics errorMetrics) {
         super(storageFacade);
+        this.operationErrorMetrics = errorMetrics;
     }
 
     @Override
@@ -33,16 +37,19 @@ public class NumericOperationCommandHandler extends StorageCommandHandler {
             if (state.exists()) {
                 final var parseResult = parseValue(state.value().getValue());
                 if (!parseResult.success) {
+                    operationErrorMetrics.onError(WRONG_TYPE);
                     return new MutationDecision.Error(WRONG_TYPE);
                 }
                 value = parseResult.value;
             }
 
             if (value > 0 && addValue > 0 && (Long.MAX_VALUE - value) < addValue) {
+                operationErrorMetrics.onError(RANGE);
                 return new MutationDecision.Error(RANGE);
             }
 
             if (value < 0 && addValue < 0 && (Long.MIN_VALUE - value) > addValue) {
+                operationErrorMetrics.onError(RANGE);
                 return new MutationDecision.Error(RANGE);
             }
 
