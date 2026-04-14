@@ -2,7 +2,7 @@ package com.kiwi.server.dispatcher.command;
 
 import static com.kiwi.server.request.Method.TTL;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.OperationResult;
@@ -14,7 +14,7 @@ public class TtlCommandHandler extends StorageCommandHandler {
     private static final long TTL_RESPONSE_NOT_FOUND = -2L;
     private static final long TTL_RESPONSE_NO_TTL = -1L;
 
-    public TtlCommandHandler(StorageFacade storageFacade) {
+    public TtlCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 

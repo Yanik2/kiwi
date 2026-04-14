@@ -8,6 +8,7 @@ import com.kiwi.server.response.model.TCPResponse;
 import java.net.Socket;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -21,6 +22,10 @@ public final class ConnectionContext {
     private final AtomicInteger requestIdSequence = new AtomicInteger(1);
     private final WriterProxy writerProxy;
     private final WriterLock writerLock;
+    public final ConcurrentHashMap<Integer, Long> times = new ConcurrentHashMap<>();
+    public void setTime(int requestId, long time) {
+        times.put(requestId, time);
+    }
 
     private volatile int closeAfter = -1;
 

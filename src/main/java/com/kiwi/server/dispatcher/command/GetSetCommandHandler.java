@@ -1,6 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.NoOpExpiration;
@@ -13,7 +13,7 @@ import com.kiwi.server.response.model.DataResponse;
 import com.kiwi.server.response.model.EmptyResponse;
 
 public class GetSetCommandHandler extends StorageCommandHandler {
-    public GetSetCommandHandler(StorageFacade storageFacade) {
+    public GetSetCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 

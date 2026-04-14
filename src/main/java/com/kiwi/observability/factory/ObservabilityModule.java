@@ -3,6 +3,7 @@ package com.kiwi.observability.factory;
 import com.kiwi.observability.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.observability.MetricsRegistry;
+import com.kiwi.observability.OperationErrorMetrics;
 import com.kiwi.observability.RequestMetrics;
 import com.kiwi.observability.StorageMetrics;
 import com.kiwi.observability.ThreadPoolMetrics;
@@ -24,7 +25,8 @@ public class ObservabilityModule {
                         new ThreadPoolMetrics(MetricsRegistry.getInstance(), SERVER_THREAD_POOL_NAME),
                         REJECTION_THREAD_POOL_NAME,
                         new ThreadPoolMetrics(MetricsRegistry.getInstance(), REJECTION_THREAD_POOL_NAME)
-                )
+                ),
+                new OperationErrorMetrics(MetricsRegistry.getInstance())
         );
     }
 }

@@ -23,8 +23,12 @@ public class ServerModule {
                                          ConcurrencyContainer concurrencyContainer) {
         final var observabilityRequestHandler = observabilityContainer.metricsProvider();
         final var methodMetrics = observabilityContainer.methodMetrics();
-        final var dispatcher =
-                RequestDispatcher.create(observabilityRequestHandler, methodMetrics, storageContainer.storageFacade());
+        final var dispatcher = RequestDispatcher.create(
+                observabilityRequestHandler,
+                methodMetrics,
+                observabilityContainer.operationErrorMetrics(),
+                storageContainer.storageFacade()
+        );
         final var requestMetrics = observabilityContainer.requestMetrics();
         final var requestValidator = new BaseRequestValidator();
         final var connectionRegistry = new ConnectionRegistry();

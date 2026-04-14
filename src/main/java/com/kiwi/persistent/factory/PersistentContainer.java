@@ -1,8 +1,8 @@
 package com.kiwi.persistent.factory;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 
 public record PersistentContainer(
-        StorageFacade storageFacade
+        Storage storageFacade
 ) {
 }

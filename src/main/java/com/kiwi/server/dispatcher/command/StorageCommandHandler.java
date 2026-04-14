@@ -1,11 +1,11 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 
 public abstract class StorageCommandHandler implements RequestCommandHandler {
-    protected final StorageFacade storageFacade;
+    protected final Storage storageFacade;
 
-    protected StorageCommandHandler(StorageFacade storageFacade) {
+    protected StorageCommandHandler(Storage storageFacade) {
         this.storageFacade = storageFacade;
     }
 }

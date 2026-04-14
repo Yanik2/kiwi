@@ -1,6 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.OperationResult;
@@ -9,7 +9,7 @@ import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.EmptyResponse;
 
 public class DeleteCommandHandler extends StorageCommandHandler {
-    public DeleteCommandHandler(StorageFacade storageFacade) {
+    public DeleteCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 

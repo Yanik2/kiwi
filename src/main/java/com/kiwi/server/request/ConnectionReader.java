@@ -61,7 +61,8 @@ public class ConnectionReader {
                     for (ParserResult<ParsedRequest> parserResult : parserResults) {
                         switch (parserResult.status()) {
                             case OK -> delegateTask(context, parserResult.value());
-                            case NEED_MORE_DATA -> {}
+                            case NEED_MORE_DATA -> {
+                            }
                             case ERROR -> throw parserResult.error();
                         }
                         if (context.isClosed()) {
@@ -84,6 +85,12 @@ public class ConnectionReader {
             requestMetrics.onClose();
             requestMetrics.onReaderThreadActive(-1);
         }
+
+        final var map = context.times;
+        final var overall = map.values().stream()
+                .reduce(Long::sum)
+                .get();
+        System.out.println("Time: " + (overall / map.size()));
     }
 
     private void onError(ProtocolException ex, ConnectionContext context) {
