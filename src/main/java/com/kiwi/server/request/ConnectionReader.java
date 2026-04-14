@@ -61,8 +61,7 @@ public class ConnectionReader {
                     for (ParserResult<ParsedRequest> parserResult : parserResults) {
                         switch (parserResult.status()) {
                             case OK -> delegateTask(context, parserResult.value());
-                            case NEED_MORE_DATA -> {
-                            }
+                            case NEED_MORE_DATA -> {}
                             case ERROR -> throw parserResult.error();
                         }
                         if (context.isClosed()) {

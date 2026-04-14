@@ -102,6 +102,6 @@ public class RequestDispatcher {
         final var result = commands.get(request.getMethod()).handle(request, context);
         metrics.onRequest(request.getMethod());
         return new TCPResponse(request.getRequestId(), result.value(),
-                result.success() ? OK_MESSAGE : ERROR_MESSAGE, result.success(), context, request.getStart());
+                result.success() ? OK_MESSAGE : ERROR_MESSAGE, result.success());
     }
 }
