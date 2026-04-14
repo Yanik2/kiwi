@@ -37,7 +37,6 @@ public class StorageStrippingLockImpl implements Storage {
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
         try {
-            longOperation();
             return expirationGate(key);
         } finally {
             lock.unlock();
@@ -51,7 +50,6 @@ public class StorageStrippingLockImpl implements Storage {
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
         try {
-            longOperation();
             inMemoryStorage.put(key, value);
         } finally {
             lock.unlock();
@@ -66,7 +64,6 @@ public class StorageStrippingLockImpl implements Storage {
         lock.lock();
 
         try {
-            longOperation();
             final var value = expirationGate(key);
             final var state = new CurrentState(value.isPresent(), value.orElse(null));
             final var mutationDecision = mutation.apply(state);
@@ -95,7 +92,6 @@ public class StorageStrippingLockImpl implements Storage {
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
         try {
-            longOperation();
             final var value = inMemoryStorage.get(key);
             if (value != null && value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
                 storageMetrics.onTtlExpiredEviction();
@@ -168,19 +164,4 @@ public class StorageStrippingLockImpl implements Storage {
 
         return Optional.of(value);
     }
-
-    private void longOperation() {
-        long x = System.nanoTime();
-
-        for (int i = 0; i < 100000; i++) {
-            // Some meaningless but real CPU work
-            x ^= (x << 13);
-            x ^= (x >>> 7);
-            x ^= (x << 17);
-            x += i * 31L;
-        }
-
-        sink = x;
-    }
-    private static volatile long sink;
 }

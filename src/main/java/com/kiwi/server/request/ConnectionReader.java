@@ -85,12 +85,6 @@ public class ConnectionReader {
             requestMetrics.onClose();
             requestMetrics.onReaderThreadActive(-1);
         }
-
-        final var map = context.times;
-        final var overall = map.values().stream()
-                .reduce(Long::sum)
-                .get();
-        System.out.println("Time: " + (overall / map.size()));
     }
 
     private void onError(ProtocolException ex, ConnectionContext context) {

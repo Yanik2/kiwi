@@ -102,7 +102,6 @@ public class WriterProxy {
 
                     if (isActive) {
                         final var writeResult = responseWriter.writeResponse(outputStream, response);
-                        response.setTime(System.currentTimeMillis());
                         if (OK == writeResult.status()) {
                             requestMetrics.onWrite(writeResult.writtenBytes());
                             nextToWrite.incrementAndGet();
