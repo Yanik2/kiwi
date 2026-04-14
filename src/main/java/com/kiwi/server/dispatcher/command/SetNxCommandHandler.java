@@ -1,6 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.NoOpExpiration;
@@ -14,7 +14,7 @@ import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
 import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
 
 public class SetNxCommandHandler extends StorageCommandHandler {
-    public SetNxCommandHandler(StorageFacade storageFacade) {
+    public SetNxCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 

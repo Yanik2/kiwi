@@ -5,7 +5,7 @@ import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
 import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
 
 import com.kiwi.observability.OperationErrorMetrics;
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.HasTtlExpiration;
@@ -18,7 +18,7 @@ import com.kiwi.server.request.model.TCPRequest;
 public class ExpireCommandHandler extends StorageCommandHandler {
     private final OperationErrorMetrics operationErrorMetrics;
 
-    public ExpireCommandHandler(StorageFacade storageFacade, OperationErrorMetrics operationErrorMetrics) {
+    public ExpireCommandHandler(Storage storageFacade, OperationErrorMetrics operationErrorMetrics) {
         super(storageFacade);
         this.operationErrorMetrics = operationErrorMetrics;
     }

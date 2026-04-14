@@ -26,7 +26,8 @@ import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.observability.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.observability.OperationErrorMetrics;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.server.dispatcher.command.DbSizeCommandHandler;
 import com.kiwi.server.dispatcher.command.DeleteCommandHandler;
 import com.kiwi.server.dispatcher.command.ExistsCommandHandler;
@@ -65,10 +66,11 @@ public class RequestDispatcher {
 
     public static RequestDispatcher create(MetricsProvider metricsProvider,
                                            MethodMetrics metrics,
-                                           StorageFacade storageFacade) {
-        final var expireCommandHandler = new ExpireCommandHandler(storageFacade);
+                                           OperationErrorMetrics operationErrorMetrics,
+                                           Storage storageFacade) {
+        final var expireCommandHandler = new ExpireCommandHandler(storageFacade, operationErrorMetrics);
         final var ttlCommandHandler = new TtlCommandHandler(storageFacade);
-        final var numericCommandHandler = new NumericOperationCommandHandler(storageFacade);
+        final var numericCommandHandler = new NumericOperationCommandHandler(storageFacade, operationErrorMetrics);
         final var commands = new EnumMap<Method, RequestCommandHandler>(Method.class);
 
         commands.put(GET, new GetCommandHandler(storageFacade));
@@ -79,7 +81,7 @@ public class RequestDispatcher {
         commands.put(PING, new PingCommandHandler());
         commands.put(EXPIRE, expireCommandHandler);
         commands.put(PEXPIRE, expireCommandHandler);
-        commands.put(PERSIST, new PersistCommandHandler(storageFacade));
+        commands.put(PERSIST, new PersistCommandHandler(storageFacade, operationErrorMetrics));
         commands.put(TTL, ttlCommandHandler);
         commands.put(PTTL, ttlCommandHandler);
         commands.put(EXISTS, new ExistsCommandHandler(storageFacade));

@@ -1,7 +1,7 @@
 package com.kiwi.server.dispatcher.command;
 
 import com.kiwi.observability.OperationErrorMetrics;
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.model.expiration.NoOpExpiration;
@@ -20,7 +20,7 @@ import static com.kiwi.server.request.Method.DECRBY;
 public class NumericOperationCommandHandler extends StorageCommandHandler {
     private final OperationErrorMetrics operationErrorMetrics;
 
-    public NumericOperationCommandHandler(StorageFacade storageFacade, OperationErrorMetrics errorMetrics) {
+    public NumericOperationCommandHandler(Storage storageFacade, OperationErrorMetrics errorMetrics) {
         super(storageFacade);
         this.operationErrorMetrics = errorMetrics;
     }

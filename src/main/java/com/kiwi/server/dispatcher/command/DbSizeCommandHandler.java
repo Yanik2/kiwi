@@ -1,12 +1,12 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.OperationResult;
 import com.kiwi.server.request.model.TCPRequest;
 
 public class DbSizeCommandHandler extends StorageCommandHandler {
-    public DbSizeCommandHandler(StorageFacade storageFacade) {
+    public DbSizeCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 

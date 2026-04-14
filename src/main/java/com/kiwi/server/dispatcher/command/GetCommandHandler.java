@@ -1,6 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.server.context.ConnectionContext;
@@ -10,7 +10,7 @@ import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.DataResponse;
 
 public class GetCommandHandler extends StorageCommandHandler {
-    public GetCommandHandler(StorageFacade storageFacade) {
+    public GetCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 

@@ -1,6 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.persistent.StorageFacade;
+import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.server.context.ConnectionContext;
@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 
 public class MultiGetCommandHandler extends StorageCommandHandler {
-    public MultiGetCommandHandler(StorageFacade storageFacade) {
+    public MultiGetCommandHandler(Storage storageFacade) {
         super(storageFacade);
     }
 
