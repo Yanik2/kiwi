@@ -34,7 +34,8 @@ public class StorageStrippingLockImpl implements Storage {
 
     @Override
     public Optional<Value> read(Key key) {
-        final var lock = locks[Math.abs(key.hashCode() % locks.length)];
+        final var snapLocks = locks;
+        final var lock = snapLocks[Math.abs(key.hashCode() % snapLocks.length)];
         lock.lock();
         try {
             return expirationGate(key);
@@ -89,6 +90,7 @@ public class StorageStrippingLockImpl implements Storage {
     @Override
     public void delete(Key key) {
         while (resizeInProgress) {}
+        resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
         try {
