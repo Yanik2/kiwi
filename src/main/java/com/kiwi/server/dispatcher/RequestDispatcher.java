@@ -24,9 +24,9 @@ import static com.kiwi.server.request.Method.TTL;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
-import com.kiwi.observability.MethodMetrics;
+import com.kiwi.observability.metrics.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
-import com.kiwi.observability.OperationErrorMetrics;
+import com.kiwi.observability.metrics.OperationErrorMetrics;
 import com.kiwi.persistent.storage.Storage;
 import com.kiwi.server.dispatcher.command.DbSizeCommandHandler;
 import com.kiwi.server.dispatcher.command.DeleteCommandHandler;

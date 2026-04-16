@@ -1,6 +1,6 @@
 package com.kiwi.server.accept;
 
-import com.kiwi.observability.RequestMetrics;
+import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;

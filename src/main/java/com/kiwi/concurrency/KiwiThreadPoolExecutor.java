@@ -1,7 +1,7 @@
 package com.kiwi.concurrency;
 
 import com.kiwi.concurrency.task.Task;
-import com.kiwi.observability.ThreadPoolMetrics;
+import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;

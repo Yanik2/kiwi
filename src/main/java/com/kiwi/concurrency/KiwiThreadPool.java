@@ -1,7 +1,7 @@
 package com.kiwi.concurrency;
 
 import com.kiwi.concurrency.exception.KiwiGeneralException;
-import com.kiwi.observability.ThreadPoolMetrics;
+import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.Map;
 import java.util.concurrent.*;

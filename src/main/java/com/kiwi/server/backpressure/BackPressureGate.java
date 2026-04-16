@@ -1,7 +1,7 @@
 package com.kiwi.server.backpressure;
 
 import com.kiwi.concurrency.KiwiThreadPoolExecutor;
-import com.kiwi.observability.ThreadPoolMetrics;
+import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;

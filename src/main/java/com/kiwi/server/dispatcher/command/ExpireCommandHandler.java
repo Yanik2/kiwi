@@ -4,7 +4,7 @@ import static com.kiwi.persistent.mutation.ErrorType.NOT_EXISTS;
 import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
 import static com.kiwi.server.response.model.BinaryResponseValues.SUCCESS;
 
-import com.kiwi.observability.OperationErrorMetrics;
+import com.kiwi.observability.metrics.OperationErrorMetrics;
 import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;

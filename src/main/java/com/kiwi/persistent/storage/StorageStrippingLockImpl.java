@@ -1,6 +1,6 @@
 package com.kiwi.persistent.storage;
 
-import com.kiwi.observability.StorageMetrics;
+import com.kiwi.observability.metrics.StorageMetrics;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.mutation.CurrentState;
