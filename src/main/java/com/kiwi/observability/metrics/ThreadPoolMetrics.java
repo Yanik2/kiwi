@@ -1,4 +1,6 @@
-package com.kiwi.observability;
+package com.kiwi.observability.metrics;
+
+import com.kiwi.observability.MetricsRegistry;
 
 import static com.kiwi.observability.util.MetricKeys.BP_PAUSED_COUNT;
 import static com.kiwi.observability.util.MetricKeys.BP_PAUSE_COUNT;

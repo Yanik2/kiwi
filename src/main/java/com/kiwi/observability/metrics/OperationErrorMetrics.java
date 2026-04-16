@@ -1,5 +1,6 @@
-package com.kiwi.observability;
+package com.kiwi.observability.metrics;
 
+import com.kiwi.observability.MetricsRegistry;
 import com.kiwi.persistent.mutation.ErrorType;
 
 import static com.kiwi.observability.util.MetricKeys.OP_NOT_EXISTS;

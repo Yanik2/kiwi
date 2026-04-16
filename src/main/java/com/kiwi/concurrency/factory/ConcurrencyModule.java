@@ -4,7 +4,7 @@ import com.kiwi.concurrency.KiwiThreadFactory;
 import com.kiwi.concurrency.KiwiThreadPool;
 import com.kiwi.concurrency.KiwiThreadPoolExecutor;
 import com.kiwi.observability.factory.ObservabilityContainer;
-import com.kiwi.observability.ThreadPoolMetrics;
+import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.Map;
 

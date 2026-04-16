@@ -1,5 +1,6 @@
-package com.kiwi.observability;
+package com.kiwi.observability.metrics;
 
+import com.kiwi.observability.MetricsRegistry;
 import com.kiwi.server.request.Method;
 
 import static com.kiwi.observability.util.MetricKeys.CMD_DBSIZE;

@@ -1,6 +1,7 @@
-package com.kiwi.observability;
+package com.kiwi.observability.metrics;
 
 import com.kiwi.exception.protocol.ProtocolErrorCode;
+import com.kiwi.observability.MetricsRegistry;
 
 import static com.kiwi.observability.util.MetricKeys.BYTES_IN;
 import static com.kiwi.observability.util.MetricKeys.BYTES_OUT;

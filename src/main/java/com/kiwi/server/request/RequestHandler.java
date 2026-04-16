@@ -1,7 +1,7 @@
 package com.kiwi.server.request;
 
 import com.kiwi.exception.protocol.ProtocolException;
-import com.kiwi.observability.RequestMetrics;
+import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.RequestDispatcher;
 import com.kiwi.server.request.model.TCPRequest;

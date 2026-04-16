@@ -1,6 +1,6 @@
 package com.kiwi.server.dispatcher.command;
 
-import com.kiwi.observability.OperationErrorMetrics;
+import com.kiwi.observability.metrics.OperationErrorMetrics;
 import com.kiwi.persistent.storage.Storage;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;

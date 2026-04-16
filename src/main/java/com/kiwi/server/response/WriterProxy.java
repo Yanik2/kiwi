@@ -1,6 +1,6 @@
 package com.kiwi.server.response;
 
-import com.kiwi.observability.RequestMetrics;
+import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.response.model.TCPResponse;
 
 import java.io.OutputStream;

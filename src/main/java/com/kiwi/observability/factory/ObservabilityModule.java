@@ -1,12 +1,12 @@
 package com.kiwi.observability.factory;
 
-import com.kiwi.observability.MethodMetrics;
+import com.kiwi.observability.metrics.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.observability.MetricsRegistry;
-import com.kiwi.observability.OperationErrorMetrics;
-import com.kiwi.observability.RequestMetrics;
-import com.kiwi.observability.StorageMetrics;
-import com.kiwi.observability.ThreadPoolMetrics;
+import com.kiwi.observability.metrics.OperationErrorMetrics;
+import com.kiwi.observability.metrics.RequestMetrics;
+import com.kiwi.observability.metrics.StorageMetrics;
+import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.Map;
 
