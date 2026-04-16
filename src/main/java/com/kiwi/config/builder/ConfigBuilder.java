@@ -1,7 +1,7 @@
 package com.kiwi.config.builder;
 
 import com.kiwi.config.domain.Config;
-import com.kiwi.exception.ConfigurationValidationException;
+import com.kiwi.exception.config.ConfigurationValidationException;
 
 import static com.kiwi.config.properties.DefaultProperties.BACKLOG;
 import static com.kiwi.config.properties.DefaultProperties.MAX_CLIENTS;
@@ -44,7 +44,7 @@ public class ConfigBuilder {
     }
 
     public Config build() {
-        if (port < 0 || port > 65535) {
+        if (port <= 0 || port > 65535) {
             throw new ConfigurationValidationException("Invalid port number: " + port);
         }
         if (backlog < 0) {
