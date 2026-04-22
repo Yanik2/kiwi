@@ -1,6 +1,7 @@
 package com.kiwi;
 
 import com.kiwi.concurrency.factory.ConcurrencyModule;
+import com.kiwi.config.ConfigModule;
 import com.kiwi.observability.factory.ObservabilityModule;
 import com.kiwi.persistent.factory.PersistentModule;
 import com.kiwi.server.factory.ServerModule;
@@ -12,6 +13,7 @@ public class KiwiMain {
     public static void main(String[] args) throws Exception {
         log.info("Starting initialization Kiwi");
         final long start = System.currentTimeMillis();
+        final var configContainer = ConfigModule.createConfig(args);
         final var observabilityContainer = ObservabilityModule.create();
         final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
         final var persistentContainer = PersistentModule.create(observabilityContainer);
