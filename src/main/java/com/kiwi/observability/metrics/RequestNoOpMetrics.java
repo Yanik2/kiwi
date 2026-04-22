@@ -60,7 +60,7 @@ public class RequestNoOpMetrics implements RequestMetrics {
 
     @Override
     public void onRefuse() {
-
+        metricsRegistry.updateGauge(CON_CURRENT, -1);
     }
 
     @Override
