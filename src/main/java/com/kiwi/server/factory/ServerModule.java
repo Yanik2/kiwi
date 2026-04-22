@@ -1,6 +1,7 @@
 package com.kiwi.server.factory;
 
 import com.kiwi.concurrency.factory.ConcurrencyContainer;
+import com.kiwi.config.domain.Config;
 import com.kiwi.observability.factory.ObservabilityContainer;
 import com.kiwi.persistent.factory.PersistentContainer;
 import com.kiwi.server.hook.ShutdownHook;
@@ -20,7 +21,7 @@ import static com.kiwi.config.properties.Properties.SERVER_THREAD_POOL_NAME;
 public class ServerModule {
 
     public static ServerContainer create(ObservabilityContainer observabilityContainer, PersistentContainer storageContainer,
-                                         ConcurrencyContainer concurrencyContainer) {
+                                         ConcurrencyContainer concurrencyContainer, Config config) {
         final var observabilityRequestHandler = observabilityContainer.metricsProvider();
         final var methodMetrics = observabilityContainer.methodMetrics();
         final var dispatcher = RequestDispatcher.create(
@@ -47,7 +48,8 @@ public class ServerModule {
                 observabilityContainer.threadPoolMetrics().get(SERVER_THREAD_POOL_NAME)
         );
         final var tcpServer = new TCPServer(
-                connectionReader, responseWriter, requestMetrics, backPressureGate, connectionRegistry
+                connectionReader, responseWriter, requestMetrics, backPressureGate, connectionRegistry,
+                config.port(), config.soTimeoutMillis(), config.maxClients()
         );
         final var shutdownHook =
                 new ShutdownHook(tcpServer, concurrencyContainer.executors().values(), connectionRegistry);

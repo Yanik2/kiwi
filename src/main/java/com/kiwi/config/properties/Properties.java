@@ -16,9 +16,6 @@ public class Properties {
     public static final int SERVER_THREAD_POOL_SIZE = 9;
     public static final int SERVER_THREAD_POOL_QUEUE_CAP = 1000;
 
-    public static final int SOCKET_PORT = 8090;
-    public static final int MAX_CLIENTS = 1000;
-
     public static final double BP_HIGH_LOAD_WATERMARK = 0.8;
     public static final double BP_LOW_LOAD_WATERMARK = 0.5;
 
