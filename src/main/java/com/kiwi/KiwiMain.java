@@ -14,10 +14,11 @@ public class KiwiMain {
         log.info("Starting initialization Kiwi");
         final long start = System.currentTimeMillis();
         final var configContainer = ConfigModule.createConfig();
-        final var observabilityContainer = ObservabilityModule.create();
+        final var observabilityContainer = ObservabilityModule.create(configContainer);
         final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
         final var persistentContainer = PersistentModule.create(observabilityContainer);
-        final var serverContainer = ServerModule.create(observabilityContainer, persistentContainer, concurrencyContainer);
+        final var serverContainer = ServerModule.create(observabilityContainer, persistentContainer,
+                concurrencyContainer, configContainer);
         final long end = System.currentTimeMillis();
         log.info("Kiwi initialized in [" + (end - start) + "]ms, starting server");
         serverContainer.start();

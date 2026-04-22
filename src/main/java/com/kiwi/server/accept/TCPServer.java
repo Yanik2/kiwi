@@ -18,8 +18,6 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.kiwi.config.properties.Properties.MAX_CLIENTS;
-import static com.kiwi.config.properties.Properties.SOCKET_PORT;
 import static com.kiwi.server.accept.ServerStatus.RUNNING;
 import static com.kiwi.server.accept.ServerStatus.STOPPED;
 import static com.kiwi.server.accept.ServerStatus.STOPPING;
@@ -33,6 +31,10 @@ public class TCPServer {
     private final RequestMetrics requestMetrics;
     private final BackPressureGate backPressureGate;
     private final ConnectionRegistry connectionRegistry;
+    private final int socketPort;
+    private final int soTimeout;
+    private final int maxClients;
+    private final int backlog;
 
     private final ExecutorService connectionThreadPool = Executors.newCachedThreadPool();
 
@@ -42,16 +44,20 @@ public class TCPServer {
 
     public TCPServer(ConnectionReader connectionReader, ResponseWriter responseWriter,
                      RequestMetrics requestMetrics, BackPressureGate backPressureGate,
-                     ConnectionRegistry connectionRegistry) {
+                     ConnectionRegistry connectionRegistry, int socketPort, int soTimeout, int maxClients, int backlog) {
         this.connectionReader = connectionReader;
         this.responseWriter = responseWriter;
         this.requestMetrics = requestMetrics;
         this.backPressureGate = backPressureGate;
         this.connectionRegistry = connectionRegistry;
+        this.socketPort = socketPort;
+        this.soTimeout = soTimeout;
+        this.maxClients = maxClients;
+        this.backlog = backlog;
     }
 
     public void start() throws Exception {
-        serverSocket = new ServerSocket(SOCKET_PORT);
+        serverSocket = new ServerSocket(socketPort, backlog);
         this.status = RUNNING;
 
         while (RUNNING == status) {
@@ -60,10 +66,11 @@ public class TCPServer {
                 socket = serverSocket.accept();
 
                 //for testing purposes timeout for 10 min
+//                socket.setSoTimeout(soTimeout);
                 socket.setSoTimeout(600000);
 
                 requestMetrics.onConnection();
-                if (requestMetrics.getCurrentClients() > MAX_CLIENTS) {
+                if (requestMetrics.getCurrentClients() > maxClients) {
                     requestMetrics.onRefuse();
                     refuseConnection(socket);
                 } else {
@@ -115,7 +122,7 @@ public class TCPServer {
     }
 
     private void refuseConnection(Socket socket) {
-        log.info("Maximum clients exceeded, refusing connection. Max clients: " + MAX_CLIENTS + ". Current clients: "
+        log.info("Maximum clients exceeded, refusing connection. Max clients: " + maxClients + ". Current clients: "
                 + requestMetrics.getCurrentClients());
         try {
             socket.setSoLinger(true, 0);

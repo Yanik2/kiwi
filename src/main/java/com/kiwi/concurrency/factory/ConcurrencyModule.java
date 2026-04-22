@@ -28,23 +28,23 @@ public final class ConcurrencyModule {
                 REJECTION_POOL_SIZE, REJECTION_QUEUE_SIZE, metrics);
         return new ConcurrencyContainer(
                 Map.of(SERVER_THREAD_POOL_EXECUTOR_NAME,
-                createExecutor(
-                        SERVER_THREAD_POOL_EXECUTOR_NAME,
-                        SERVER_THREAD_POOL_NAME,
-                        SERVER_THREAD_POOL_SIZE,
-                        SERVER_THREAD_POOL_QUEUE_CAP,
-                        observabilityContainer.threadPoolMetrics().get(SERVER_THREAD_POOL_NAME),
-                        rejectionThreadPool)
+                        createExecutor(
+                                SERVER_THREAD_POOL_EXECUTOR_NAME,
+                                SERVER_THREAD_POOL_NAME,
+                                SERVER_THREAD_POOL_SIZE,
+                                SERVER_THREAD_POOL_QUEUE_CAP,
+                                observabilityContainer.threadPoolMetrics().get(SERVER_THREAD_POOL_NAME),
+                                rejectionThreadPool)
                 )
         );
     }
 
     // ignore IDE warnings, there will be another executors
     private static KiwiThreadPoolExecutor createExecutor(String threadPoolExecutorName,
-                                                        String threadPoolName,
-                                                        int threadPoolSize,
-                                                        int queueCapacity,
-                                                        ThreadPoolMetrics metrics,
+                                                         String threadPoolName,
+                                                         int threadPoolSize,
+                                                         int queueCapacity,
+                                                         ThreadPoolMetrics metrics,
                                                          KiwiThreadPool rejectionThreadPool) {
         final var threadFactory = new KiwiThreadFactory(threadPoolName);
         return new KiwiThreadPoolExecutor(
