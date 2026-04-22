@@ -13,6 +13,7 @@ import com.kiwi.config.registry.PropertiesKeyRegistry;
 
 import java.util.List;
 
+import static com.kiwi.config.util.ConfigConstants.CONFIG_FILE;
 import static com.kiwi.config.util.ConfigConstants.METRICS_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.SERVER_BACKLOG;
 import static com.kiwi.config.util.ConfigConstants.SERVER_MAX_CLIENTS;
@@ -21,25 +22,20 @@ import static com.kiwi.config.util.ConfigConstants.SOCKET_TIMEOUT;
 
 public class ConfigModule {
     private static final String DEFAULT_FILE_PATH = "config/kiwi.properties";
-    private static final String FILE_KEY = "-Dkiwi.config";
 
-    public static Config createConfig(String[] args) {
+    public static Config createConfig() {
+        final var systemSource = new SystemPropertiesSource();
+        final var keyRegistry = PropertiesKeyRegistry.getInstance();
+        var filePath = systemSource.load(keyRegistry.getKey(CONFIG_FILE));
+        filePath = filePath == null ? DEFAULT_FILE_PATH : filePath;
 
-        var filePath = DEFAULT_FILE_PATH;
-        for (String arg : args) {
-            if (arg.startsWith(FILE_KEY)) {
-                filePath = arg.substring(arg.indexOf("=") + 1);
-            }
-        }
 
         final var props = ConfigurationFileLoader.loadProperties(filePath);
         final var fileSource = new FileSource(props);
         final var defaultSource = new DefaultSource();
         final var envSource = new EnvSource();
-        final var systemSource = new SystemPropertiesSource();
-        final var sources = List.of(systemSource, envSource, fileSource, defaultSource);
-        final var keyRegistry = PropertiesKeyRegistry.getInstance();
 
+        final var sources = List.of(systemSource, envSource, fileSource, defaultSource);
         final var builder = new ConfigBuilder();
 
         final var backlogKey = keyRegistry.getKey(SERVER_BACKLOG);

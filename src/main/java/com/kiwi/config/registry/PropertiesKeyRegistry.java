@@ -3,7 +3,9 @@ package com.kiwi.config.registry;
 import com.kiwi.exception.config.ConfigurationInitializationException;
 
 import java.util.Map;
+import java.util.Set;
 
+import static com.kiwi.config.util.ConfigConstants.CONFIG_FILE;
 import static com.kiwi.config.util.ConfigConstants.METRICS_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.SERVER_BACKLOG;
 import static com.kiwi.config.util.ConfigConstants.SERVER_MAX_CLIENTS;
@@ -62,12 +64,18 @@ public class PropertiesKeyRegistry {
                 }),
                 METRICS_ENABLED, new ConfigKey("metrics.enabled", "KV_METRICS_ENABLED", "true", new ValueParser() {
                     public boolean getBoolean(String value) {
-                        try {
-                            return Boolean.parseBoolean(value);
-                        } catch (Exception ex) {
-                            throw new ConfigurationInitializationException(
-                                    "Error during parsing metrics.enabled: " + value, ex);
+                        if (!Boolean.TRUE.toString().equalsIgnoreCase(value)
+                                && !Boolean.FALSE.toString().equalsIgnoreCase(value)) {
+                            throw new ConfigurationInitializationException("Error during parsing metrics.enabled: "
+                                    + value);
                         }
+
+                        return Boolean.parseBoolean(value);
+                    }
+                }),
+                CONFIG_FILE, new ConfigKey("kiwi.config", "KV_KIWI_CONFIG", "config/kiwi.properties", new ValueParser() {
+                    public String getString(String value) {
+                        return value;
                     }
                 })
         );
@@ -79,5 +87,9 @@ public class PropertiesKeyRegistry {
 
     public ConfigKey getKey(String keyName) {
         return configKeys.get(keyName);
+    }
+
+    public Set<String> getKeyNames() {
+        return configKeys.keySet();
     }
 }

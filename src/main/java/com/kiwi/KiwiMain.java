@@ -13,7 +13,7 @@ public class KiwiMain {
     public static void main(String[] args) throws Exception {
         log.info("Starting initialization Kiwi");
         final long start = System.currentTimeMillis();
-        final var configContainer = ConfigModule.createConfig(args);
+        final var configContainer = ConfigModule.createConfig();
         final var observabilityContainer = ObservabilityModule.create();
         final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
         final var persistentContainer = PersistentModule.create(observabilityContainer);
