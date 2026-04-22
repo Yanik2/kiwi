@@ -49,7 +49,7 @@ public class ServerModule {
         );
         final var tcpServer = new TCPServer(
                 connectionReader, responseWriter, requestMetrics, backPressureGate, connectionRegistry,
-                config.port(), config.soTimeoutMillis(), config.maxClients()
+                config.port(), config.soTimeoutMillis(), config.maxClients(), config.backlog()
         );
         final var shutdownHook =
                 new ShutdownHook(tcpServer, concurrencyContainer.executors().values(), connectionRegistry);
