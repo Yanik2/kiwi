@@ -12,6 +12,7 @@ import com.kiwi.config.registry.ConfigKey;
 import com.kiwi.config.registry.PropertiesKeyRegistry;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import static com.kiwi.config.util.ConfigConstants.CONFIG_FILE;
 import static com.kiwi.config.util.ConfigConstants.METRICS_ENABLED;
@@ -21,6 +22,8 @@ import static com.kiwi.config.util.ConfigConstants.SERVER_PORT;
 import static com.kiwi.config.util.ConfigConstants.SOCKET_TIMEOUT;
 
 public class ConfigModule {
+    private static final Logger log = Logger.getLogger(ConfigModule.class.getName());
+
     private static final String DEFAULT_FILE_PATH = "config/kiwi.properties";
 
     public static Config createConfig() {
@@ -58,12 +61,13 @@ public class ConfigModule {
         final var metricsEnabledProperty = getProperty(sources, metricsEnabledKey);
         builder.metricsEnabled(metricsEnabledKey.valueParser().getBoolean(metricsEnabledProperty));
 
-        return builder.build();
-
+        final var config = builder.build();
+        logConfig(config);
+        return config;
     }
 
     private static String getProperty(List<PropertySource> sources,
-                                     ConfigKey configKey) {
+                                      ConfigKey configKey) {
         String value = null;
         for (PropertySource s : sources) {
             if (value == null) {
@@ -72,5 +76,13 @@ public class ConfigModule {
         }
 
         return value;
+    }
+
+    private static void logConfig(Config config) {
+        log.info("Kiwi configuration: \n" + SERVER_PORT + "=" + config.port() + "\n"
+                + SERVER_BACKLOG + "=" + config.backlog() + "\n"
+                + SERVER_MAX_CLIENTS + "=" + config.maxClients() + "\n"
+                + SOCKET_TIMEOUT + "=" + config.soTimeoutMillis() + "\n"
+                + METRICS_ENABLED + "=" + config.metricsEnabled());
     }
 }
