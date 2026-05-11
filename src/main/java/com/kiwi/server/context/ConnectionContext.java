@@ -1,5 +1,7 @@
 package com.kiwi.server.context;
 
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.response.WriterLock;
 import com.kiwi.server.response.WriterProxy;
@@ -9,10 +11,9 @@ import java.net.Socket;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 public final class ConnectionContext {
-    private static final Logger log = Logger.getLogger(ConnectionContext.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ConnectionContext.class.getName());
 
     private final UUID connectionId;
     private final Socket socket;
@@ -69,9 +70,8 @@ public final class ConnectionContext {
         this.backPressureGate.signalIfBelowLow();
         if (!this.isClosed() && writerProxy != null) {
             if (!writerProxy.addResponse(tcpResponse)) {
-                log.warning("Trying to add response to context, when writer proxy is not active, " +
-                        "or response queue is full. Close connection on slow client. " +
-                        "Response id: [" + tcpResponse.requestId() + "], Connection id: [" + connectionId + "]");
+                log.warn("Close connection on slow client", "Trying to add response to context, when writer proxy is "
+                        + "not active or response queue is full", connectionId);
                 close();
             }
         }

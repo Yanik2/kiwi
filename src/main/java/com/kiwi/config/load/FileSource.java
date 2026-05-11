@@ -2,14 +2,13 @@ package com.kiwi.config.load;
 
 import com.kiwi.config.registry.ConfigKey;
 import com.kiwi.config.registry.PropertiesKeyRegistry;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 
 import java.util.Properties;
-import java.util.logging.Logger;
-
-import static java.util.logging.Level.WARNING;
 
 public class FileSource implements PropertySource {
-    private static final Logger log = Logger.getLogger(FileSource.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(FileSource.class.getName());
 
     private final Properties properties;
 
@@ -27,7 +26,7 @@ public class FileSource implements PropertySource {
         final var knownKeyNames = PropertiesKeyRegistry.getInstance().getKeyNames();
         for (Object pn : props.keySet()) {
             if (!knownKeyNames.contains(pn)) {
-                log.log(WARNING, "Key name is not known: " + pn);
+                log.warn("Key name is not known: " + pn);
             }
         }
     }

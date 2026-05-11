@@ -10,9 +10,10 @@ import com.kiwi.config.load.PropertySource;
 import com.kiwi.config.load.SystemPropertiesSource;
 import com.kiwi.config.registry.ConfigKey;
 import com.kiwi.config.registry.PropertiesKeyRegistry;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import static com.kiwi.config.util.ConfigConstants.CONFIG_FILE;
 import static com.kiwi.config.util.ConfigConstants.METRICS_ENABLED;
@@ -22,7 +23,7 @@ import static com.kiwi.config.util.ConfigConstants.SERVER_PORT;
 import static com.kiwi.config.util.ConfigConstants.SOCKET_TIMEOUT;
 
 public class ConfigModule {
-    private static final Logger log = Logger.getLogger(ConfigModule.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ConfigModule.class.getName());
 
     private static final String DEFAULT_FILE_PATH = "config/kiwi.properties";
 

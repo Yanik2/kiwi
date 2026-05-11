@@ -1,13 +1,14 @@
 package com.kiwi.concurrency;
 
 import com.kiwi.concurrency.task.Task;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Logger;
 
 public class KiwiThreadPoolExecutor {
-    private static final Logger logger = Logger.getLogger(KiwiThreadPoolExecutor.class.getName());
+    private static final KiwiLogger logger = KiwiLoggerFactory.getLogger(KiwiThreadPoolExecutor.class.getName());
 
     private final KiwiThreadPool executionThreadPool;
     private final KiwiThreadPool rejectionThreadPool;
@@ -52,7 +53,7 @@ public class KiwiThreadPoolExecutor {
             executionThreadPool.stop();
             rejectionThreadPool.stop();
         } catch (Exception ex) {
-            logger.warning("Exception during stop thread pools");
+            logger.warn("Exception during stop thread pools", ex.getMessage());
         }
     }
 }
