@@ -2,17 +2,18 @@ package com.kiwi.server.buffer;
 
 import com.kiwi.exception.protocol.ProtocolErrorCode;
 import com.kiwi.exception.protocol.ProtocolException;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.server.context.ConnectionContext;
 
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 import static com.kiwi.config.properties.Properties.BUFFER_EXPAND_RATIO;
 import static com.kiwi.config.properties.Properties.BUFFER_INITIAL_CAP;
 import static com.kiwi.config.properties.Properties.BUFFER_MAX_CAP;
 
 public class ReadBuffer {
-    private static final Logger log = Logger.getLogger(ReadBuffer.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ReadBuffer.class.getName());
 
     private byte[] buf = new byte[BUFFER_INITIAL_CAP];
 
@@ -24,7 +25,7 @@ public class ReadBuffer {
         if (!isFull()) {
             return fillBuffer(is, context);
         } else {
-            log.severe("Trying to fill full buffer, connection id: [" + context.connectionId() + "]");
+            log.error("Error in read buffer", "Trying to fill full buffer", context.connectionId());
             throw new ProtocolException("Trying to fill full buffer", ProtocolErrorCode.BUFFER_ERROR);
         }
     }
@@ -46,8 +47,7 @@ public class ReadBuffer {
             if (context.isClosed()) {
                 return 0;
             } else {
-                log.severe("Unexpected error in read buffer on reading request: " + ex.getMessage() +
-                        ". Connection id: [" + context.connectionId() + "]");
+                log.error("Unexpected error in read buffer on reading request", ex.getMessage(), context.connectionId());
                 throw new ProtocolException("Unexpected exception in read buffer", ProtocolErrorCode.BUFFER_ERROR);
             }
         }
@@ -75,9 +75,7 @@ public class ReadBuffer {
         final var newSize = Math.min(buf.length * BUFFER_EXPAND_RATIO, BUFFER_MAX_CAP);
         final var newBuffer = new byte[newSize];
 
-        for (int i = 0; i < buf.length; i++) {
-            newBuffer[i] = buf[i];
-        }
+        System.arraycopy(buf, 0, newBuffer, 0, buf.length);
 
         this.buf = newBuffer;
     }
@@ -105,9 +103,7 @@ public class ReadBuffer {
     }
 
     public byte[] getRange(byte[] arr, int offset, int len) {
-        for (int i = 0; i < len; i++) {
-            arr[i] = buf[offset + i];
-        }
+        if (len >= 0) System.arraycopy(buf, offset, arr, 0, len);
 
         return arr;
     }

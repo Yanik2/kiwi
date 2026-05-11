@@ -3,6 +3,8 @@ package com.kiwi.server.request;
 import com.kiwi.concurrency.KiwiThreadPoolExecutor;
 import com.kiwi.concurrency.task.ConnectionTask;
 import com.kiwi.exception.protocol.ProtocolException;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
@@ -15,14 +17,12 @@ import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
 
 import java.net.SocketTimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.kiwi.server.request.Method.EXT;
 import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
 
 public class ConnectionReader {
-    private static final Logger log = Logger.getLogger(ConnectionReader.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ConnectionReader.class.getName());
 
     private final BinaryRequestParser requestParser;
     private final RequestMetrics requestMetrics;
@@ -61,7 +61,8 @@ public class ConnectionReader {
                     for (ParserResult<ParsedRequest> parserResult : parserResults) {
                         switch (parserResult.status()) {
                             case OK -> delegateTask(context, parserResult.value());
-                            case NEED_MORE_DATA -> {}
+                            case NEED_MORE_DATA -> {
+                            }
                             case ERROR -> throw parserResult.error();
                         }
                         if (context.isClosed()) {
@@ -72,11 +73,11 @@ public class ConnectionReader {
 
             }
         } catch (SocketTimeoutException ex) {
-            log.log(Level.WARNING, "Socket timed out");
+            log.warn("Connection reader error", "Socket timed out", context.connectionId());
         } catch (ProtocolException ex) {
             onError(ex, context);
         } catch (Exception ex) {
-            log.severe("Unexpected exception during request processing: " + ex.getMessage());
+            log.error("Error during request processing", ex.getMessage(), context.connectionId());
         } finally {
             context.close();
             connectionRegistry.unregister(context);
@@ -87,8 +88,8 @@ public class ConnectionReader {
     }
 
     private void onError(ProtocolException ex, ConnectionContext context) {
-        log.severe("Unexpected error in protocol parsing: " + ex.getMessage());
-        context.addResponse(new TCPResponse(context.getRequestId(), ERROR_MESSAGE, false));
+        log.error("Error in protocol parsing", ex.getMessage(), context.connectionId());
+        context.addResponse(new TCPResponse(context.getRequestId(), ERROR_MESSAGE, false, context.connectionId()));
         requestMetrics.onProtoError(ex.getProtocolErrorCode());
     }
 

@@ -2,13 +2,14 @@ package com.kiwi;
 
 import com.kiwi.concurrency.factory.ConcurrencyModule;
 import com.kiwi.config.ConfigModule;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.factory.ObservabilityModule;
 import com.kiwi.persistent.factory.PersistentModule;
 import com.kiwi.server.factory.ServerModule;
-import java.util.logging.Logger;
 
 public class KiwiMain {
-    private static final Logger log = Logger.getLogger(KiwiMain.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(KiwiMain.class.getName());
 
     public static void main(String[] args) throws Exception {
         log.info("Starting initialization Kiwi");

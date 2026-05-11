@@ -1,16 +1,17 @@
 package com.kiwi.concurrency;
 
 import com.kiwi.concurrency.exception.KiwiGeneralException;
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.metrics.ThreadPoolMetrics;
 
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class KiwiThreadPool {
-    private static final Logger log = Logger.getLogger(KiwiThreadPool.class.getSimpleName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(KiwiThreadPool.class.getName());
     private static final String WORKER_NAME_PREFIX = "-thread-pool-worker-";
 
     private final int size;
@@ -90,7 +91,7 @@ public class KiwiThreadPool {
 
             if (this.isRunning) {
                 // unknown situation
-                log.severe("Worker: [" + workerName + "] is done, but thread pool is still running");
+                log.error("Worker: [" + workerName + "] is done, but thread pool is still running");
             }
         };
     }
@@ -160,8 +161,7 @@ public class KiwiThreadPool {
                 return false;
             }
         } catch (Exception ex) {
-            log.log(Level.SEVERE, "Couldn't accept task: " + ex.getMessage() + ". Task will be rejected. "
-            + "ThreadPool: [" + this.name + "]");
+            log.error("Task will be rejected", ex.getMessage());
             return false;
         }
     }

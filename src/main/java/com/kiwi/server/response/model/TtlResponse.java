@@ -1,10 +1,6 @@
 package com.kiwi.server.response.model;
 
-import java.util.logging.Logger;
-
 public final class TtlResponse implements SerializableValue {
-    private static final Logger logger = Logger.getLogger(TtlResponse.class.getName());
-
     private final long ttl;
 
     public TtlResponse(long ttl) {
@@ -25,8 +21,6 @@ public final class TtlResponse implements SerializableValue {
     }
 
     private byte[] serializeLong(long value) {
-        logger.info("Serializing long value: [" + value + "]");
-
         int arraySize = 19;
         long divider = 10_000_000_000_000_000_00L;
 

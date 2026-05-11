@@ -1,5 +1,7 @@
 package com.kiwi.server.accept;
 
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionContext;
@@ -15,8 +17,6 @@ import java.net.Socket;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.kiwi.server.accept.ServerStatus.RUNNING;
 import static com.kiwi.server.accept.ServerStatus.STOPPED;
@@ -24,7 +24,7 @@ import static com.kiwi.server.accept.ServerStatus.STOPPING;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class TCPServer {
-    private static final Logger log = Logger.getLogger(TCPServer.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(TCPServer.class.getName());
 
     private final ConnectionReader connectionReader;
     private final ResponseWriter responseWriter;
@@ -90,14 +90,13 @@ public class TCPServer {
                     break;
                 } else if (serverSocket.isClosed()) {
                     this.status = STOPPING;
-                    log.severe("Server socket is closed with exception: " + ex.getMessage());
+                    log.error("Server socket is closed with exception", ex.getMessage());
                     break;
                 } else if (socket != null && socket.isClosed()) {
-                    log.warning("Connection socket is closed, continue accept connections. Exception: "
-                            + ex.getMessage());
+                    log.warn("Connection socket is closed, continue accept connections", ex.getMessage());
                 }
                 else {
-                    log.warning("Server socket exception: " + ex.getMessage() + ", continue accepting");
+                    log.warn("Server socket exception, continue accepting", ex.getMessage());
                 }
             }
 
@@ -105,7 +104,7 @@ public class TCPServer {
 
         connectionThreadPool.shutdown();
         if (!connectionThreadPool.awaitTermination(10, SECONDS)) {
-            log.warning("Timeout elapsed on readers threads stop, will be stopped immediately");
+            log.warn("Server will be stopped immediately", "Timeout elapsed on readers threads stop");
             connectionThreadPool.shutdownNow();
         }
         this.status = STOPPED;
@@ -113,11 +112,10 @@ public class TCPServer {
 
     public void stop() {
         this.status = STOPPING;
-
         try {
             this.serverSocket.close();
         } catch (IOException ex) {
-            log.warning("Exception on closing server socket: " + ex.getMessage());
+            log.warn("Exception on closing server socket", ex.getMessage());
         }
     }
 
@@ -128,7 +126,7 @@ public class TCPServer {
             socket.setSoLinger(true, 0);
             socket.close();
         } catch (Exception ex) {
-            log.log(Level.WARNING, "Unexpected error on socket closing");
+            log.warn("Unexpected error on socket closing", ex.getMessage());
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.kiwi.server.response;
 
+import com.kiwi.log.KiwiLogger;
+import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.response.model.TCPResponse;
 
@@ -9,14 +11,13 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 
 import static com.kiwi.config.properties.Properties.RESPONSE_QUEUE_MAX_SIZE;
 import static com.kiwi.server.response.dto.WriteResponseStatus.OK;
 import static java.util.Comparator.comparingInt;
 
 public class WriterProxy {
-    private static final Logger log = Logger.getLogger(WriterProxy.class.getName());
+    private static final KiwiLogger log = KiwiLoggerFactory.getLogger(WriterProxy.class.getName());
 
     private final ResponseWriter responseWriter;
     private final OutputStream outputStream;
@@ -117,9 +118,9 @@ public class WriterProxy {
                     }
                 } catch (Exception ex) {
                     if (ex instanceof InterruptedException && !isActive) {
-                        log.info("Writer proxy interrupted and not active");
+                        log.info("Writer proxy interrupted and not active", ex.getMessage());
                     } else {
-                        log.warning("Writer proxy thread exception: " + ex.getMessage());
+                        log.warn("Writer proxy thread error", ex.getMessage());
                     }
                 }
             }
