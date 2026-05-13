@@ -1,7 +1,5 @@
 package com.kiwi.log;
 
-import com.kiwi.server.context.ConnectionContext;
-
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -27,7 +25,11 @@ public class KiwiLogger {
     }
 
     public void info(String message, String reason) {
-        this.log(message, reason, null, INFO);
+        this.log(message, reason, null, INFO, null);
+    }
+
+    public void info(String message, String reason, RequestContext requestContext) {
+        this.log(message, reason, null, INFO, requestContext);
     }
 
     public void warn(String message) {
@@ -35,35 +37,39 @@ public class KiwiLogger {
     }
 
     public void warn(String message, String reason) {
-        this.log(message, reason, null, WARNING);
+        this.log(message, reason, null, WARNING, null);
+    }
+
+    public void warn(String message, String reason, RequestContext requestContext) {
+        this.log(message, reason, null, WARNING, requestContext);
     }
 
     public void warn(String message, String reason, UUID connectionId) {
-        this.log(message, reason, connectionId, WARNING);
-    }
-
-    public void error(String message, ConnectionContext context) {
-        this.log(message, null, context.connectionId(), SEVERE);
-    }
-
-    public void error(String message) {
-        this.log(message, null, null, SEVERE);
-    }
-
-    public void error(String message, String reason) {
-        this.log(message, reason, null, SEVERE);
+        this.log(message, reason, connectionId, WARNING, null);
     }
 
     public void error(String message, String reason, UUID connectionId) {
-        this.log(message, reason, connectionId, SEVERE);
+        this.log(message, reason, connectionId, SEVERE, null);
     }
 
-    public void error(String message, UUID connectionId) {
-        this.log(message, null, connectionId, SEVERE);
+    public void error(String message) {
+        this.log(message, null, null, SEVERE, null);
     }
 
-    private void log(String message, String reason, UUID connectionId, Level level) {
-        this.submitTask(new KiwiLoggerTask(message, connectionId, reason, level));
+    public void error(String message, String reason) {
+        this.log(message, reason, null, SEVERE, null);
+    }
+
+    public void error(String message, String reason, UUID connectionId, RequestContext requestContext) {
+        this.log(message, reason, connectionId, SEVERE, requestContext);
+    }
+
+    public void error(String message, UUID connectionId, RequestContext requestContext) {
+        this.log(message, null, connectionId, SEVERE, requestContext);
+    }
+
+    private void log(String message, String reason, UUID connectionId, Level level, RequestContext requestContext) {
+        this.submitTask(new KiwiLoggerTask(message, connectionId, reason, level, requestContext));
     }
 
     private void submitTask(KiwiLoggerTask task) {
@@ -72,6 +78,17 @@ public class KiwiLogger {
             sb.append("source=");
             sb.append(name);
             sb.append(" ");
+
+            if (task.requestContext() != null) {
+                sb.append("req_id=");
+                sb.append(task.requestContext().requestId());
+                sb.append(" ");
+                if (task.requestContext().method() != null) {
+                    sb.append("method=");
+                    sb.append(task.requestContext().method());
+                    sb.append(" ");
+                }
+            }
 
             if (task.connectionId() != null) {
                 sb.append("conn_id=");

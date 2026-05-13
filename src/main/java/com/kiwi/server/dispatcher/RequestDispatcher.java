@@ -101,7 +101,7 @@ public class RequestDispatcher {
     public TCPResponse dispatch(TCPRequest request, ConnectionContext context) {
         final var result = commands.get(request.getMethod()).handle(request, context);
         metrics.onRequest(request.getMethod());
-        return new TCPResponse(request.getRequestId(), context.connectionId(), result.value(),
+        return new TCPResponse(request.getRequestId(), request.getMethod(), context.connectionId(), result.value(),
                 result.success() ? OK_MESSAGE : ERROR_MESSAGE, result.success());
     }
 }
