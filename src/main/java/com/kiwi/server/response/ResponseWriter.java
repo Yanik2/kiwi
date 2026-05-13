@@ -8,6 +8,7 @@ import static com.kiwi.server.util.ServerConstants.SUCCESS_PREFIX;
 
 import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
+import com.kiwi.log.RequestContext;
 import com.kiwi.server.response.dto.WriteResponseResult;
 import com.kiwi.server.response.model.TCPResponse;
 
@@ -28,7 +29,8 @@ public class ResponseWriter {
             baos.writeTo(os);
             return new WriteResponseResult(baos.size(), OK);
         } catch (IOException ex) {
-            log.error("Error during writing to output stream: ", ex.getMessage(), tcpResponse.connectionId());
+            log.error("Error during writing to output stream: ", ex.getMessage(), tcpResponse.connectionId(),
+                    new RequestContext(tcpResponse.requestId(), tcpResponse.method()));
             return new WriteResponseResult(0, ERROR);
         }
     }

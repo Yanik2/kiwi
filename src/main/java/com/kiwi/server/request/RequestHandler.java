@@ -3,6 +3,7 @@ package com.kiwi.server.request;
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
+import com.kiwi.log.RequestContext;
 import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.RequestDispatcher;
@@ -40,8 +41,14 @@ public class RequestHandler {
             try {
                 result = requestDispatcher.dispatch(validatedRequest, connectionContext);
             } catch (Exception ex) {
-                log.error("Error in processing request", ex.getMessage(), connectionContext.connectionId());
-                result = new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false, connectionContext.connectionId());
+                log.error("Error in processing request", ex.getMessage(), connectionContext.connectionId(),
+                        new RequestContext(request.getRequestId(), request.getMethod()));
+                result = new TCPResponse(request.getRequestId(),
+                        request.getMethod(),
+                        ERROR_MESSAGE,
+                        false,
+                        connectionContext.connectionId()
+                );
             }
             connectionContext.addResponse(result);
         } else {
@@ -50,8 +57,14 @@ public class RequestHandler {
     }
 
     public void reject(TCPRequest request, ConnectionContext context) {
-        log.error("Request is rejected: ", context.connectionId());
-        context.addResponse(new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false, context.connectionId()));
+        log.error("Request is rejected: ", context.connectionId(),
+                new RequestContext(request.getRequestId(), request.getMethod()));
+        context.addResponse(new TCPResponse(request.getRequestId(),
+                request.getMethod(),
+                ERROR_MESSAGE,
+                false,
+                context.connectionId()
+        ));
         requestMetrics.onRefuse();
         context.close();
     }
@@ -60,11 +73,18 @@ public class RequestHandler {
         final var errorMessages = errors.stream()
                 .map(Throwable::getMessage)
                 .collect(Collectors.joining("[", ",", "]"));
-        log.error("Request is rejected", errorMessages, context.connectionId());
+        log.error("Request is rejected", errorMessages, context.connectionId(),
+                new RequestContext(request.getRequestId(), request.getMethod()));
         for (ProtocolException ex : errors) {
             requestMetrics.onProtoError(ex.getProtocolErrorCode());
         }
-        context.addResponse(new TCPResponse(request.getRequestId(), ERROR_MESSAGE, false, context.connectionId()));
+        context.addResponse(new TCPResponse(
+                request.getRequestId(),
+                request.getMethod(),
+                ERROR_MESSAGE,
+                false,
+                context.connectionId()
+        ));
         context.close();
     }
 }

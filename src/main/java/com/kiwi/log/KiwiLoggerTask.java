@@ -7,6 +7,7 @@ public record KiwiLoggerTask(
         String message,
         UUID connectionId,
         String reason,
-        Level level
+        Level level,
+        RequestContext requestContext
 ) {
 }
