@@ -1,5 +1,6 @@
 package com.kiwi.server.validator;
 
+import static com.kiwi.server.request.Method.CONFIGGET;
 import static com.kiwi.server.request.Method.DECR;
 import static com.kiwi.server.request.Method.DECRBY;
 import static com.kiwi.server.request.Method.DEL;
@@ -46,6 +47,7 @@ public class BaseRequestValidator implements RequestValidator {
         validators.put(SETNX, singleKeyValidator);
         validators.put(GETSET, singleKeyValidator);
         validators.put(EXISTS, singleKeyValidator);
+        validators.put(CONFIGGET, new ConfigGetValidator());
 
         this.requestValidators = Collections.unmodifiableMap(validators);
     }

@@ -1,5 +1,6 @@
 package com.kiwi.server.dispatcher;
 
+import static com.kiwi.server.request.Method.CONFIGGET;
 import static com.kiwi.server.request.Method.DBSIZE;
 import static com.kiwi.server.request.Method.DECR;
 import static com.kiwi.server.request.Method.DECRBY;
@@ -28,6 +29,7 @@ import com.kiwi.observability.metrics.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.observability.metrics.OperationErrorMetrics;
 import com.kiwi.persistent.storage.Storage;
+import com.kiwi.server.dispatcher.command.ConfigGetCommandHandler;
 import com.kiwi.server.dispatcher.command.DbSizeCommandHandler;
 import com.kiwi.server.dispatcher.command.DeleteCommandHandler;
 import com.kiwi.server.dispatcher.command.ExistsCommandHandler;
@@ -94,6 +96,7 @@ public class RequestDispatcher {
         commands.put(MGET, new MultiGetCommandHandler(storageFacade));
         commands.put(MSET, new MultiSetCommandHandler(storageFacade));
         commands.put(DBSIZE, new DbSizeCommandHandler(storageFacade));
+        commands.put(CONFIGGET, new ConfigGetCommandHandler());
 
         return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }

@@ -8,8 +8,10 @@ import com.kiwi.config.load.EnvSource;
 import com.kiwi.config.load.FileSource;
 import com.kiwi.config.load.PropertySource;
 import com.kiwi.config.load.SystemPropertiesSource;
+import com.kiwi.config.provider.ConfigurationHolder;
 import com.kiwi.config.registry.ConfigKey;
 import com.kiwi.config.registry.PropertiesKeyRegistry;
+import com.kiwi.exception.config.ConfigurationInitializationException;
 import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
 
@@ -26,6 +28,8 @@ public class ConfigModule {
     private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ConfigModule.class.getName());
 
     private static final String DEFAULT_FILE_PATH = "config/kiwi.properties";
+
+    private static ConfigurationHolder configurationHolder;
 
     public static Config createConfig() {
         final var systemSource = new SystemPropertiesSource();
@@ -64,7 +68,18 @@ public class ConfigModule {
 
         final var config = builder.build();
         logConfig(config);
+        configurationHolder = new ConfigurationHolder(config);
         return config;
+    }
+
+    // this method is not thread safe and must be used only after configuration initialized
+    // in future on hot config change will be made thread safe
+    public static ConfigurationHolder getConfigurationHolder() {
+        if (configurationHolder == null) {
+            log.error("Attempt to get uninitialized configuration");
+            throw new ConfigurationInitializationException("Configuration is not initialized");
+        }
+        return configurationHolder;
     }
 
     private static String getProperty(List<PropertySource> sources,

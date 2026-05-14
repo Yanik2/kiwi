@@ -1,9 +1,12 @@
 package com.kiwi;
 
+import com.kiwi.exception.MethodException;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 
+import static com.kiwi.Method.CONFIGGET;
 import static com.kiwi.Method.QUIT;
 
 // This class subject to work, will be advanced and refactored with further implementation
@@ -22,8 +25,12 @@ public class ClientMain {
             final var line = scanner.nextLine();
             final String[] tokens = line.split(" ");
             final Method method;
+            int keyTokenIndex = 1;
             try {
-                method = Method.valueOf(tokens[0].trim());
+                method = getMethod(tokens);
+                if (CONFIGGET.equals(method)) {
+                    keyTokenIndex = 2;
+                }
             } catch (Exception ex) {
                 System.out.println("Unknown method: [" + tokens[0] + "]");
                 continue;
@@ -39,9 +46,9 @@ public class ClientMain {
                 os.flush();
             } else if (method.isMultiKey()) {
                 if (method.withValue()) {
-                    final var keyAmount = (tokens.length - 1) / 2;
+                    final var keyAmount = (tokens.length - keyTokenIndex) / 2;
                     os.write(new byte[]{0, (byte) keyAmount});
-                    for (int i = 1; i < tokens.length; i += 2) {
+                    for (int i = keyTokenIndex; i < tokens.length; i += 2) {
                         final var key = tokens[i].trim();
                         final var value = tokens[i + 1].trim();
                         os.write(payloadLength(key, 2));
@@ -50,9 +57,9 @@ public class ClientMain {
                         os.write(value.getBytes());
                     }
                 } else {
-                    final var keyAmount = tokens.length - 1;
+                    final var keyAmount = tokens.length - keyTokenIndex;
                     os.write(new byte[]{0, (byte) keyAmount});
-                    for (int i = 1; i < tokens.length; i++) {
+                    for (int i = keyTokenIndex; i < tokens.length; i++) {
                         final var key = tokens[i].trim();
                         os.write(payloadLength(key, 2));
                         os.write(new byte[]{0, 0, 0, 0});
@@ -65,16 +72,16 @@ public class ClientMain {
             } else {
                 os.write(new byte[]{0,1});
 
-                os.write(payloadLength(tokens[1].trim(), 2));
+                os.write(payloadLength(tokens[keyTokenIndex].trim(), 2));
                 if (method.withValue()) {
-                    os.write(payloadLength(tokens[2].trim(), 4));
+                    os.write(payloadLength(tokens[keyTokenIndex + 1].trim(), 4));
                 } else {
                     os.write(new byte[]{0, 0, 0, 0});
                 }
-                os.write(tokens[1].getBytes());
+                os.write(tokens[keyTokenIndex].getBytes());
 
                 if (method.withValue()) {
-                    os.write(tokens[2].getBytes());
+                    os.write(tokens[keyTokenIndex + 1].getBytes());
                 }
                 os.write(new byte[]{13, 10});
                 os.flush();
@@ -86,6 +93,16 @@ public class ClientMain {
             System.out.println(response);
         }
         socket.close();
+    }
+
+    private static Method getMethod(String[] tokens) {
+        if ("CONFIG".equals(tokens[0].trim()) && "GET".equals(tokens[1].trim())) {
+            return CONFIGGET;
+        } else if ("CONFIG".equals(tokens[0])) {
+            throw new MethodException("Wrong method");
+        } else {
+            return Method.valueOf(tokens[0].trim());
+        }
     }
 
     private static byte[] payloadLength(String value, int headerLength) {

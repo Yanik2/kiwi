@@ -25,6 +25,7 @@ public enum Method {
     MGET,
     MSET,
     DBSIZE,
+    CONFIGGET,
     QUIT;
 
     private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING, DBSIZE);
