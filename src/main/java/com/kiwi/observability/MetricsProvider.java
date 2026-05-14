@@ -1,5 +1,6 @@
 package com.kiwi.observability;
 
+import com.kiwi.config.ConfigModule;
 import com.kiwi.config.properties.Properties;
 import com.kiwi.observability.dto.MetricsDataDto;
 
@@ -13,6 +14,7 @@ public class MetricsProvider {
     public MetricsDataDto getMetricsInfo() {
         final var gauges = metricsRegistry.getGauges();
         final var counters = metricsRegistry.getCounters();
+        final var configHolder = ConfigModule.getConfigurationHolder();
 
         return new MetricsDataDto(
                 Properties.PROTOCOL_VERSION,
@@ -20,7 +22,8 @@ public class MetricsProvider {
                 gauges,
                 counters,
                 metricsRegistry.getServerStart(),
-                System.currentTimeMillis() - metricsRegistry.getServerStart()
+                System.currentTimeMillis() - metricsRegistry.getServerStart(),
+                configHolder.getConfig()
         );
     }
 }
