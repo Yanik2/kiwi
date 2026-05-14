@@ -18,11 +18,16 @@ import com.kiwi.log.KiwiLoggerFactory;
 import java.util.List;
 
 import static com.kiwi.config.util.ConfigConstants.CONFIG_FILE;
+import static com.kiwi.config.util.ConfigConstants.EVICTION_POLICY;
+import static com.kiwi.config.util.ConfigConstants.MEMORY_MAX_BYTES;
 import static com.kiwi.config.util.ConfigConstants.METRICS_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.SERVER_BACKLOG;
 import static com.kiwi.config.util.ConfigConstants.SERVER_MAX_CLIENTS;
 import static com.kiwi.config.util.ConfigConstants.SERVER_PORT;
 import static com.kiwi.config.util.ConfigConstants.SOCKET_TIMEOUT;
+import static com.kiwi.config.util.ConfigConstants.TTL_BACKOFF_MAX_MS;
+import static com.kiwi.config.util.ConfigConstants.TTL_SAMPLER_PERIOD_MS;
+import static com.kiwi.config.util.ConfigConstants.TTL_SAMPLE_BATCH;
 
 public class ConfigModule {
     private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ConfigModule.class.getName());
@@ -66,6 +71,26 @@ public class ConfigModule {
         final var metricsEnabledProperty = getProperty(sources, metricsEnabledKey);
         builder.metricsEnabled(metricsEnabledKey.valueParser().getBoolean(metricsEnabledProperty));
 
+        final var ttlSamplerPeriodMsKey = keyRegistry.getKey(TTL_SAMPLER_PERIOD_MS);
+        final var ttlSamplerPeriodMsProperty = getProperty(sources, ttlSamplerPeriodMsKey);
+        builder.ttlSamplerPeriodMs(ttlSamplerPeriodMsKey.valueParser().getInt(ttlSamplerPeriodMsProperty));
+
+        final var ttlSampleBatchKey = keyRegistry.getKey(TTL_SAMPLE_BATCH);
+        final var ttlSampleBatchProperty = getProperty(sources, ttlSampleBatchKey);
+        builder.ttlSampleBatch(ttlSampleBatchKey.valueParser().getInt(ttlSampleBatchProperty));
+
+        final var ttlBackoffMaxMsKey = keyRegistry.getKey(TTL_BACKOFF_MAX_MS);
+        final var ttlBackoffMaxMsProperty = getProperty(sources, ttlBackoffMaxMsKey);
+        builder.ttlBackoffMaxMs(ttlBackoffMaxMsKey.valueParser().getInt(ttlBackoffMaxMsProperty));
+
+        final var memoryMaxBytesKey = keyRegistry.getKey(MEMORY_MAX_BYTES);
+        final var memoryMaxBytesProperty = getProperty(sources, memoryMaxBytesKey);
+        builder.memoryMaxBytes(memoryMaxBytesKey.valueParser().getInt(memoryMaxBytesProperty));
+
+        final var evictionPolicyKey = keyRegistry.getKey(EVICTION_POLICY);
+        final var evictionPolicyProperty = getProperty(sources, evictionPolicyKey);
+        builder.evictionPolicy(evictionPolicyProperty);
+
         final var config = builder.build();
         logConfig(config);
         configurationHolder = new ConfigurationHolder(config);
@@ -99,6 +124,12 @@ public class ConfigModule {
                 + SERVER_BACKLOG + "=" + config.backlog() + "\n"
                 + SERVER_MAX_CLIENTS + "=" + config.maxClients() + "\n"
                 + SOCKET_TIMEOUT + "=" + config.soTimeoutMillis() + "\n"
-                + METRICS_ENABLED + "=" + config.metricsEnabled());
+                + METRICS_ENABLED + "=" + config.metricsEnabled() + "\n"
+                + TTL_SAMPLER_PERIOD_MS + "=" + config.ttlSamplerPeriodMs() + "\n"
+                + TTL_SAMPLE_BATCH + "=" + config.ttlSampleBatch() + "\n"
+                + TTL_BACKOFF_MAX_MS + "=" + config.ttlBackoffMaxMs() + "\n"
+                + MEMORY_MAX_BYTES + "=" + config.memoryMaxBytes() + "\n"
+                + EVICTION_POLICY + "=" + config.evictionPolicy().getValue()
+        );
     }
 }
