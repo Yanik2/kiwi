@@ -223,5 +223,116 @@ This cleanly captures what you actually built—including the important **stripe
 
 Phase 4 is properly closed now.
 
+---
+
+## Phase 5 — Configuration, Observability, and Admin Surface
+
+### Completed
+
+* **Immutable configuration model**
+
+  * Introduced typed immutable `Config` snapshot
+  * Centralized supported keys:
+
+    * `server.port`
+    * `server.backlog`
+    * `server.maxClients`
+    * `socket.soTimeoutMillis`
+    * `metrics.enabled`
+  * Builder-based construction with fail-fast validation
+
+* **Layered configuration loading**
+
+  * Implemented deterministic precedence:
+
+    * JVM system properties (`-D`) > environment variables > properties file > defaults
+  * Default config file: `./config/kiwi.properties`
+  * Override via `-Dkiwi.config=/path/to/file`
+  * Centralized parsing of raw string values into typed fields
+  * Unknown file keys produce warnings
+  * Invalid known values fail startup
+
+* **Runtime config wiring**
+
+  * Server bind port and backlog driven by config
+  * Admission control (`maxClients`) driven by config
+  * Metrics enable/disable flag wired into observability
+  * Socket timeout partially wired (temporary hardcoded value kept for testing)
+
+* **Startup configuration visibility**
+
+  * Effective config snapshot printed once at startup
+  * Canonical key names and deterministic output
+
+* **Structured logging foundation**
+
+  * Introduced logging abstraction over underlying logger
+  * Flat `key=value` format
+  * Connection-level context (`conn_id`)
+  * Logs for:
+
+    * connection accept
+    * connection close
+    * connection refused
+    * protocol/parse errors
+    * socket timeouts
+
+* **Request context propagation**
+
+  * Introduced `req_id` (monotonic per connection)
+  * Propagated `conn_id` + `req_id` across execution pipeline
+  * Enabled structured error logging with request context
+
+* **Admin command: `CONFIG GET`**
+
+  * Supports:
+
+    * single key lookup
+    * `*` for full config dump
+  * Returns effective runtime config (not defaults)
+  * Stable output ordering
+  * Read-only (no `CONFIG SET`)
+
+* **Extended `INFO`**
+
+  * Added `config` section
+  * Includes all Phase 5 config keys
+  * Fully derived from immutable config snapshot
+  * Preserved existing fields (additive only)
+
+* **Metrics disabled path**
+
+  * `metrics.enabled=false` disables most metric updates
+  * Fast-path short-circuiting in observability layer
+  * Minimal overhead in hot paths
+
+---
+
+### Known limitations / deferred
+
+* No `CONFIG SET` (runtime mutation not supported)
+* No hot reload of configuration
+* Socket timeout config not fully wired (temporary testing override present)
+* Logging:
+
+  * no log rotation or shipping
+  * no advanced filtering/levels
+* Metrics:
+
+  * `currentClients` still coupled to metrics/admission logic
+* No persistence of config changes
+
+---
+
+### Outcome
+
+* Configuration is now deterministic, validated, and centrally managed
+* Runtime behavior is driven by immutable config snapshot
+* Observability foundation established (structured logs + metrics toggle)
+* Basic admin surface available (`CONFIG GET`, `INFO.config`)
+* System is ready for further operational features (replication, clustering, persistence)
+
+---
+
 
 
