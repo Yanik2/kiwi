@@ -14,6 +14,11 @@ public class ConfigGetValidator implements RequestValidator {
     @Override
     public ValidationResult validate(TCPRequest request) {
         final var parsedRequest = (ParsedRequest) request;
+        if (parsedRequest.size() != 1) {
+            return new ValidationResult(request, List.of(new ProtocolException("Config request requires one key",
+                    SINGLE_KEY_ERROR)));
+        }
+
         final var key = parsedRequest.getKey();
 
         if (key.length == 0) {
