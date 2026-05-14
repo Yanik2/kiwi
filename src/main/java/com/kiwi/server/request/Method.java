@@ -23,7 +23,8 @@ public enum Method {
     DECRBY,
     MGET,
     MSET,
-    DBSIZE;
+    DBSIZE,
+    CONFIGGET;
 
     private static final Set<Method> keyLessMethods = Set.of(EXT, INF, PING, DBSIZE);
     private static final Set<Method> withValueMethods = Set.of(SET, EXPIRE, PEXPIRE, SETNX, GETSET, INCRBY, DECRBY, MSET);
