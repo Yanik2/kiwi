@@ -4,6 +4,7 @@ import com.kiwi.concurrency.factory.ConcurrencyContainer;
 import com.kiwi.config.domain.Config;
 import com.kiwi.observability.factory.ObservabilityContainer;
 import com.kiwi.persistent.factory.PersistentContainer;
+import com.kiwi.server.expiration.ExpirySampler;
 import com.kiwi.server.hook.ShutdownHook;
 import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionRegistry;
@@ -51,13 +52,21 @@ public class ServerModule {
                 connectionReader, responseWriter, requestMetrics, backPressureGate, connectionRegistry,
                 config.port(), config.soTimeoutMillis(), config.maxClients(), config.backlog()
         );
+        final var expirySampler = new ExpirySampler(
+                config.ttlSamplerPeriodMs(),
+                config.ttlSampleBatch(),
+                config.ttlBackoffMaxMs(),
+                config.memoryMaxBytes(),
+                config.evictionPolicy()
+        );
         final var shutdownHook =
-                new ShutdownHook(tcpServer, concurrencyContainer.executors().values(), connectionRegistry);
+                new ShutdownHook(tcpServer, concurrencyContainer.executors().values(), connectionRegistry, expirySampler);
 
         return new ServerContainer(
                 tcpServer,
                 concurrencyContainer.executors().values(),
-                shutdownHook
+                shutdownHook,
+                expirySampler
         );
     }
 
