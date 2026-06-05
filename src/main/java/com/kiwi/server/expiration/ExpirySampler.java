@@ -55,7 +55,6 @@ public class ExpirySampler {
                     Thread.sleep(result.nextSleepTime);
                 } catch (Exception e) {
                     log.error("Sampler thread was interrupted", e.getMessage());
-                    //TODO
                 }
             }
         };
