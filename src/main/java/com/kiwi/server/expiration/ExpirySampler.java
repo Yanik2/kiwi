@@ -1,7 +1,7 @@
 package com.kiwi.server.expiration;
 
 import com.kiwi.config.util.EvictionPolicy;
-import com.kiwi.exception.IllegalStateException;
+import com.kiwi.exception.IllegalSamplerStateException;
 import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
 
@@ -29,11 +29,11 @@ public class ExpirySampler {
     public void start() {
         if (thread.isAlive()) {
             log.error("Cannot start sampler thread", "Thread has already started");
-            throw new IllegalStateException("Trying to start running sampler thread");
+            throw new IllegalSamplerStateException("Trying to start running sampler thread");
         }
 
+        this.running = true;
         thread.start();
-        running = true;
     }
 
     public void shutdown() {
@@ -55,6 +55,7 @@ public class ExpirySampler {
                     Thread.sleep(result.nextSleepTime);
                 } catch (Exception e) {
                     log.error("Sampler thread was interrupted", e.getMessage());
+                    // TODO introduce states, process interrupting exception depending on states
                 }
             }
         };
@@ -63,7 +64,7 @@ public class ExpirySampler {
     // TODO will return performance result, that contains next sleep period, and other data of clean up
     private CycleResult performCycle() {
         // temporary stub
-        return new CycleResult(0);
+        return new CycleResult(period);
     }
 
     private record CycleResult(
