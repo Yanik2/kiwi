@@ -1,8 +1,8 @@
 package com.kiwi.persistent.factory;
 
-import com.kiwi.persistent.storage.Storage;
+import com.kiwi.persistent.storage.StorageStrippingLockImpl;
 
 public record PersistentContainer(
-        Storage storageFacade
+        StorageStrippingLockImpl storageFacade
 ) {
 }

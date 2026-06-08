@@ -53,6 +53,8 @@ public class ServerModule {
                 config.port(), config.soTimeoutMillis(), config.maxClients(), config.backlog()
         );
         final var expirySampler = new ExpirySampler(
+                storageContainer.storageFacade(),
+                observabilityContainer.expirySampleMetrics(),
                 config.ttlSamplerPeriodMs(),
                 config.ttlSampleBatch(),
                 config.ttlBackoffMaxMs(),
