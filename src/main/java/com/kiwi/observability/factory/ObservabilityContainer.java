@@ -1,7 +1,8 @@
 package com.kiwi.observability.factory;
 
-import com.kiwi.observability.metrics.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
+import com.kiwi.observability.metrics.ExpirySampleMetrics;
+import com.kiwi.observability.metrics.MethodMetrics;
 import com.kiwi.observability.metrics.OperationErrorMetrics;
 import com.kiwi.observability.metrics.RequestMetrics;
 import com.kiwi.observability.metrics.StorageMetrics;
@@ -15,6 +16,7 @@ public record ObservabilityContainer(
         MethodMetrics methodMetrics,
         StorageMetrics storageMetrics,
         Map<String, ThreadPoolMetrics> threadPoolMetrics,
-        OperationErrorMetrics operationErrorMetrics
+        OperationErrorMetrics operationErrorMetrics,
+        ExpirySampleMetrics expirySampleMetrics
 ) {
 }

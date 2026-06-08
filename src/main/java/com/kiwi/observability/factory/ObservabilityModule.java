@@ -1,18 +1,9 @@
 package com.kiwi.observability.factory;
 
 import com.kiwi.config.domain.Config;
-import com.kiwi.observability.metrics.MethodMetricsImpl;
+import com.kiwi.observability.metrics.*;
 import com.kiwi.observability.MetricsProvider;
 import com.kiwi.observability.MetricsRegistry;
-import com.kiwi.observability.metrics.MethodNoOpMetrics;
-import com.kiwi.observability.metrics.OperationErrorMetricsImpl;
-import com.kiwi.observability.metrics.OperationErrorNoOpMetrics;
-import com.kiwi.observability.metrics.RequestMetricsImpl;
-import com.kiwi.observability.metrics.RequestNoOpMetrics;
-import com.kiwi.observability.metrics.StorageMetricsImpl;
-import com.kiwi.observability.metrics.StorageNoOpMetrics;
-import com.kiwi.observability.metrics.ThreadPoolMetricsImpl;
-import com.kiwi.observability.metrics.ThreadPoolNoOpMetrics;
 
 import java.util.Map;
 
@@ -33,7 +24,8 @@ public class ObservabilityModule {
                             REJECTION_THREAD_POOL_NAME,
                             new ThreadPoolMetricsImpl(MetricsRegistry.getInstance(), REJECTION_THREAD_POOL_NAME)
                     ),
-                    new OperationErrorMetricsImpl(MetricsRegistry.getInstance())
+                    new OperationErrorMetricsImpl(MetricsRegistry.getInstance()),
+                    new ExpirySampleMetricsImpl(MetricsRegistry.getInstance())
             );
         } else {
             return new ObservabilityContainer(
@@ -46,7 +38,8 @@ public class ObservabilityModule {
                             REJECTION_THREAD_POOL_NAME,
                             new ThreadPoolNoOpMetrics()
                     ),
-                    new OperationErrorNoOpMetrics()
+                    new OperationErrorNoOpMetrics(),
+                    new ExpirySampleNoOpMetrics()
             );
         }
     }
