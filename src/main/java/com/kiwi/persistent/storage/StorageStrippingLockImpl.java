@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class StorageStrippingLockImpl implements Storage, SampleStorage {
+public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage {
     private final StorageMetrics storageMetrics;
 
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
@@ -120,34 +120,35 @@ public class StorageStrippingLockImpl implements Storage, SampleStorage {
     }
 
     @Override
-    public List<Key> getExpiryKeys(int limit) {
-        final var now = System.currentTimeMillis();
-        return inMemoryStorage.entrySet().stream()
-                .filter(e -> e.getValue().getExpiryPolicy().shouldEvictOnRead(now))
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
+    public List<Key> sampleKeysWithTtl(int limit) {
+        generalLock.lock();
+        try {
+            return inMemoryStorage.entrySet().stream()
+                    .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
+                    .limit(limit)
+                    .map(Map.Entry::getKey)
+                    .toList();
+        } finally {
+            generalLock.unlock();
+        }
     }
 
     @Override
-    public boolean deleteExpiryKey(Key key, long millisNow) {
+    public boolean deleteIfExpired(Key key, long millisNow) {
         while (resizeInProgress) {}
         resizeLocks();
-        final var lock = locks[Math.abs(key.hashCode()) % locks.length];
+        final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
-        final var value = inMemoryStorage.get(key);
-        if (value == null) {
+        try {
+            final var value = inMemoryStorage.get(key);
+            if (value == null || !value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
+                return false;
+            } else {
+                inMemoryStorage.remove(key);
+                return true;
+            }
+        } finally {
             lock.unlock();
-            return true;
-        }
-
-        if (value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
-            inMemoryStorage.remove(key);
-            lock.unlock();
-            return true;
-        } else {
-            lock.unlock();
-            return false;
         }
     }
 
