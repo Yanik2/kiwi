@@ -8,14 +8,11 @@ import com.kiwi.persistent.mutation.Mutation;
 import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.persistent.mutation.MutationResult;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class StorageStrippingLockImpl implements Storage {
+public class StorageStrippingLockImpl implements Storage, SampleStorage {
     private final StorageMetrics storageMetrics;
 
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
@@ -122,6 +119,37 @@ public class StorageStrippingLockImpl implements Storage {
         }
     }
 
+    @Override
+    public List<Key> getExpiryKeys(int limit) {
+        final var now = System.currentTimeMillis();
+        return inMemoryStorage.keySet().stream()
+                .filter(key -> inMemoryStorage.get(key).getExpiryPolicy().shouldEvictOnRead(now))
+                .limit(limit)
+                .toList();
+    }
+
+    @Override
+    public boolean deleteExpiryKey(Key key, long millisNow) {
+        while (resizeInProgress) {}
+        resizeLocks();
+        final var lock = locks[Math.abs(key.hashCode()) % locks.length];
+        lock.lock();
+        final var value = inMemoryStorage.get(key);
+        if (value == null) {
+            lock.unlock();
+            return true;
+        }
+
+        if (value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
+            inMemoryStorage.remove(key);
+            lock.unlock();
+            return true;
+        } else {
+            lock.unlock();
+            return false;
+        }
+    }
+
     private void resizeLocks() {
         if (inMemoryStorage.size() / 4 < locks.length && inMemoryStorage.size() > locks.length) {
             return;
@@ -166,4 +194,5 @@ public class StorageStrippingLockImpl implements Storage {
 
         return Optional.of(value);
     }
+
 }
