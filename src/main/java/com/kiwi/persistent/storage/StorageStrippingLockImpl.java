@@ -124,6 +124,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public List<Key> sampleKeysWithTtl(int limit) {
+        // copy is not thread safe
         return new HashSet<>(inMemoryStorage.entrySet()).stream()
                 .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
                 .limit(limit)
