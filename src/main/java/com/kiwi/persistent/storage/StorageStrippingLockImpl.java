@@ -43,7 +43,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public void write(Key key, Value value) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -56,7 +57,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public MutationResult mutate(Key key, Mutation mutation) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -86,7 +88,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public void delete(Key key) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -121,21 +124,17 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public List<Key> sampleKeysWithTtl(int limit) {
-        generalLock.lock();
-        try {
-            return inMemoryStorage.entrySet().stream()
-                    .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
-                    .limit(limit)
-                    .map(Map.Entry::getKey)
-                    .toList();
-        } finally {
-            generalLock.unlock();
-        }
+        return new HashSet<>(inMemoryStorage.entrySet()).stream()
+                .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
+                .limit(limit)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     @Override
     public boolean deleteIfExpired(Key key, long millisNow) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
