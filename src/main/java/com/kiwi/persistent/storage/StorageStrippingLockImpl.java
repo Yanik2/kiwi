@@ -122,9 +122,10 @@ public class StorageStrippingLockImpl implements Storage, SampleStorage {
     @Override
     public List<Key> getExpiryKeys(int limit) {
         final var now = System.currentTimeMillis();
-        return inMemoryStorage.keySet().stream()
-                .filter(key -> inMemoryStorage.get(key).getExpiryPolicy().shouldEvictOnRead(now))
+        return inMemoryStorage.entrySet().stream()
+                .filter(e -> e.getValue().getExpiryPolicy().shouldEvictOnRead(now))
                 .limit(limit)
+                .map(Map.Entry::getKey)
                 .toList();
     }
 
