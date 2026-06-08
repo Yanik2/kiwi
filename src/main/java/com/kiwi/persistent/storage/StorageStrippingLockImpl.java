@@ -8,14 +8,11 @@ import com.kiwi.persistent.mutation.Mutation;
 import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.persistent.mutation.MutationResult;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class StorageStrippingLockImpl implements Storage {
+public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage {
     private final StorageMetrics storageMetrics;
 
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
@@ -46,7 +43,8 @@ public class StorageStrippingLockImpl implements Storage {
 
     @Override
     public void write(Key key, Value value) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -59,7 +57,8 @@ public class StorageStrippingLockImpl implements Storage {
 
     @Override
     public MutationResult mutate(Key key, Mutation mutation) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -89,7 +88,8 @@ public class StorageStrippingLockImpl implements Storage {
 
     @Override
     public void delete(Key key) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -119,6 +119,36 @@ public class StorageStrippingLockImpl implements Storage {
             return size;
         } finally {
             generalLock.unlock();
+        }
+    }
+
+    @Override
+    public List<Key> sampleKeysWithTtl(int limit) {
+        // copy is not thread safe
+        return new HashSet<>(inMemoryStorage.entrySet()).stream()
+                .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
+                .limit(limit)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    @Override
+    public boolean deleteIfExpired(Key key, long millisNow) {
+        while (resizeInProgress) {
+        }
+        resizeLocks();
+        final var lock = locks[Math.abs(key.hashCode() % locks.length)];
+        lock.lock();
+        try {
+            final var value = inMemoryStorage.get(key);
+            if (value == null || !value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
+                return false;
+            } else {
+                inMemoryStorage.remove(key);
+                return true;
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -166,4 +196,5 @@ public class StorageStrippingLockImpl implements Storage {
 
         return Optional.of(value);
     }
+
 }
