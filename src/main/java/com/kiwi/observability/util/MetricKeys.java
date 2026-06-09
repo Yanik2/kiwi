@@ -79,6 +79,6 @@ public final class MetricKeys {
     public static final String BP_PAUSED_COUNT = ".bp.paused_count";
 
     // expiry sampler metrics
-    public static final String TTL_SCANNED = "ttl.snanned";
+    public static final String TTL_SCANNED = "ttl.scanned";
     public static final String TTL_ACTIVE_EXPIRED_EVICTIONS = "ttl.active_expired_evictions";
 }
