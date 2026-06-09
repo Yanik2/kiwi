@@ -20,7 +20,7 @@ public class ExpirySampler {
     private final int maxBytes;
     private final EvictionPolicy policy;
 
-    private Thread thread;
+    private final Thread thread;
     private volatile boolean running = false;
 
     public ExpirySampler(ExpirySamplingStorage storage,
@@ -63,21 +63,29 @@ public class ExpirySampler {
 
     private Runnable sample() {
         return () -> {
+            int sleepTime = period;
             while (running) {
                 try {
-                    final var result = performCycle();
+                    final var result = performCycle(sleepTime);
                     metrics.onTtlScanned(result.scanned());
                     metrics.onActiveExpiredEvictions(result.expired);
-                    Thread.sleep(result.nextSleepTime);
+                    sleepTime = result.nextSleepTime();
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    if (running) {
+                        log.error("Interrupted exception in running sampler thread, continue execution", e.getMessage());
+                    } else {
+                        log.info("Sampler thread is stopping");
+                        break;
+                    }
                 } catch (Exception e) {
-                    log.error("Sampler thread was interrupted", e.getMessage());
-                    // TODO introduce states, process interrupting exception depending on states
+                    log.error("Exception in sampler thread", e.getMessage());
                 }
             }
         };
     }
 
-    private CycleResult performCycle() {
+    private CycleResult performCycle(int previousSleep) {
         final var now = System.currentTimeMillis();
         final var keys = storage.sampleKeysWithTtl(batch);
         int evictionCounter = 0;
@@ -88,7 +96,8 @@ public class ExpirySampler {
             }
         }
 
-        return new CycleResult(period, keys.size(), evictionCounter);
+        final var nextSleep = evictionCounter == 0 ? Math.min(previousSleep * 2, backoff) : period;
+        return new CycleResult(nextSleep, keys.size(), evictionCounter);
     }
 
     private record CycleResult(
