@@ -71,14 +71,15 @@ public class ExpirySampler {
                     metrics.onActiveExpiredEvictions(result.expired);
                     sleepTime = result.nextSleepTime();
                     Thread.sleep(sleepTime);
-                } catch (Exception e) {
-                    log.error("Exception in sampler thread", e.getMessage());
+                } catch (InterruptedException e) {
                     if (running) {
-                        log.info("Sampler thread is still in running state, continue execution");
+                        log.error("Interrupted exception in running sampler thread, continue execution", e.getMessage());
                     } else {
                         log.info("Sampler thread is stopping");
                         break;
                     }
+                } catch (Exception e) {
+                    log.error("Exception in sampler thread", e.getMessage());
                 }
             }
         };
@@ -95,7 +96,7 @@ public class ExpirySampler {
             }
         }
 
-        final var nextSleep = keys.isEmpty() || evictionCounter == 0 ? Math.min(previousSleep * 2, backoff) : period;
+        final var nextSleep = evictionCounter == 0 ? Math.min(previousSleep * 2, backoff) : period;
         return new CycleResult(nextSleep, keys.size(), evictionCounter);
     }
 
