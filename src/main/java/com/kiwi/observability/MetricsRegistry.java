@@ -56,4 +56,5 @@ public final class MetricsRegistry {
     public long getGauge(String name) {
         return gauges.get(name);
     }
+
 }
