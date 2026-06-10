@@ -53,6 +53,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         } finally {
             lock.unlock();
         }
+
+        storageMetrics.onMemoryBytes(key.size() + value.size());
     }
 
     @Override
@@ -69,10 +71,15 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
             final var mutationDecision = mutation.apply(state);
             return switch (mutationDecision) {
                 case MutationDecision.Write w -> {
+                    final var delta = value.map(v -> w.value().size() - v.size())
+                                    .orElseGet(() -> key.size() + w.value().size());
+                    storageMetrics.onMemoryBytes(delta);
                     inMemoryStorage.put(key, w.value());
                     yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
                 }
                 case MutationDecision.Delete d -> {
+                    final var delta = value.map(v -> -(v.size() + key.size())).orElse(key.size());
+                    storageMetrics.onMemoryBytes(delta);
                     inMemoryStorage.remove(key);
                     yield new MutationResult(key, Optional.empty(), d.success());
                 }
@@ -92,9 +99,10 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
+        Value value;
         lock.lock();
         try {
-            final var value = inMemoryStorage.get(key);
+            value = inMemoryStorage.get(key);
             if (value != null && value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
                 storageMetrics.onTtlExpiredEviction();
             }
@@ -102,6 +110,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         } finally {
             lock.unlock();
         }
+
+        storageMetrics.onMemoryBytes(-(key.size() + (value != null ? value.size() : 0)));
     }
 
     @Override
@@ -191,6 +201,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
             inMemoryStorage.remove(key);
             storageMetrics.onTtlExpiredEviction();
+            storageMetrics.onMemoryBytes(-(key.size() + value.size()));
             return Optional.empty();
         }
 

@@ -12,6 +12,10 @@ public final class Key {
         this.hashcode = Arrays.hashCode(key);
     }
 
+    public int size() {
+        return key.length;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
