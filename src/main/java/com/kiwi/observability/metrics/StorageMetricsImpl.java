@@ -12,7 +12,7 @@ public class StorageMetricsImpl implements StorageMetrics {
         this.metricsRegistry = metricsRegistry;
 
         metricsRegistry.registerCounter(STORAGE_TTL_EXPIRED_EVICTION);
-        metricsRegistry.registerCounter(STORAGE_MEMORY_USED_BYTES);
+        metricsRegistry.registerGauge(STORAGE_MEMORY_USED_BYTES);
     }
 
     public void onTtlExpiredEviction() {
@@ -21,12 +21,12 @@ public class StorageMetricsImpl implements StorageMetrics {
 
     @Override
     public void onMemoryBytes(int delta) {
-        metricsRegistry.updateCounter(STORAGE_MEMORY_USED_BYTES, delta);
+        metricsRegistry.updateGauge(STORAGE_MEMORY_USED_BYTES, delta);
     }
 
     @Override
     public long getMemoryUsedBytes() {
-        return metricsRegistry.getCounter(STORAGE_MEMORY_USED_BYTES);
+        return metricsRegistry.getGauge(STORAGE_MEMORY_USED_BYTES);
     }
 
 }

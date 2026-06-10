@@ -13,6 +13,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage {
+    private static final int ENTRY_OVERHEAD_BYTES = 64;
+
     private final StorageMetrics storageMetrics;
 
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
@@ -49,12 +51,12 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
         try {
+            final var delta = inMemoryStorage.containsKey(key) ? value.size() : key.size() + value.size();
+            storageMetrics.onMemoryBytes(delta + ENTRY_OVERHEAD_BYTES);
             inMemoryStorage.put(key, value);
         } finally {
             lock.unlock();
         }
-
-        storageMetrics.onMemoryBytes(key.size() + value.size());
     }
 
     @Override
@@ -73,13 +75,13 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                 case MutationDecision.Write w -> {
                     final var delta = value.map(v -> w.value().size() - v.size())
                                     .orElseGet(() -> key.size() + w.value().size());
-                    storageMetrics.onMemoryBytes(delta);
+                    storageMetrics.onMemoryBytes(delta + ENTRY_OVERHEAD_BYTES);
                     inMemoryStorage.put(key, w.value());
                     yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
                 }
                 case MutationDecision.Delete d -> {
                     final var delta = value.map(v -> -(v.size() + key.size())).orElse(key.size());
-                    storageMetrics.onMemoryBytes(delta);
+                    storageMetrics.onMemoryBytes(delta - ENTRY_OVERHEAD_BYTES);
                     inMemoryStorage.remove(key);
                     yield new MutationResult(key, Optional.empty(), d.success());
                 }
@@ -104,14 +106,14 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         try {
             value = inMemoryStorage.get(key);
             if (value != null && value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
+                final var delta = -(key.size() + value.size());
+                storageMetrics.onMemoryBytes(delta - ENTRY_OVERHEAD_BYTES);
                 storageMetrics.onTtlExpiredEviction();
             }
             inMemoryStorage.remove(key);
         } finally {
             lock.unlock();
         }
-
-        storageMetrics.onMemoryBytes(-(key.size() + (value != null ? value.size() : 0)));
     }
 
     @Override
@@ -154,6 +156,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
             if (value == null || !value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
                 return false;
             } else {
+                final var delta = -(key.size() + value.size() + ENTRY_OVERHEAD_BYTES);
+                storageMetrics.onMemoryBytes(delta);
                 inMemoryStorage.remove(key);
                 return true;
             }
@@ -201,7 +205,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         if (value.getExpiryPolicy().shouldEvictOnRead(System.currentTimeMillis())) {
             inMemoryStorage.remove(key);
             storageMetrics.onTtlExpiredEviction();
-            storageMetrics.onMemoryBytes(-(key.size() + value.size()));
+            storageMetrics.onMemoryBytes(-(key.size() + value.size() + ENTRY_OVERHEAD_BYTES));
             return Optional.empty();
         }
 
