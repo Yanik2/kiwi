@@ -17,7 +17,7 @@ public class KiwiMain {
         final var configContainer = ConfigModule.createConfig();
         final var observabilityContainer = ObservabilityModule.create(configContainer);
         final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
-        final var persistentContainer = PersistentModule.create(observabilityContainer);
+        final var persistentContainer = PersistentModule.create(observabilityContainer, configContainer);
         final var serverContainer = ServerModule.create(observabilityContainer, persistentContainer,
                 concurrencyContainer, configContainer);
         final long end = System.currentTimeMillis();
