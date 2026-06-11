@@ -1,4 +1,4 @@
-package com.kiwi.persistent.mutation;
+package com.kiwi.persistent.result;
 
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;

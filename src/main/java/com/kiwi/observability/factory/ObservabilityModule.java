@@ -32,7 +32,7 @@ public class ObservabilityModule {
                 new MetricsProvider(MetricsRegistry.getInstance()),
                     new RequestNoOpMetrics(MetricsRegistry.getInstance()),
                     new MethodNoOpMetrics(),
-                    new StorageNoOpMetrics(),
+                    new StorageNoOpMetrics(MetricsRegistry.getInstance()),
                     Map.of(SERVER_THREAD_POOL_NAME,
                             new ThreadPoolNoOpMetrics(),
                             REJECTION_THREAD_POOL_NAME,

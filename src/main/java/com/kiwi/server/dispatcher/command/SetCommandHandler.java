@@ -9,6 +9,7 @@ import com.kiwi.server.dispatcher.OperationResult;
 import com.kiwi.server.request.model.ParsedRequest;
 import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.EmptyResponse;
+import com.kiwi.server.response.model.SerializableValue;
 
 public class SetCommandHandler extends StorageCommandHandler {
 
@@ -23,7 +24,7 @@ public class SetCommandHandler extends StorageCommandHandler {
         final var value = new Value(parsedRequest.getValue(), NoOpExpiration.getInstance());
 
         final var result = storageFacade.write(key, value);
-        return new OperationResult(EmptyResponse.getInstance(), result);
+        return new OperationResult(() -> result.value().getValue(), result.success());
     }
 
 

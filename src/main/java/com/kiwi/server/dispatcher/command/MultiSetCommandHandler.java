@@ -22,7 +22,7 @@ public class MultiSetCommandHandler extends StorageCommandHandler {
         for (ParsedRequest.KeyValuePair kvp : parsedRequest.getKeyValues()) {
             final var writeResult =
                     storageFacade.write(new Key(kvp.getKey()), new Value(kvp.getValue(), NoOpExpiration.getInstance()));
-            if (!result && writeResult) {
+            if (!result && writeResult.success()) {
                 result = true;
             }
         }

@@ -6,7 +6,8 @@ import com.kiwi.persistent.model.Value;
 import com.kiwi.persistent.mutation.CurrentState;
 import com.kiwi.persistent.mutation.Mutation;
 import com.kiwi.persistent.mutation.MutationDecision;
-import com.kiwi.persistent.mutation.MutationResult;
+import com.kiwi.persistent.result.MutationResult;
+import com.kiwi.persistent.result.WriteResult;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static com.kiwi.persistent.mutation.ErrorType.MEMORY_LIMIT;
 
 public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage {
+    private static final Value EMPTY_VALUE = new Value(new byte[0]);
     private static final int ENTRY_OVERHEAD_BYTES = 64;
 
     private final StorageMetrics storageMetrics;
@@ -54,7 +56,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
     }
 
     @Override
-    public boolean write(Key key, Value value) {
+    public WriteResult write(Key key, Value value) {
         while (resizeInProgress) {
         }
         resizeLocks();
@@ -65,10 +67,10 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                     ? value.size() - inMemoryStorage.get(key).size()
                     : key.size() + value.size() + ENTRY_OVERHEAD_BYTES;
             if (exceedsMaxCap(delta)) {
-                return false;
+                return new WriteResult(false, new Value(MEMORY_LIMIT.name().getBytes()));
             } else {
                 inMemoryStorage.put(key, value);
-                return true;
+                return new WriteResult(true, EMPTY_VALUE);
             }
         } finally {
             lock.unlock();
@@ -235,10 +237,11 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
     private boolean exceedsMaxCap(int delta) {
         memoryBytesLock.lock();
         try {
-            if (storageMetrics.getMemoryUsedBytes() + delta <= memoryMaxBytes) {
+            if (memoryMaxBytes == 0 || storageMetrics.getMemoryUsedBytes() + delta <= memoryMaxBytes) {
                 storageMetrics.onMemoryBytes(delta);
                 return false;
             } else {
+                storageMetrics.onEvictionTriggered();
                 return true;
             }
         } finally {
