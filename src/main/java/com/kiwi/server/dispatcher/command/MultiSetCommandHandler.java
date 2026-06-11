@@ -18,10 +18,16 @@ public class MultiSetCommandHandler extends StorageCommandHandler {
     @Override
     public OperationResult handle(TCPRequest request, ConnectionContext context) {
         final var parsedRequest = (ParsedRequest) request;
+        boolean result = false;
         for (ParsedRequest.KeyValuePair kvp : parsedRequest.getKeyValues()) {
-            storageFacade.write(new Key(kvp.getKey()), new Value(kvp.getValue(), NoOpExpiration.getInstance()));
+            final var writeResult =
+                    storageFacade.write(new Key(kvp.getKey()), new Value(kvp.getValue(), NoOpExpiration.getInstance()));
+            if (!result && writeResult) {
+                result = true;
+            }
         }
 
-        return new OperationResult(EmptyResponse.getInstance(), true);
+        // multi set based on best effort, so result will be success if at least one value was written successfully
+        return new OperationResult(EmptyResponse.getInstance(), result);
     }
 }

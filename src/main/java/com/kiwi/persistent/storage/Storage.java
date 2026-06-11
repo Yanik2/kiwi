@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface Storage {
     Optional<Value> read(Key key);
 
-    void write(Key key, Value value);
+    boolean write(Key key, Value value);
 
     MutationResult mutate(Key key, Mutation mutation);
 

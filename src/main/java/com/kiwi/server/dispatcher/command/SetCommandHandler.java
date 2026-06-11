@@ -22,8 +22,8 @@ public class SetCommandHandler extends StorageCommandHandler {
         final var key = new Key(parsedRequest.getKey());
         final var value = new Value(parsedRequest.getValue(), NoOpExpiration.getInstance());
 
-        storageFacade.write(key, value);
-        return new OperationResult(EmptyResponse.getInstance(), true);
+        final var result = storageFacade.write(key, value);
+        return new OperationResult(EmptyResponse.getInstance(), result);
     }
 
 
