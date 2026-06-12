@@ -5,4 +5,5 @@ public interface StorageMetrics {
     void onMemoryBytes(int delta);
     long getMemoryUsedBytes();
     void onEvictionTriggered();
+    void onKeyWithExpiration(int delta);
 }

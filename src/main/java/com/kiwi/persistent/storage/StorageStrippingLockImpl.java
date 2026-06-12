@@ -70,6 +70,9 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                 return new WriteResult(false, new Value(MEMORY_LIMIT.name().getBytes()));
             } else {
                 inMemoryStorage.put(key, value);
+                if (value.getExpiryPolicy().hasTtl()) {
+                    storageMetrics.onKeyWithExpiration(1);
+                }
                 return new WriteResult(true, EMPTY_VALUE);
             }
         } finally {
@@ -97,6 +100,17 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                         yield new MutationResult(key, Optional.of(new Value(MEMORY_LIMIT.name().getBytes())), false);
                     } else {
                         inMemoryStorage.put(key, w.value());
+                        if (value.isEmpty()) {
+                            if (w.value().getExpiryPolicy().hasTtl()) {
+                                storageMetrics.onKeyWithExpiration(1);
+                            }
+                        } else {
+                            final var oldValue = value.get();
+                            final var expirationDelta = oldValue.getExpiryPolicy().hasTtl()
+                                    ? w.value().getExpiryPolicy().hasTtl() ? 0 : -1
+                                    : w.value().getExpiryPolicy().hasTtl() ? 1 : 0;
+                            storageMetrics.onKeyWithExpiration(expirationDelta);
+                        }
                         yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
                     }
                 }
@@ -131,6 +145,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                 final var delta = -(key.size() + value.size() + ENTRY_OVERHEAD_BYTES);
                 storageMetrics.onMemoryBytes(delta);
                 storageMetrics.onTtlExpiredEviction();
+                storageMetrics.onKeyWithExpiration(-1);
             }
             inMemoryStorage.remove(key);
         } finally {
@@ -181,6 +196,9 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                 final var delta = -(key.size() + value.size() + ENTRY_OVERHEAD_BYTES);
                 storageMetrics.onMemoryBytes(delta);
                 inMemoryStorage.remove(key);
+                if (value.getExpiryPolicy().hasTtl()) {
+                    storageMetrics.onKeyWithExpiration(-1);
+                }
                 return true;
             }
         } finally {
@@ -228,6 +246,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
             inMemoryStorage.remove(key);
             storageMetrics.onTtlExpiredEviction();
             storageMetrics.onMemoryBytes(-(key.size() + value.size() + ENTRY_OVERHEAD_BYTES));
+            storageMetrics.onKeyWithExpiration(-1);
             return Optional.empty();
         }
 
