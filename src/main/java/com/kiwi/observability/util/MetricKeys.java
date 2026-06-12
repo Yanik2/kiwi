@@ -67,6 +67,7 @@ public final class MetricKeys {
     public static final String STORAGE_TTL_EXPIRED_EVICTION = "storage.ttl.expired.eviction";
     public static final String STORAGE_MEMORY_USED_BYTES = "storage.memory_used_bytes";
     public static final String STORAGE_EVICTION_TRIGGERED = "storage.eviction_triggered";
+    public static final String STORAGE_KEYS_WITH_EXPIRATION = "storage.keys_with_expiration";
 
     // thread pool metrics
     public static final String TP_WORKERS_MAX = ".workers_max";

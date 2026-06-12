@@ -12,11 +12,8 @@ public class StorageNoOpMetrics implements StorageMetrics {
         metricsRegistry.registerGauge(STORAGE_MEMORY_USED_BYTES);
     }
 
-
     @Override
-    public void onTtlExpiredEviction() {
-
-    }
+    public void onTtlExpiredEviction() {}
 
     @Override
     public void onMemoryBytes(int delta) {
@@ -30,7 +27,9 @@ public class StorageNoOpMetrics implements StorageMetrics {
     }
 
     @Override
-    public void onEvictionTriggered() {
+    public void onEvictionTriggered() {}
 
-    }
+    @Override
+    public void onKeyWithExpiration(int delta) {}
+
 }

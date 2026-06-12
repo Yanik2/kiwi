@@ -42,9 +42,9 @@ public record ObservabilityResponse(
                 .append(metrics.config().ttlBackoffMaxMs())
                 .append(", \"config.memory.maxBytes\": ")
                 .append(metrics.config().memoryMaxBytes())
-                .append(", \"config.eviction.policy\": ")
-                .append(metrics.config().evictionPolicy())
-                .append(" }")
+                .append(", \"config.eviction.policy\": \"")
+                .append(metrics.config().evictionPolicy().name())
+                .append("\" }")
                 .toString()
                 .getBytes(UTF_8);
     }
