@@ -334,5 +334,152 @@ Phase 4 is properly closed now.
 
 ---
 
+---
+
+## Phase 6 — Expiry Engine & Memory Management
+
+### Completed
+
+* **Phase 6 configuration surface**
+
+  * Added immutable configuration support for:
+
+    * `ttl.sampler_period_ms`
+    * `ttl.sample_batch`
+    * `ttl.backoff_max_ms`
+    * `memory.max_bytes`
+    * `eviction.policy`
+  * Validation integrated into bootstrap
+  * Added visibility through `CONFIG GET` and `INFO.config`
+
+* **Active expiry engine**
+
+  * Introduced dedicated background expiry sampler thread
+  * Integrated sampler into server lifecycle
+  * Cooperative startup and shutdown
+  * Interrupt-driven shutdown support
+  * Runtime-owned component (not embedded into storage)
+
+* **Expiry sampling infrastructure**
+
+  * Added dedicated storage sampling interface
+  * Introduced sampling API for TTL-bearing keys
+  * Added safe delete path that re-validates expiry under lock before removal
+  * Preserved correctness under concurrent writes and expiry races
+  * Unified deletion accounting with existing storage semantics
+
+* **Active expiry execution**
+
+  * Sampler periodically scans TTL candidates
+  * Expired keys are proactively removed without requiring reads
+  * Added metrics:
+
+    * `ttl_scanned`
+    * `ttl_active_expired_evictions`
+  * Active expiry now complements existing lazy expiry mechanism
+
+* **Adaptive sampler throttling**
+
+  * Implemented dynamic backoff behavior
+  * Sampler becomes less aggressive when little work is found
+  * Sampler returns to active mode when expired keys are detected
+  * Configurable upper bound via `ttl.backoff_max_ms`
+  * Reduced unnecessary background CPU activity
+
+* **Approximate memory accounting**
+
+  * Introduced storage-level memory tracking
+  * Accounting based on:
+
+    * key size
+    * value size
+    * fixed entry overhead estimate
+  * Memory usage updated on:
+
+    * writes
+    * overwrites
+    * deletes
+    * lazy expiry
+    * active expiry
+  * Added metrics:
+
+    * `memory_used_bytes`
+    * `memory_max_bytes`
+
+* **Memory guard (`noevict`)**
+
+  * Implemented configurable memory cap via `memory.max_bytes`
+  * Added deterministic write admission checks
+  * Writes exceeding configured limits are rejected
+  * Existing data is preserved
+  * Added operation-level error:
+
+    * `MEMORY_LIMIT`
+  * Added metric:
+
+    * `eviction_triggered`
+
+* **INFO and observability extensions**
+
+  * Added TTL and memory visibility through `INFO`
+  * Added active expiry metrics
+  * Added memory usage and configured limits
+  * Preserved additive-only INFO evolution
+  * All new Phase 6 configuration values exposed through admin surfaces
+
+---
+
+### Key Decisions
+
+* Active expiry implemented using a dedicated sampler thread rather than expiry queues or timing wheels
+* Sampling results are treated as potentially stale; deletion re-validates expiry under lock
+* Expiry uses the same storage deletion/accounting paths as normal operations
+* Memory accounting is approximate by design and intended for operational guardrails rather than JVM-accurate measurement
+* `memory.max_bytes = 0` disables memory enforcement
+* `noevict` chosen as the only supported eviction policy for Phase 6
+* Background expiry uses adaptive backoff to avoid competing with foreground workloads
+
+---
+
+### Deferred
+
+* `allkeys-lru` eviction policy
+* Alternative eviction policies
+* Expiry index structures (heap, timing wheel, bucketed queues)
+* Dynamic sampler batch sizing
+* Precise JVM-level memory accounting
+* Persistence-aware memory management
+
+---
+
+### Notes on LRU Deferral
+
+The original roadmap allowed optional implementation of `allkeys-lru`. During implementation it was intentionally deferred.
+
+Reasoning:
+
+* Kiwi currently operates as an in-memory database rather than a cache.
+* There is no persistence layer yet.
+* Under sustained load, memory pressure can be reached quickly, making "least recently used" keys only seconds old.
+* Automatic removal of arbitrary keys was considered unsafe for current database-style semantics.
+* Deterministic rejection of new writes (`noevict`) was preferred over silent loss of existing data.
+
+`allkeys-lru` may be revisited later if Kiwi gains a dedicated cache mode or persistence guarantees.
+
+---
+
+### Outcome
+
+* Expired keys are now removed proactively without requiring reads.
+* Memory usage is observable and bounded through configurable limits.
+* Memory pressure results in deterministic behavior instead of uncontrolled growth.
+* Operational visibility significantly improved through metrics, INFO, and configuration surfaces.
+* Phase 6 exit criteria achieved with active expiry, memory guardrails, observability, and runtime tuning controls.
+
+---
+
+**Phase 6 closed.** The system now has proactive expiry, bounded memory behavior, and the operational foundations required before replication work begins.
+
+
 
 
