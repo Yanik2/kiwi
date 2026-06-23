@@ -10,7 +10,6 @@ import com.kiwi.persistent.result.MutationResult;
 import com.kiwi.persistent.result.WriteResult;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +44,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public Optional<Value> read(Key key) {
+        while (resizeInProgress || generalLock.isLocked()) {}
         final var snapLocks = locks;
         final var lock = snapLocks[Math.abs(key.hashCode() % snapLocks.length)];
         lock.lock();
@@ -57,7 +57,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public WriteResult write(Key key, Value value) {
-        while (resizeInProgress) {
+        while (resizeInProgress || generalLock.isLocked()) {
         }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
@@ -82,7 +82,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public MutationResult mutate(Key key, Mutation mutation) {
-        while (resizeInProgress) {
+        while (resizeInProgress || generalLock.isLocked()) {
         }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
@@ -133,7 +133,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public void delete(Key key) {
-        while (resizeInProgress) {
+        while (resizeInProgress || generalLock.isLocked()) {
         }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
@@ -173,17 +173,21 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public List<Key> sampleKeysWithTtl(int limit) {
-        // copy is not thread safe
-        return new HashSet<>(inMemoryStorage.entrySet()).stream()
-                .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
+        generalLock.lock();
+        try {
+            return inMemoryStorage.entrySet().stream()
+                    .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
+                    .limit(limit)
+                    .map(Map.Entry::getKey)
+                    .toList();
+        } finally {
+            generalLock.unlock();
+        }
     }
 
     @Override
     public boolean deleteIfExpired(Key key, long millisNow) {
-        while (resizeInProgress) {
+        while (resizeInProgress || generalLock.isLocked()) {
         }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];

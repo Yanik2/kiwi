@@ -66,11 +66,11 @@ public class ExpirySampler {
             int sleepTime = period;
             while (running) {
                 try {
+                    Thread.sleep(sleepTime);
                     final var result = performCycle(sleepTime);
                     metrics.onTtlScanned(result.scanned());
                     metrics.onActiveExpiredEvictions(result.expired);
                     sleepTime = result.nextSleepTime();
-                    Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
                     if (running) {
                         log.error("Interrupted exception in running sampler thread, continue execution", e.getMessage());
