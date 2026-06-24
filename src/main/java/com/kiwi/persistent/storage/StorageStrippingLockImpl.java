@@ -134,7 +134,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public void delete(Key key) {
-        while (resizeInProgress || generalLock.isLocked()) {
+        while (resizeInProgress) {
         }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
