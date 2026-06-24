@@ -47,7 +47,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public Optional<Value> read(Key key) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         final var snapLocks = locks;
         final var lock = snapLocks[Math.abs(key.hashCode() % snapLocks.length)];
         lock.lock();
@@ -60,7 +61,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public WriteResult write(Key key, Value value) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -85,7 +87,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public MutationResult mutate(Key key, Mutation mutation) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
@@ -102,15 +105,11 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                         yield new MutationResult(key, Optional.of(new Value(MEMORY_LIMIT.name().getBytes())), false);
                     } else {
                         inMemoryStorage.put(key, w.value());
-                        if (w.value().getExpiryPolicy().hasTtl()) {
+                        if (value.isEmpty() && w.value().getExpiryPolicy().hasTtl()) {
+                            storageMetrics.onKeyWithExpiration(1);
                             samplerQueue.add(key);
-                            if (value.isEmpty()) {
-                                storageMetrics.onKeyWithExpiration(1);
-                            } else {
-                                final var oldValue = value.get();
-                                final var expirationDelta = oldValue.getExpiryPolicy().hasTtl() ? 0 : 1;
-                                storageMetrics.onKeyWithExpiration(expirationDelta);
-                            }
+                        } else if (value.isPresent() && !w.value().getExpiryPolicy().hasTtl()) {
+                            storageMetrics.onKeyWithExpiration(-1);
                         }
 
                         yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
@@ -135,7 +134,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public void delete(Key key) {
-        while (resizeInProgress || generalLock.isLocked()) {}
+        while (resizeInProgress || generalLock.isLocked()) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         Value value;
@@ -188,15 +188,16 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public boolean deleteIfExpired(Key key, long millisNow) {
-        while (resizeInProgress) {}
+        while (resizeInProgress) {
+        }
         resizeLocks();
         final var lock = locks[Math.abs(key.hashCode() % locks.length)];
         lock.lock();
         try {
             final var value = inMemoryStorage.get(key);
-            if (value == null || !value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
+            if (value == null) {
                 return false;
-            } else {
+            } else if (value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
                 final var delta = -(key.size() + value.size() + ENTRY_OVERHEAD_BYTES);
                 storageMetrics.onMemoryBytes(delta);
                 inMemoryStorage.remove(key);
@@ -204,7 +205,11 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                     storageMetrics.onKeyWithExpiration(-1);
                 }
                 return true;
+            } else {
+                samplerQueue.add(key);
+                return false;
             }
+
         } finally {
             lock.unlock();
         }
