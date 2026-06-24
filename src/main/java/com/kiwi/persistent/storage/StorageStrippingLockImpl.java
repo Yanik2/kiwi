@@ -9,12 +9,13 @@ import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.persistent.result.MutationResult;
 import com.kiwi.persistent.result.WriteResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,6 +29,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
     private final int memoryMaxBytes;
 
     private final Map<Key, Value> inMemoryStorage = new HashMap<>();
+    private final Queue<Key> samplerQueue = new LinkedList<>();
     private volatile ReentrantLock[] locks;
     private final ReentrantLock generalLock = new ReentrantLock();
     private final ReentrantLock memoryBytesLock = new ReentrantLock();
@@ -45,6 +47,8 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public Optional<Value> read(Key key) {
+        while (resizeInProgress) {
+        }
         final var snapLocks = locks;
         final var lock = snapLocks[Math.abs(key.hashCode() % snapLocks.length)];
         lock.lock();
@@ -71,6 +75,7 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
             } else {
                 inMemoryStorage.put(key, value);
                 if (value.getExpiryPolicy().hasTtl()) {
+                    samplerQueue.add(key);
                     storageMetrics.onKeyWithExpiration(1);
                 }
                 return new WriteResult(true, EMPTY_VALUE);
@@ -95,22 +100,18 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
             return switch (mutationDecision) {
                 case MutationDecision.Write w -> {
                     final int delta = value.map(v -> w.value().size() - v.size())
-                                    .orElseGet(() -> key.size() + w.value().size() + ENTRY_OVERHEAD_BYTES);
+                            .orElseGet(() -> key.size() + w.value().size() + ENTRY_OVERHEAD_BYTES);
                     if (exceedsMaxCap(delta)) {
                         yield new MutationResult(key, Optional.of(new Value(MEMORY_LIMIT.name().getBytes())), false);
                     } else {
                         inMemoryStorage.put(key, w.value());
-                        if (value.isEmpty()) {
-                            if (w.value().getExpiryPolicy().hasTtl()) {
-                                storageMetrics.onKeyWithExpiration(1);
-                            }
-                        } else {
-                            final var oldValue = value.get();
-                            final var expirationDelta = oldValue.getExpiryPolicy().hasTtl()
-                                    ? w.value().getExpiryPolicy().hasTtl() ? 0 : -1
-                                    : w.value().getExpiryPolicy().hasTtl() ? 1 : 0;
-                            storageMetrics.onKeyWithExpiration(expirationDelta);
+                        if (value.isEmpty() && w.value().getExpiryPolicy().hasTtl()) {
+                            storageMetrics.onKeyWithExpiration(1);
+                            samplerQueue.add(key);
+                        } else if (value.isPresent() && !w.value().getExpiryPolicy().hasTtl()) {
+                            storageMetrics.onKeyWithExpiration(-1);
                         }
+
                         yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());
                     }
                 }
@@ -173,12 +174,16 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
 
     @Override
     public List<Key> sampleKeysWithTtl(int limit) {
-        // copy is not thread safe
-        return new HashSet<>(inMemoryStorage.entrySet()).stream()
-                .filter(e -> e.getValue().getExpiryPolicy().hasTtl())
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
+        final var sampleKeys = new ArrayList<Key>();
+
+        while (samplerQueue.peek() != null && sampleKeys.size() < limit) {
+            final var key = samplerQueue.poll();
+            if (inMemoryStorage.containsKey(key) && inMemoryStorage.get(key).getExpiryPolicy().hasTtl()) {
+                sampleKeys.add(key);
+            }
+        }
+
+        return sampleKeys;
     }
 
     @Override
@@ -190,9 +195,9 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
         lock.lock();
         try {
             final var value = inMemoryStorage.get(key);
-            if (value == null || !value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
+            if (value == null) {
                 return false;
-            } else {
+            } else if (value.getExpiryPolicy().shouldEvictOnRead(millisNow)) {
                 final var delta = -(key.size() + value.size() + ENTRY_OVERHEAD_BYTES);
                 storageMetrics.onMemoryBytes(delta);
                 inMemoryStorage.remove(key);
@@ -200,7 +205,11 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                     storageMetrics.onKeyWithExpiration(-1);
                 }
                 return true;
+            } else {
+                samplerQueue.add(key);
+                return false;
             }
+
         } finally {
             lock.unlock();
         }
