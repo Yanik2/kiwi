@@ -20,6 +20,10 @@ public record ObservabilityResponse(
                 .append(k)
                 .append("\": ")
                 .append(v));
+        metrics.jvmInfoSnapshot().metrics().forEach((k, v) -> sb.append(", \"")
+                .append(k)
+                .append("\": ")
+                .append(v));
         return sb.append(", \"server.start\": ")
                 .append(metrics.serverStart())
                 .append(", \"server.uptime\": ")

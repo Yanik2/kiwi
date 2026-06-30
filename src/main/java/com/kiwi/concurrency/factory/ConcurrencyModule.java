@@ -22,7 +22,7 @@ public final class ConcurrencyModule {
     private static KiwiThreadPool rejectionThreadPool;
 
     public static ConcurrencyContainer create(ObservabilityContainer observabilityContainer) {
-        final var rejectionThreadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX);
+        final var rejectionThreadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX + "rejection");
         final var metrics = observabilityContainer.threadPoolMetrics().get(REJECTION_THREAD_POOL_NAME);
         rejectionThreadPool = new KiwiThreadPool(rejectionThreadFactory, REJECTION_THREAD_POOL_NAME,
                 REJECTION_POOL_SIZE, REJECTION_QUEUE_SIZE, metrics);
@@ -46,7 +46,7 @@ public final class ConcurrencyModule {
                                                          int queueCapacity,
                                                          ThreadPoolMetrics metrics,
                                                          KiwiThreadPool rejectionThreadPool) {
-        final var threadFactory = new KiwiThreadFactory(threadPoolName);
+        final var threadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX + threadPoolName);
         return new KiwiThreadPoolExecutor(
                 threadPoolExecutorName,
                 threadFactory,

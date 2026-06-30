@@ -10,7 +10,7 @@ public class Properties {
     public static final String SERVER_THREAD_POOL_NAME = "server-thread-pool";
     public static final String SERVER_THREAD_POOL_EXECUTOR_NAME = "server-executor";
     public static final String REJECTION_THREAD_POOL_NAME = "rejection-thread-pool";
-    public static final String THREAD_NAME_PREFIX = "kiwi-thread";
+    public static final String THREAD_NAME_PREFIX = "kiwi-thread-";
     public static final int REJECTION_POOL_SIZE = 1;
     public static final int REJECTION_QUEUE_SIZE = 100;
     public static final int SERVER_THREAD_POOL_SIZE = 9;

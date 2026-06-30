@@ -8,6 +8,8 @@ import com.kiwi.observability.metrics.ExpirySampleMetrics;
 import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.storage.ExpirySamplingStorage;
 
+import static com.kiwi.config.properties.Properties.THREAD_NAME_PREFIX;
+
 public class ExpirySampler {
     private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ExpirySampler.class.getName());
 
@@ -37,7 +39,9 @@ public class ExpirySampler {
         this.backoff = backoff;
         this.maxBytes = maxBytes;
         this.policy = policy;
-        this.thread = new Thread(sample());
+        final var samplerThread = new Thread(sample());
+        samplerThread.setName(THREAD_NAME_PREFIX);
+        this.thread = samplerThread;
     }
 
     public void start() {
