@@ -1,5 +1,6 @@
 package com.kiwi.server.accept;
 
+import com.kiwi.concurrency.KiwiThreadFactory;
 import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
 import com.kiwi.observability.metrics.RequestMetrics;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.kiwi.config.properties.Properties.THREAD_NAME_PREFIX;
 import static com.kiwi.server.accept.ServerStatus.RUNNING;
 import static com.kiwi.server.accept.ServerStatus.STOPPED;
 import static com.kiwi.server.accept.ServerStatus.STOPPING;
@@ -36,7 +38,7 @@ public class TCPServer {
     private final int maxClients;
     private final int backlog;
 
-    private final ExecutorService connectionThreadPool = Executors.newCachedThreadPool();
+    private final ExecutorService connectionThreadPool;
 
     private volatile ServerStatus status;
 
@@ -54,6 +56,8 @@ public class TCPServer {
         this.soTimeout = soTimeout;
         this.maxClients = maxClients;
         this.backlog = backlog;
+        final var threadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX + "accept-loop");
+        this.connectionThreadPool = Executors.newCachedThreadPool(threadFactory);
     }
 
     public void start() throws Exception {

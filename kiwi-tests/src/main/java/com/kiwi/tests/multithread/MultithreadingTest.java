@@ -58,8 +58,15 @@ public class MultithreadingTest {
             t.join();
         }
 
+        int amount = 0;
+        double avg = 0;
         for (Map.Entry<String, ThreadTask.ResponsePerf> e : map.entrySet()) {
             System.out.println(e.getKey() + ": " + e.getValue());
+            amount++;
+            avg += e.getValue().averageTime();
         }
+
+        System.out.println("============");
+        System.out.println("Average time: " + (avg / amount));
     }
 }
