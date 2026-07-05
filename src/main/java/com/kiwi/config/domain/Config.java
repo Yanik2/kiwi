@@ -1,7 +1,5 @@
 package com.kiwi.config.domain;
 
-import com.kiwi.config.util.EvictionPolicy;
-
 public record Config(
         int port,
         int backlog,
@@ -12,6 +10,7 @@ public record Config(
         int ttlSampleBatch,
         int ttlBackoffMaxMs,
         int memoryMaxBytes,
-        EvictionPolicy evictionPolicy
+        EvictionPolicy evictionPolicy,
+        JvmConfig jvmConfig
 ) {
 }

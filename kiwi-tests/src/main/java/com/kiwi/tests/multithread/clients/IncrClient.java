@@ -24,7 +24,11 @@ public class IncrClient implements Client {
 
     @Override
     public void execute(OutputStream os) throws IOException {
-        final var cursor = keyIndexesCursor.getAndIncrement();
+        var cursor = keyIndexesCursor.getAndIncrement();
+        if (cursor >= keyIndexes.size()) {
+            keyIndexesCursor.set(0);
+            cursor = 0;
+        }
         final var currentIndex = keyIndexes.get(cursor);
         final var currentKey = keys.get(currentIndex);
 

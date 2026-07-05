@@ -22,6 +22,7 @@ public class ThreadTask implements Runnable {
     public void run() {
         final Socket socket;
         long start = 0;
+        long startNanos = 0;
         ResponseReader responseReader = null;
         final byte flags = 0;
         final byte ext = 3;
@@ -34,30 +35,40 @@ public class ThreadTask implements Runnable {
             responseThread.start();
 
             start = System.currentTimeMillis();
-            for (int i = 0; i < 100000; i++) {
+//            for (int i = 0; i < 100000; i++) {
+//                os.write(flags);
+//                os.flush();
+//                final var methodIndex = rand.nextInt(4);
+//                clients.get(methodIndex).execute(os);
+//            }
+            final long difference = 300_000_000_000L;
+            startNanos = System.nanoTime();
+
+            while ((System.nanoTime() - startNanos) < difference) {
                 os.write(flags);
                 os.flush();
                 final var methodIndex = rand.nextInt(4);
                 clients.get(methodIndex).execute(os);
             }
 
-            os.write(flags);
-            os.write(ext);
-            os.write(new byte[]{0, 1, 0, 0, 0, 0, 0, 0, 13, 10});
-            os.flush();
-
-            responseThread.join();
+//            os.write(flags);
+//            os.write(ext);
+//            os.write(new byte[]{0, 1, 0, 0, 0, 0, 0, 0, 13, 10});
+//            os.flush();
+//
+//            responseThread.join();
         } catch (Exception ex) {
             System.out.println("Exception in thread: [" + Thread.currentThread().getName() +
                     "]. Message: " + ex.getMessage());
         }
 
+        final var timeNanos = System.nanoTime() - startNanos;
         final var time = System.currentTimeMillis() - start;
         final var responseNumber = responseReader.getResponseNumber();
         responses.put(Thread.currentThread().getName(),
-                new ResponsePerf(responseNumber, time, (double) time / responseNumber));
+                new ResponsePerf(responseNumber, timeNanos, (double) time / responseNumber));
     }
 
-    public record ResponsePerf(int responseNumber, long time, double averageTime) {}
+    public record ResponsePerf(long responseNumber, long time, double averageTime) {}
 }
 

@@ -1,6 +1,6 @@
 package com.kiwi.server.expiration;
 
-import com.kiwi.config.util.EvictionPolicy;
+import com.kiwi.config.domain.EvictionPolicy;
 import com.kiwi.exception.IllegalSamplerStateException;
 import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
@@ -40,7 +40,7 @@ public class ExpirySampler {
         this.maxBytes = maxBytes;
         this.policy = policy;
         final var samplerThread = new Thread(sample());
-        samplerThread.setName(THREAD_NAME_PREFIX);
+        samplerThread.setName(THREAD_NAME_PREFIX + "-sampler");
         this.thread = samplerThread;
     }
 

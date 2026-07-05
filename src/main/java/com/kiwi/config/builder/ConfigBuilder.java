@@ -1,7 +1,9 @@
 package com.kiwi.config.builder;
 
 import com.kiwi.config.domain.Config;
-import com.kiwi.config.util.EvictionPolicy;
+import com.kiwi.config.domain.EvictionPolicy;
+import com.kiwi.config.domain.JvmBuffersStrategy;
+import com.kiwi.config.domain.JvmConfig;
 import com.kiwi.exception.config.ConfigurationValidationException;
 
 import static com.kiwi.config.properties.DefaultProperties.BACKLOG;
@@ -26,8 +28,81 @@ public class ConfigBuilder {
     private int ttlBackoffMaxMs = TTL_BACKOFF_MAX_MS;
     private int memoryMaxBytes = MEMORY_MAX_BYTES;
     private String evictionPolicy = EVICTION_POLICY;
+    private boolean jvmInfoEnabled;
+    private boolean jvmJfrEnabled;
+    private String jvmJfrDir;
+    private int jvmJfrMaxAgeSeconds;
+    private int jvmJfrMaxSizeBytes;
+    private String jvmBuffersStrategy;
+    private boolean jvmBuffersPoolingEnabled;
+    private boolean jvmBuffersLeakTrackingEnabled;
+    private boolean jvmArenaEnabled;
+    private boolean jvmArenaDebugPoisoning;
+    private boolean jvmSafepointWatchdogEnabled;
+    private int jvmSafepointWatchdogPeriodMs;
+
 
     public ConfigBuilder() {}
+
+    public ConfigBuilder jvmSafepointWatchdogPeriodMs(int safepointWatchdogPeriodMs) {
+        this.jvmSafepointWatchdogPeriodMs = safepointWatchdogPeriodMs;
+        return this;
+    }
+
+    public ConfigBuilder jvmSafepointWatchdogEnabled(boolean safepointWatchdogEnabled) {
+        this.jvmSafepointWatchdogEnabled = safepointWatchdogEnabled;
+        return this;
+    }
+
+    public ConfigBuilder jvmArenaDebugPoisoning(boolean arenaDebugPoisoning) {
+        this.jvmArenaDebugPoisoning = arenaDebugPoisoning;
+        return this;
+    }
+
+    public ConfigBuilder jvmArenaEnabled(boolean arenaEnabled) {
+        this.jvmArenaEnabled = arenaEnabled;
+        return this;
+    }
+
+    public ConfigBuilder jvmBuffersLeakTrackingEnabled(boolean leakTrackingEnabled) {
+        this.jvmBuffersLeakTrackingEnabled = leakTrackingEnabled;
+        return this;
+    }
+
+    public ConfigBuilder jvmBuffersPoolingEnabled(boolean poolingEnabled) {
+        this.jvmBuffersPoolingEnabled = poolingEnabled;
+        return this;
+    }
+
+    public ConfigBuilder jvmBuffersStrategy(String bufferStrategy) {
+        this.jvmBuffersStrategy = bufferStrategy;
+        return this;
+    }
+
+    public ConfigBuilder jvmJfrMaxSizeBytes(int maxSizeBytes) {
+        this.jvmJfrMaxSizeBytes = maxSizeBytes;
+        return this;
+    }
+
+    public ConfigBuilder jvmJfrMaxAgeSeconds(int maxAgeSeconds) {
+        this.jvmJfrMaxAgeSeconds = maxAgeSeconds;
+        return this;
+    }
+
+    public ConfigBuilder jvmJfrDir(String jfrDir) {
+        this.jvmJfrDir = jfrDir;
+        return this;
+    }
+
+    public ConfigBuilder jvmJfrEnabled(boolean enabled) {
+        this.jvmJfrEnabled = enabled;
+        return this;
+    }
+
+    public ConfigBuilder jvmInfoEnabled(boolean enabled) {
+        this.jvmInfoEnabled = enabled;
+        return this;
+    }
 
     public ConfigBuilder port(int port) {
         this.port = port;
@@ -107,8 +182,28 @@ public class ConfigBuilder {
         if (!EvictionPolicy.exists(evictionPolicy)) {
             throw new ConfigurationValidationException("Invalid eviction policy: " + evictionPolicy);
         }
+        if (jvmJfrDir.isBlank()) {
+            throw new ConfigurationValidationException("Jfr directory cannot be empty");
+        }
+        if (jvmJfrMaxAgeSeconds < 1) {
+            throw new ConfigurationValidationException("Invalid java flight recorder age: " + jvmJfrMaxAgeSeconds);
+        }
+        if (jvmJfrMaxSizeBytes < 1) {
+            throw new ConfigurationValidationException("Invalid java flight recorder max size: " + jvmJfrMaxSizeBytes);
+        }
+        if (JvmBuffersStrategy.exists(jvmBuffersStrategy.toLowerCase())) {
+            throw new ConfigurationValidationException("Invalid java buffers strategy: " + jvmBuffersStrategy);
+        }
+        if (jvmSafepointWatchdogPeriodMs < 10) {
+            throw new ConfigurationValidationException("Invalid java safepoint watchdog period: "
+                    + jvmSafepointWatchdogPeriodMs);
+        }
 
         return new Config(this.port, this.backlog, this.maxClients, this.soTimeoutMillis, this.metricsEnabled,
-                ttlSamplerPeriodMs, ttlSampleBatch, ttlBackoffMaxMs, memoryMaxBytes, EvictionPolicy.get(evictionPolicy));
+                ttlSamplerPeriodMs, ttlSampleBatch, ttlBackoffMaxMs, memoryMaxBytes, EvictionPolicy.get(evictionPolicy),
+                new JvmConfig(this.jvmInfoEnabled, this.jvmJfrEnabled, this.jvmJfrDir, this.jvmJfrMaxAgeSeconds,
+                        this.jvmJfrMaxSizeBytes, JvmBuffersStrategy.valueOf(this.jvmBuffersStrategy.toUpperCase()),
+                        this.jvmBuffersPoolingEnabled, this.jvmBuffersLeakTrackingEnabled, this.jvmArenaEnabled,
+                        this.jvmArenaDebugPoisoning, this.jvmSafepointWatchdogEnabled, this.jvmSafepointWatchdogPeriodMs));
     }
 }

@@ -2,14 +2,14 @@ package com.kiwi.tests.multithread;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 import static com.kiwi.tests.utils.ResponseParser.parse;
 
 public class ResponseReader implements Runnable {
     private final InputStream is;
 
-    private final AtomicInteger responseNumber = new AtomicInteger();
+    private final LongAdder responseNumber = new LongAdder();
 
     public ResponseReader(InputStream is) {
         this.is = is;
@@ -20,7 +20,7 @@ public class ResponseReader implements Runnable {
         try {
             while (true) {
                 final var response = parse(is);
-                responseNumber.incrementAndGet();
+                responseNumber.increment();
                 if (!response.isEmpty()) {
 //                    System.out.println("Response No: " + response.getBytes()[0] + ", Thread: " + Thread.currentThread().getName());
                     if (response.equals("end of stream") || response.equals("error in response")) {
@@ -34,7 +34,7 @@ public class ResponseReader implements Runnable {
         }
     }
 
-    public int getResponseNumber() {
-        return responseNumber.get();
+    public long getResponseNumber() {
+        return responseNumber.sum();
     }
 }

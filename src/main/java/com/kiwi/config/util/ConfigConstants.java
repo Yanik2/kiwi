@@ -13,6 +13,19 @@ public final class ConfigConstants {
     public static final String MEMORY_MAX_BYTES = "memory.maxBytes";
     public static final String EVICTION_POLICY = "eviction.policy";
 
+    public static final String JVM_INFO_ENABLED = "jvm.info.enabled";
+    public static final String JVM_JFR_ENABLED = "jvm.jfr.enabled";
+    public static final String JVM_JFR_DIR = "jvm.jfr.dir";
+    public static final String JVM_JFR_MAX_AGE_SECONDS = "jvm.jfr.max_age_seconds";
+    public static final String JVM_JFR_MAX_SIZE_BYTES = "jvm.jfr.max_size_bytes";
+    public static final String JVM_BUFFERS_STRATEGY = "jvm.buffers.strategy";
+    public static final String JVM_BUFFERS_POOLING_ENABLED = "jvm.buffers.pooling.enabled";
+    public static final String JVM_BUFFERS_LEAK_TRACKING_ENABLED = "jvm.buffers.leak_tracking.enabled";
+    public static final String JVM_ARENA_ENABLED = "jvm.arena.enabled";
+    public static final String JVM_ARENA_DEBUG_POISONING = "jvm.arena.debug_poisoning";
+    public static final String JVM_SAFEPOINT_WATCHDOG_ENABLED = "jvm.safepoint_watchdog.enabled";
+    public static final String JVM_SAFEPOINT_WATCHDOG_PERIOD_MS = "jvm.safepoint_watchdog.period_ms";
+
 
     private ConfigConstants() {}
 }
