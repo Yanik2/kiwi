@@ -13,6 +13,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.kiwi.config.properties.Properties.RESPONSE_QUEUE_MAX_SIZE;
+import static com.kiwi.config.properties.Properties.THREAD_NAME_PREFIX;
 import static com.kiwi.server.response.dto.WriteResponseStatus.OK;
 import static java.util.Comparator.comparingInt;
 
@@ -40,6 +41,7 @@ public class WriterProxy {
         this.outputStream = outputStream;
         this.requestMetrics = requestMetrics;
         this.responseWriterThread = new Thread(writeResponse());
+        this.responseWriterThread.setName(THREAD_NAME_PREFIX + "response-writer");
         this.lock = new ReentrantLock();
         this.hasElements = this.lock.newCondition();
         this.isActive = true;

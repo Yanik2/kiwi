@@ -60,13 +60,19 @@ public class MultithreadingTest {
 
         int amount = 0;
         double avg = 0;
+        long responses = 0L;
+        long time = 0L;
         for (Map.Entry<String, ThreadTask.ResponsePerf> e : map.entrySet()) {
             System.out.println(e.getKey() + ": " + e.getValue());
             amount++;
             avg += e.getValue().averageTime();
+            responses += e.getValue().responseNumber();
+            time += e.getValue().time();
         }
 
         System.out.println("============");
-        System.out.println("Average time: " + (avg / amount));
+        System.out.println("Average single response time: " + (avg / amount));
+        System.out.println("Average responses: " + (responses / map.size()));
+        System.out.println("Average time: " + (time / map.size()));
     }
 }

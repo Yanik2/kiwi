@@ -1,4 +1,4 @@
-package com.kiwi.config.util;
+package com.kiwi.config.domain;
 
 import java.util.Map;
 

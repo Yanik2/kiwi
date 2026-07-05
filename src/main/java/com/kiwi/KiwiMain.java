@@ -16,7 +16,7 @@ public class KiwiMain {
         log.info("Starting initialization Kiwi");
         final long start = System.currentTimeMillis();
         final var configContainer = ConfigModule.createConfig();
-        final var jvmContainer = JvmModule.create();
+        final var jvmContainer = JvmModule.create(configContainer.jvmConfig());
         final var observabilityContainer = ObservabilityModule.create(configContainer, jvmContainer);
         final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
         final var persistentContainer = PersistentModule.create(observabilityContainer, configContainer);

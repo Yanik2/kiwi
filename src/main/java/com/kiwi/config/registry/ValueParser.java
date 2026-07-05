@@ -2,16 +2,24 @@ package com.kiwi.config.registry;
 
 import com.kiwi.exception.config.ConfigurationInitializationException;
 
-public interface ValueParser {
-    default int getInt(String value) {
-        throw new ConfigurationInitializationException("Value is not integer");
+public class ValueParser {
+
+    public int getInt(String value, String message) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception ex) {
+            throw new ConfigurationInitializationException(
+                    message + value, ex);
+        }
     }
 
-    default boolean getBoolean(String value) {
-        throw new ConfigurationInitializationException("Value is not boolean");
+    public boolean getBoolean(String value, String message) {
+            if (!Boolean.TRUE.toString().equalsIgnoreCase(value)
+                    && !Boolean.FALSE.toString().equalsIgnoreCase(value)) {
+                throw new ConfigurationInitializationException(message + value);
+            }
+
+            return Boolean.parseBoolean(value);
     }
 
-    default String getString(String value) {
-        throw new ConfigurationInitializationException("Value is not string");
-    }
 }
