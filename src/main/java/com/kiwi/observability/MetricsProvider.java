@@ -2,15 +2,15 @@ package com.kiwi.observability;
 
 import com.kiwi.config.ConfigModule;
 import com.kiwi.config.properties.Properties;
-import com.kiwi.jvm.provider.JvmInfoProviderImpl;
+import com.kiwi.jvm.provider.JvmInfoProvider;
 import com.kiwi.observability.dto.MetricsDataDto;
 
 public class MetricsProvider {
 
     private final MetricsRegistry metricsRegistry;
-    private final JvmInfoProviderImpl jvmInfoProvider;
+    private final JvmInfoProvider jvmInfoProvider;
 
-    public MetricsProvider(MetricsRegistry metricsRegistry, JvmInfoProviderImpl jvmInfoProvider) {
+    public MetricsProvider(MetricsRegistry metricsRegistry, JvmInfoProvider jvmInfoProvider) {
         this.metricsRegistry = metricsRegistry;
         this.jvmInfoProvider = jvmInfoProvider;
     }

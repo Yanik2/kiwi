@@ -191,7 +191,7 @@ public class ConfigBuilder {
         if (jvmJfrMaxSizeBytes < 1) {
             throw new ConfigurationValidationException("Invalid java flight recorder max size: " + jvmJfrMaxSizeBytes);
         }
-        if (JvmBuffersStrategy.exists(jvmBuffersStrategy.toLowerCase())) {
+        if (JvmBuffersStrategy.exists(jvmBuffersStrategy.toUpperCase())) {
             throw new ConfigurationValidationException("Invalid java buffers strategy: " + jvmBuffersStrategy);
         }
         if (jvmSafepointWatchdogPeriodMs < 10) {
