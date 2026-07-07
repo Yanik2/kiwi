@@ -1,2 +1,3 @@
-AFTER PHASE 5:
-    - test socket with different options (buffer size, latency, bandwidth)
+Problems:
+1. server-thread-pool.bp.pause_count is quite big value (6mil), check this
+2. take 2 laptops, and run tests from there over wife network

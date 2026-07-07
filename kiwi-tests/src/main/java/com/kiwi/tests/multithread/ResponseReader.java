@@ -28,6 +28,9 @@ public class ResponseReader implements Runnable {
                         break;
                     }
                 }
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
+                }
             }
         } catch (IOException e) {
             System.out.println("Exception is response parser: " + e.getMessage());

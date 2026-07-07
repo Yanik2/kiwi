@@ -51,12 +51,12 @@ public class ThreadTask implements Runnable {
                 clients.get(methodIndex).execute(os);
             }
 
-//            os.write(flags);
-//            os.write(ext);
-//            os.write(new byte[]{0, 1, 0, 0, 0, 0, 0, 0, 13, 10});
-//            os.flush();
+            os.write(flags);
+            os.write(ext);
+            os.write(new byte[]{0, 1, 0, 0, 0, 0, 0, 0, 13, 10});
+            os.flush();
 //
-//            responseThread.join();
+            responseThread.join();
         } catch (Exception ex) {
             System.out.println("Exception in thread: [" + Thread.currentThread().getName() +
                     "]. Message: " + ex.getMessage());
