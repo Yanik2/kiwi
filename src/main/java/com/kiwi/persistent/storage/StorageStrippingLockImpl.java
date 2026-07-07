@@ -105,11 +105,18 @@ public class StorageStrippingLockImpl implements Storage, ExpirySamplingStorage 
                         yield new MutationResult(key, Optional.of(new Value(MEMORY_LIMIT.name().getBytes())), false);
                     } else {
                         inMemoryStorage.put(key, w.value());
-                        if (value.isEmpty() && w.value().getExpiryPolicy().hasTtl()) {
-                            storageMetrics.onKeyWithExpiration(1);
-                            samplerQueue.add(key);
-                        } else if (value.isPresent() && !w.value().getExpiryPolicy().hasTtl()) {
-                            storageMetrics.onKeyWithExpiration(-1);
+                        int expirationKeyDelta = 0;
+                        if (value.map(v -> v.getExpiryPolicy().hasTtl()).orElse(false)) {
+                            expirationKeyDelta--;
+                        }
+                        if (w.value().getExpiryPolicy().hasTtl()) {
+                            expirationKeyDelta++;
+                        }
+                        if (expirationKeyDelta != 0) {
+                            storageMetrics.onKeyWithExpiration(delta);
+                            if (expirationKeyDelta == 1) {
+                                samplerQueue.add(key);
+                            }
                         }
 
                         yield new MutationResult(key, Optional.ofNullable(w.returnValue()), w.success());

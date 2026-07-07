@@ -19,7 +19,7 @@ public class ReadBuffer {
 
     private int readPos = 0;
     private int writePos = 0;
-    private int readBytes = 0;
+    private long readBytes = 0;
 
     public int fill(InputStream is, ConnectionContext context) {
         if (!isFull()) {
@@ -115,7 +115,7 @@ public class ReadBuffer {
         this.readPos = index;
     }
 
-    public int getReadBytes() {
+    public long getReadBytes() {
         return readBytes;
     }
 
