@@ -22,9 +22,8 @@ public record ObservabilityResponse(
                 .append(v));
         metrics.jvmInfoSnapshot().metrics().forEach((k, v) -> sb.append(", \"")
                 .append(k)
-                .append("\": \"")
-                .append(v)
-                .append("\""));
+                .append("\": ")
+                .append(v instanceof String ? "\"" + v + "\"" : v));
         return sb.append(", \"server.start\": ")
                 .append(metrics.serverStart())
                 .append(", \"server.uptime\": ")

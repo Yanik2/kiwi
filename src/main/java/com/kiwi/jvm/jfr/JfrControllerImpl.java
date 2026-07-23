@@ -3,6 +3,8 @@ package com.kiwi.jvm.jfr;
 import jdk.jfr.Recording;
 import jdk.jfr.RecordingState;
 
+import java.io.IOException;
+
 public class JfrControllerImpl implements JfrController {
     private final Recording recording;
 
@@ -11,12 +13,19 @@ public class JfrControllerImpl implements JfrController {
     }
 
     public void start() {
-        recording.start();
+        if (RecordingState.NEW.equals(recording.getState())) {
+            recording.start();
+        }
     }
 
     public void stop() {
-        recording.stop();
-        recording.close();
+        if (RecordingState.RUNNING.equals(recording.getState())) {
+            recording.stop();
+        }
+        dump();
+        if (!RecordingState.CLOSED.equals(recording.getState())) {
+            recording.close();
+        }
     }
 
     public boolean isRunning() {
@@ -47,5 +56,16 @@ public class JfrControllerImpl implements JfrController {
     public boolean enabled() {
         // currently hardcode, because no other options, will be changed to dynamic in future features
         return true;
+    }
+
+    private void dump() {
+        if (RecordingState.RUNNING.equals(recording.getState())
+                || RecordingState.STOPPED.equals(recording.getState())) {
+            try {
+                recording.dump(recording.getDestination());
+            } catch (IOException e) {
+                // ignore because check was performed (this is single threaded class)
+            }
+        }
     }
 }

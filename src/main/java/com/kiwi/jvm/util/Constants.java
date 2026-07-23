@@ -30,4 +30,6 @@ public class Constants {
     public static final String JFR_DESTINATION = "jvm.jfr.destination";
     public static final String JFR_MAX_AGE_SECONDS = "jvm.jfr.max_age_seconds";
     public static final String JFR_MAX_SIZE_BYTES = "jvm.jfr.max_size_bytes";
+
+    public static final String JFR_FILE_TEMPLATE = "kiwi-%d-%d.jfr";
 }

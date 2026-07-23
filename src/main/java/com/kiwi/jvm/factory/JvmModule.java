@@ -11,8 +11,12 @@ import com.kiwi.log.KiwiLogger;
 import com.kiwi.log.KiwiLoggerFactory;
 import jdk.jfr.Recording;
 
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
+
+import static com.kiwi.jvm.util.Constants.JFR_FILE_TEMPLATE;
 
 public class JvmModule {
     private static final KiwiLogger log = KiwiLoggerFactory.getLogger(JvmModule.class.getName());
@@ -33,7 +37,11 @@ public class JvmModule {
     private static JfrController initJavaFlightRecording(JvmConfig jvmConfig) {
         try {
             final var recording = new Recording();
-            recording.setDestination(Paths.get(jvmConfig.jfrDir()));
+            createDirectoryForJfr(Path.of(jvmConfig.jfrDir()));
+            final var pid = ProcessHandle.current().pid();
+            final var destination = jvmConfig.jfrDir() + "/"
+                    + JFR_FILE_TEMPLATE.formatted(pid, System.currentTimeMillis());
+            recording.setDestination(Path.of(destination));
             recording.setMaxAge(Duration.ofSeconds(jvmConfig.jfrMaxAgeSeconds()));
             recording.setMaxSize(jvmConfig.jfrMaxSizeBytes());
             recording.setName("kiwi-main");
@@ -43,6 +51,12 @@ public class JvmModule {
         } catch (Exception ex) {
             log.warn("Error during initializing Java Flight Recording", ex.getMessage());
             return new NoOpJfrController();
+        }
+    }
+
+    private static void createDirectoryForJfr(Path path) throws IOException {
+        if (Files.notExists(path)) {
+            Files.createDirectory(path);
         }
     }
 }
