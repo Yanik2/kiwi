@@ -22,4 +22,12 @@ public class Constants {
     public static final String AVAILABLE_PROCESSORS = "jvm.available_processors";
     public static final String PROCESS_CPU_LOAD = "jvm.process_cpu_load";
     public static final String SYSTEM_CPU_LOAD = "jvm.system_cpu_load";
+
+    public static final String JFR_ENABLED = "jvm.jfr.enabled";
+    public static final String JFR_RUNNING = "jvm.jfr.running";
+    public static final String JFR_RECORDING_ID = "jvm.jfr.recording_id";
+    public static final String JFR_NAME = "jvm.jfr.name";
+    public static final String JFR_DESTINATION = "jvm.jfr.destination";
+    public static final String JFR_MAX_AGE_SECONDS = "jvm.jfr.max_age_seconds";
+    public static final String JFR_MAX_SIZE_BYTES = "jvm.jfr.max_size_bytes";
 }

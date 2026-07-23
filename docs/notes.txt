@@ -1,3 +1,13 @@
-Problems:
-1. server-thread-pool.bp.pause_count is quite big value (6mil), check this
-2. take 2 laptops, and run tests from there over wife network
+1. Resource leaking. When there is error and connection dropped, response writer still waiting for writing response
+2. Thread synchronization on storage (HashMap throws on resize), sometimes value is null (write method root)
+3. Move all configurations for threads (queue size, threads amount, timeouts, etc) to config module
+4. Figure out Writer Proxy queue size, currently 100000 blocks on thread
+5. Add response in WriterProxy add response object, so error would be easier to identify
+6. Figure out request in flight amount
+7. Figure out heap size + all configurations
+8. Figure out sizes for queues
+9. Add to multithreading test assertions, fix connection
+10. Close connection operation blocks thread from main kiwi thread pool
+11. Thread pool workers are still using java logger. Need to change to kiwi logger (and check for names, they are weird)
+12. Metrics registry replace concurrent hash map with simple hash map, use as values atomic classes
+    Currently in JFR.LockInstances Total Blocked time is 1.586s for 5 min run
