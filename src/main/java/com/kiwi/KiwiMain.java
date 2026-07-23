@@ -21,7 +21,7 @@ public class KiwiMain {
         final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
         final var persistentContainer = PersistentModule.create(observabilityContainer, configContainer);
         final var serverContainer = ServerModule.create(observabilityContainer, persistentContainer,
-                concurrencyContainer, configContainer);
+                concurrencyContainer, configContainer, jvmContainer);
         final long end = System.currentTimeMillis();
         log.info("Kiwi initialized in [" + (end - start) + "]ms, starting server");
         serverContainer.start();

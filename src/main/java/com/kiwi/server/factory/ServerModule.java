@@ -2,6 +2,7 @@ package com.kiwi.server.factory;
 
 import com.kiwi.concurrency.factory.ConcurrencyContainer;
 import com.kiwi.config.domain.Config;
+import com.kiwi.jvm.factory.JvmModuleContainer;
 import com.kiwi.observability.factory.ObservabilityContainer;
 import com.kiwi.persistent.factory.PersistentContainer;
 import com.kiwi.server.expiration.ExpirySampler;
@@ -21,8 +22,11 @@ import static com.kiwi.config.properties.Properties.SERVER_THREAD_POOL_NAME;
 
 public class ServerModule {
 
-    public static ServerContainer create(ObservabilityContainer observabilityContainer, PersistentContainer storageContainer,
-                                         ConcurrencyContainer concurrencyContainer, Config config) {
+    public static ServerContainer create(ObservabilityContainer observabilityContainer,
+                                         PersistentContainer storageContainer,
+                                         ConcurrencyContainer concurrencyContainer,
+                                         Config config,
+                                         JvmModuleContainer jvmContainer) {
         final var observabilityRequestHandler = observabilityContainer.metricsProvider();
         final var methodMetrics = observabilityContainer.methodMetrics();
         final var dispatcher = RequestDispatcher.create(
@@ -62,7 +66,8 @@ public class ServerModule {
                 config.evictionPolicy()
         );
         final var shutdownHook =
-                new ShutdownHook(tcpServer, concurrencyContainer.executors().values(), connectionRegistry, expirySampler);
+                new ShutdownHook(tcpServer, concurrencyContainer.executors().values(), connectionRegistry, expirySampler,
+                        jvmContainer.jfrController());
 
         return new ServerContainer(
                 tcpServer,
