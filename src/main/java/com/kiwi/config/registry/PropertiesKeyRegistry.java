@@ -17,6 +17,7 @@ import static com.kiwi.config.util.ConfigConstants.JVM_JFR_DIR;
 import static com.kiwi.config.util.ConfigConstants.JVM_JFR_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.JVM_JFR_MAX_AGE_SECONDS;
 import static com.kiwi.config.util.ConfigConstants.JVM_JFR_MAX_SIZE_BYTES;
+import static com.kiwi.config.util.ConfigConstants.JVM_JFR_THRESHOLD_MS;
 import static com.kiwi.config.util.ConfigConstants.JVM_SAFEPOINT_WATCHDOG_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.JVM_SAFEPOINT_WATCHDOG_PERIOD_MS;
 import static com.kiwi.config.util.ConfigConstants.MEMORY_MAX_BYTES;
@@ -70,6 +71,8 @@ public class PropertiesKeyRegistry {
                         "KV_JVM_SAFEPOINT_WATCHDOG_ENABLED", "false"));
                 map.put(JVM_SAFEPOINT_WATCHDOG_PERIOD_MS, new ConfigKey(JVM_SAFEPOINT_WATCHDOG_PERIOD_MS,
                         "KV_JVM_SAFEPOINT_WATCHDOG_PERIOD_MS", "100"));
+                map.put(JVM_JFR_THRESHOLD_MS, new ConfigKey(JVM_JFR_THRESHOLD_MS,
+                        "KV_JVM_JFR_THRESHOLD_MS", "1"));
 
                 this.configKeys = Collections.unmodifiableMap(map);
     }

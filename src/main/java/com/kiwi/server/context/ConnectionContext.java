@@ -9,13 +9,12 @@ import com.kiwi.server.response.model.TCPResponse;
 
 import java.net.Socket;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ConnectionContext {
     private static final KiwiLogger log = KiwiLoggerFactory.getLogger(ConnectionContext.class.getName());
 
-    private final UUID connectionId;
+    private final long connectionId;
     private final Socket socket;
     private final BackPressureGate backPressureGate;
     private volatile boolean isClosed;
@@ -25,7 +24,7 @@ public final class ConnectionContext {
 
     private volatile int closeAfter = -1;
 
-    public ConnectionContext(UUID connectionId,
+    public ConnectionContext(long connectionId,
                              Socket socket,
                              BackPressureGate backPressureGate,
                              boolean closed,
@@ -39,7 +38,7 @@ public final class ConnectionContext {
         this.writerLock = writerLock;
     }
 
-    public UUID connectionId() {
+    public long connectionId() {
         return connectionId;
     }
 
@@ -68,13 +67,24 @@ public final class ConnectionContext {
 
     public void addResponse(TCPResponse tcpResponse) {
         this.backPressureGate.signalIfBelowLow();
-        if (!this.isClosed() && writerProxy != null) {
-            if (!writerProxy.addResponse(tcpResponse)) {
-                log.warn("Close connection on slow client", "Trying to add response to context, when writer proxy is "
-                        + "not active or response queue is full", connectionId);
-                close();
-            }
+
+        if (this.isClosed() || writerProxy == null || !writerProxy.addResponse(tcpResponse)) {
+            log.warn("Close connection on slow client", "Could not add response to writer proxy. "
+                    + "Socket closed: [" + this.isClosed + "]");
+            tcpResponse.completeRequest();
+            close();
         }
+
+//        if (!this.isClosed() && writerProxy != null) {
+//            if (!writerProxy.addResponse(tcpResponse)) {
+//                log.warn("Close connection on slow client", "Trying to add response to context, when writer proxy is "
+//                        + "not active or response queue is full", connectionId);
+//                tcpResponse.completeRequest();
+//                close();
+//            }
+//        } else {
+//            tcpResponse.completeRequest();
+//        }
 
         if (closeAfter == tcpResponse.requestId()) {
             this.isClosed = false;

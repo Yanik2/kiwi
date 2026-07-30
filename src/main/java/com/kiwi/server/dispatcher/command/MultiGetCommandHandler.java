@@ -5,7 +5,7 @@ import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.OperationResult;
-import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.DefaultRequest;
 import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.MultiGetResponse;
 
@@ -19,7 +19,7 @@ public class MultiGetCommandHandler extends StorageCommandHandler {
 
     @Override
     public OperationResult handle(TCPRequest request, ConnectionContext context) {
-        final var parsedRequest = (ParsedRequest) request;
+        final var parsedRequest = (DefaultRequest) request;
         final var keys = parsedRequest.getKeys();
         final var result = new LinkedList<Optional<Value>>();
         for (byte[] key : keys) {

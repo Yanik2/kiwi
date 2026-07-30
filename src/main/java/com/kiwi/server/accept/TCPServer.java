@@ -15,7 +15,6 @@ import com.kiwi.server.response.WriterProxy;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +43,8 @@ public class TCPServer {
 
     private ServerSocket serverSocket;
 
+    private final KiwiThreadFactory threadFactory;
+
     public TCPServer(ConnectionReader connectionReader, ResponseWriter responseWriter,
                      RequestMetrics requestMetrics, BackPressureGate backPressureGate,
                      ConnectionRegistry connectionRegistry, int socketPort, int soTimeout, int maxClients, int backlog) {
@@ -56,7 +57,7 @@ public class TCPServer {
         this.soTimeout = soTimeout;
         this.maxClients = maxClients;
         this.backlog = backlog;
-        final var threadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX + "accept-loop");
+        this.threadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX + "accept-loop-");
         this.connectionThreadPool = Executors.newCachedThreadPool(threadFactory);
     }
 
@@ -71,7 +72,9 @@ public class TCPServer {
 
                 //for testing purposes timeout for 10 min
 //                socket.setSoTimeout(soTimeout);
-                socket.setSoTimeout(600000);
+                socket.setSoTimeout(soTimeout);
+                socket.setSoLinger(true, 0);
+//                socket.setTcpNoDelay(true);
 
                 requestMetrics.onConnection();
                 if (requestMetrics.getCurrentClients() > maxClients) {
@@ -79,12 +82,13 @@ public class TCPServer {
                     refuseConnection(socket);
                 } else {
                     requestMetrics.onAccept();
-                    final var requestInflightLock = new WriterLock();
+                    final var connectionId = threadFactory.getCurrentThreadNumber();
+                    final var requestInflightLock = new WriterLock(connectionId);
                     final var writerProxy = new WriterProxy(
-                            responseWriter, socket.getOutputStream(), requestMetrics, requestInflightLock);
+                            responseWriter, socket.getOutputStream(), requestMetrics, requestInflightLock, connectionId);
                     final var connectionContext =
                             new ConnectionContext(
-                                    UUID.randomUUID(), socket, backPressureGate, false, writerProxy, requestInflightLock
+                                    connectionId, socket, backPressureGate, false, writerProxy, requestInflightLock
                             );
                     connectionRegistry.register(connectionContext);
                     connectionThreadPool.execute(() -> connectionReader.readConnection(connectionContext));

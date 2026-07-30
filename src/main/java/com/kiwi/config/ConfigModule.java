@@ -30,6 +30,7 @@ import static com.kiwi.config.util.ConfigConstants.JVM_JFR_DIR;
 import static com.kiwi.config.util.ConfigConstants.JVM_JFR_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.JVM_JFR_MAX_AGE_SECONDS;
 import static com.kiwi.config.util.ConfigConstants.JVM_JFR_MAX_SIZE_BYTES;
+import static com.kiwi.config.util.ConfigConstants.JVM_JFR_THRESHOLD_MS;
 import static com.kiwi.config.util.ConfigConstants.JVM_SAFEPOINT_WATCHDOG_ENABLED;
 import static com.kiwi.config.util.ConfigConstants.JVM_SAFEPOINT_WATCHDOG_PERIOD_MS;
 import static com.kiwi.config.util.ConfigConstants.MEMORY_MAX_BYTES;
@@ -160,6 +161,11 @@ public class ConfigModule {
         final var jvmSafepointWatchodPeriodMsProperty = getProperty(sources, jvmSafepointWatchdogPeriodMsKey);
         builder.jvmSafepointWatchdogPeriodMs(valueParser.getInt(jvmSafepointWatchodPeriodMsProperty,
                 "Error during parsing jvm safepoint watchdog period ms: "));
+
+        final var jvmJfrThresholdMsKey = keyRegistry.getKey(JVM_JFR_THRESHOLD_MS);
+        final var jvmJfrThresholdMsProperty = getProperty(sources, jvmJfrThresholdMsKey);
+        builder.jvmJfrThresholdMs(valueParser.getInt(jvmJfrThresholdMsProperty,
+                "Error during parsing jfr threshold"));
 
         final var config = builder.build();
         logConfig(config);

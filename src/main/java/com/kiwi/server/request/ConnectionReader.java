@@ -10,11 +10,12 @@ import com.kiwi.server.buffer.Cursor;
 import com.kiwi.server.buffer.ReadBuffer;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.context.ConnectionRegistry;
-import com.kiwi.server.request.model.ParsedRequest;
-import com.kiwi.server.request.model.ParserResult;
+import com.kiwi.server.parsing.ParsedData;
+import com.kiwi.server.parsing.ParserResult;
 import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.TCPResponse;
 import com.kiwi.server.parsing.BinaryRequestParser;
+import com.kiwi.server.response.model.TCPResponseResult;
 
 import java.net.SocketTimeoutException;
 
@@ -29,17 +30,20 @@ public class ConnectionReader {
     private final KiwiThreadPoolExecutor taskExecutor;
     private final RequestHandler requestHandler;
     private final ConnectionRegistry connectionRegistry;
+    private final RequestBuilder requestBuilder;
 
     public ConnectionReader(BinaryRequestParser binaryRequestParser,
                             RequestMetrics requestMetrics,
                             KiwiThreadPoolExecutor taskExecutor,
                             RequestHandler requestHandler,
-                            ConnectionRegistry connectionRegistry) {
+                            ConnectionRegistry connectionRegistry,
+                            RequestBuilder requestBuilder) {
         this.requestParser = binaryRequestParser;
         this.requestMetrics = requestMetrics;
         this.taskExecutor = taskExecutor;
         this.requestHandler = requestHandler;
         this.connectionRegistry = connectionRegistry;
+        this.requestBuilder = requestBuilder;
     }
 
     public void readConnection(ConnectionContext context) {
@@ -56,11 +60,14 @@ public class ConnectionReader {
                     break;
                 }
                 cursor.reset();
-                final var parserResults = requestParser.parse(cursor, context);
+                final var parserResults = requestParser.parse(cursor);
                 if (!parserResults.isEmpty()) {
-                    for (ParserResult<ParsedRequest> parserResult : parserResults) {
+                    for (ParserResult<ParsedData> parserResult : parserResults) {
                         switch (parserResult.status()) {
-                            case OK -> delegateTask(context, parserResult.value());
+                            case OK -> {
+                                final var request = requestBuilder.build(parserResult.value(), context);
+                                delegateTask(context, request);
+                            }
                             case NEED_MORE_DATA -> {
                             }
                             case ERROR -> throw parserResult.error();
@@ -89,7 +96,8 @@ public class ConnectionReader {
 
     private void onError(ProtocolException ex, ConnectionContext context) {
         log.error("Error in protocol parsing", ex.getMessage(), context.connectionId());
-        context.addResponse(new TCPResponse(context.getRequestId(), ERROR_MESSAGE, false, context.connectionId()));
+        context.addResponse(new TCPResponse(context.getRequestId(), ERROR_MESSAGE, false, context.connectionId(),
+                TCPResponseResult.PROTOCOL_ERROR));
         requestMetrics.onProtoError(ex.getProtocolErrorCode());
     }
 

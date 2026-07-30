@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static com.kiwi.config.properties.Properties.BP_HIGH_LOAD_WATERMARK;
 import static com.kiwi.config.properties.Properties.BP_LOW_LOAD_WATERMARK;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class BackPressureGate {
 
@@ -30,12 +30,13 @@ public class BackPressureGate {
         lock.lock();
         try {
             if (this.threadPoolExecutor.getLoadFactor() >= BP_HIGH_LOAD_WATERMARK) {
+                threadPoolExecutor.onHighLoad(this.closed);
                 this.closed = true;
             }
             while (closed) {
                 tpMetrics.onBpPaused(1);
                 tpMetrics.onBpPauses();
-                overloaded.await(10, SECONDS);
+                overloaded.await(500, MILLISECONDS);
                 tpMetrics.onBpPaused(-1);
             }
         } catch (InterruptedException ex) {
@@ -51,6 +52,7 @@ public class BackPressureGate {
         if (closed && this.threadPoolExecutor.getLoadFactor() <= BP_LOW_LOAD_WATERMARK) {
             this.closed = false;
             overloaded.signalAll();
+            threadPoolExecutor.onReturnToNormalLoad(this.closed);
         }
         lock.unlock();
     }

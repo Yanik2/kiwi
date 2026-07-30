@@ -10,6 +10,7 @@ import com.kiwi.server.hook.ShutdownHook;
 import com.kiwi.server.backpressure.BackPressureGate;
 import com.kiwi.server.context.ConnectionRegistry;
 import com.kiwi.server.request.ConnectionReader;
+import com.kiwi.server.request.RequestBuilder;
 import com.kiwi.server.request.RequestHandler;
 import com.kiwi.server.dispatcher.RequestDispatcher;
 import com.kiwi.server.validator.BaseRequestValidator;
@@ -40,12 +41,14 @@ public class ServerModule {
         final var connectionRegistry = new ConnectionRegistry();
         final var parser = new BinaryRequestParser();
         final var requestHandler = new RequestHandler(dispatcher, requestValidator, requestMetrics);
+        final var requestBuilder = new RequestBuilder(jvmContainer.jfrEventFactory());
         final var connectionReader = new ConnectionReader(
                 parser,
                 requestMetrics,
                 concurrencyContainer.executors().get(SERVER_THREAD_POOL_EXECUTOR_NAME),
                 requestHandler,
-                connectionRegistry
+                connectionRegistry,
+                requestBuilder
         );
         final var responseWriter = new ResponseWriter();
         final var backPressureGate = new BackPressureGate(

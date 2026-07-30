@@ -6,6 +6,7 @@ import com.kiwi.jvm.provider.JvmInfoProvider;
 
 public record JvmModuleContainer(
         JvmInfoProvider jvmInfoProvider,
-        JfrController jfrController
+        JfrController jfrController,
+        JfrEventFactory jfrEventFactory
 ) {
 }

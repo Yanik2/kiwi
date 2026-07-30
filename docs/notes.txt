@@ -11,3 +11,7 @@
 11. Thread pool workers are still using java logger. Need to change to kiwi logger (and check for names, they are weird)
 12. Metrics registry replace concurrent hash map with simple hash map, use as values atomic classes
     Currently in JFR.LockInstances Total Blocked time is 1.586s for 5 min run
+13. Calculate relations between inflight requests, backpressure and queue size in thread pool
+14. Something blocking request in WriterProxy, it can wait for write more than 20 seconds
+15. On timeout response being added into queue, but writer thread is stopped, so method returns true as response was
+    added to writer queue, but never was read from queue

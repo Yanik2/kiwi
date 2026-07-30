@@ -1,7 +1,6 @@
-package com.kiwi.server.request.model;
+package com.kiwi.server.parsing;
 
 import com.kiwi.exception.protocol.ProtocolException;
-import com.kiwi.server.parsing.ParsingStatus;
 
 public record ParserResult<T>(ParsingStatus status, T value, ProtocolException error) {
     public ParserResult(ParsingStatus status, ProtocolException error) {

@@ -5,7 +5,7 @@ import com.kiwi.persistent.model.Key;
 import com.kiwi.persistent.model.Value;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.OperationResult;
-import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.DefaultRequest;
 import com.kiwi.server.request.model.TCPRequest;
 import com.kiwi.server.response.model.DataResponse;
 
@@ -16,7 +16,7 @@ public class GetCommandHandler extends StorageCommandHandler {
 
     @Override
     public OperationResult handle(TCPRequest request, ConnectionContext context) {
-        final var parsedRequest = (ParsedRequest) request;
+        final var parsedRequest = (DefaultRequest) request;
         final var value = storageFacade.read(new Key(parsedRequest.getKey()));
         return new OperationResult(new DataResponse(value.orElseGet(() -> new Value(new byte[0]))), true);
     }

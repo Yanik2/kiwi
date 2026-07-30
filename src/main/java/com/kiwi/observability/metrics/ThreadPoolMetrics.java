@@ -9,4 +9,5 @@ public interface ThreadPoolMetrics {
     void onTaskRejected();
     void onBpPaused(int delta);
     void onBpPauses();
+    int getRejectedTotal();
 }

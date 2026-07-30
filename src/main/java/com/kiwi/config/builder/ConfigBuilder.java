@@ -40,9 +40,15 @@ public class ConfigBuilder {
     private boolean jvmArenaDebugPoisoning;
     private boolean jvmSafepointWatchdogEnabled;
     private int jvmSafepointWatchdogPeriodMs;
+    private int jvmJfrThresholdMs;
 
 
     public ConfigBuilder() {}
+
+    public ConfigBuilder jvmJfrThresholdMs(int jvmJfrThresholdMs) {
+        this.jvmJfrThresholdMs = jvmJfrThresholdMs;
+        return this;
+    }
 
     public ConfigBuilder jvmSafepointWatchdogPeriodMs(int safepointWatchdogPeriodMs) {
         this.jvmSafepointWatchdogPeriodMs = safepointWatchdogPeriodMs;
@@ -198,12 +204,16 @@ public class ConfigBuilder {
             throw new ConfigurationValidationException("Invalid java safepoint watchdog period: "
                     + jvmSafepointWatchdogPeriodMs);
         }
+        if (jvmJfrThresholdMs < 0) {
+            throw new ConfigurationValidationException("Invalid java flight recorder threshold");
+        }
 
         return new Config(this.port, this.backlog, this.maxClients, this.soTimeoutMillis, this.metricsEnabled,
                 ttlSamplerPeriodMs, ttlSampleBatch, ttlBackoffMaxMs, memoryMaxBytes, EvictionPolicy.get(evictionPolicy),
                 new JvmConfig(this.jvmInfoEnabled, this.jvmJfrEnabled, this.jvmJfrDir, this.jvmJfrMaxAgeSeconds,
-                        this.jvmJfrMaxSizeBytes, JvmBuffersStrategy.valueOf(this.jvmBuffersStrategy.toUpperCase()),
-                        this.jvmBuffersPoolingEnabled, this.jvmBuffersLeakTrackingEnabled, this.jvmArenaEnabled,
-                        this.jvmArenaDebugPoisoning, this.jvmSafepointWatchdogEnabled, this.jvmSafepointWatchdogPeriodMs));
+                        this.jvmJfrMaxSizeBytes, this.jvmJfrThresholdMs,
+                        JvmBuffersStrategy.valueOf(this.jvmBuffersStrategy.toUpperCase()), this.jvmBuffersPoolingEnabled,
+                        this.jvmBuffersLeakTrackingEnabled, this.jvmArenaEnabled, this.jvmArenaDebugPoisoning,
+                        this.jvmSafepointWatchdogEnabled, this.jvmSafepointWatchdogPeriodMs));
     }
 }

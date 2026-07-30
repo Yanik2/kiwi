@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentMap;
 public final class MetricsRegistry {
     private static final MetricsRegistry instance = new MetricsRegistry();
 
+    // refactor to use Atomic
     private final ConcurrentMap<String, Long> gauges = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Long> counters = new ConcurrentHashMap<>();
 
@@ -55,6 +56,10 @@ public final class MetricsRegistry {
 
     public long getGauge(String name) {
         return gauges.get(name);
+    }
+
+    public long getCounter(String name) {
+        return counters.get(name);
     }
 
 }

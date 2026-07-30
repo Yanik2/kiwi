@@ -1,11 +1,9 @@
 package com.kiwi.server.parsing;
 
 import com.kiwi.exception.protocol.ProtocolException;
-import com.kiwi.server.request.Method;
 import com.kiwi.server.buffer.Cursor;
-import com.kiwi.server.context.ConnectionContext;
-import com.kiwi.server.request.model.ParsedRequest;
-import com.kiwi.server.request.model.ParserResult;
+import com.kiwi.server.request.Method;
+import com.kiwi.server.request.model.DefaultRequest;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,11 +24,11 @@ public class BinaryRequestParser {
     private static final int MAX_KEY_LENGTH = 4096;
     private static final int MAX_VALUE_LENGTH = 10485760;
 
-    public List<ParserResult<ParsedRequest>> parse(Cursor cursor, ConnectionContext context) {
-        final var results = new LinkedList<ParserResult<ParsedRequest>>();
+    public List<ParserResult<ParsedData>> parse(Cursor cursor) {
+        final var results = new LinkedList<ParserResult<ParsedData>>();
 
         while (cursor.bytesAvailable() > 0) {
-            final var parsedRequest = parseRequest(cursor, context);
+            final var parsedRequest = parseRequest(cursor);
             results.add(parsedRequest);
             if (ERROR == parsedRequest.status()) {
                 break;
@@ -40,7 +38,7 @@ public class BinaryRequestParser {
         return results;
     }
 
-    private ParserResult<ParsedRequest> parseRequest(Cursor cursor, ConnectionContext context) {
+    private ParserResult<ParsedData> parseRequest(Cursor cursor) {
         final var bytesAvailable = cursor.bytesAvailable();
 
         if (bytesAvailable < 12) {
@@ -57,7 +55,7 @@ public class BinaryRequestParser {
         final var method = parsedMethod.value();
         final var multikeysSize = getHeaderLength(cursor, MULTIKEYS_HEADER_LEN);
 
-        final var keyValuePairs = new LinkedList<ParsedRequest.KeyValuePair>();
+        final var keyValuePairs = new LinkedList<DefaultRequest.KeyValuePair>();
         for (int i = 0; i < multikeysSize; i++) {
             if (cursor.bytesAvailable() < 6) {
                 cursor.toEnd();
@@ -66,7 +64,7 @@ public class BinaryRequestParser {
 
             final var keyLength = getHeaderLength(cursor, KEY_HEADER_LEN);
             final var valueLength = getHeaderLength(cursor, VALUE_HEADER_LEN);
-            if (!isHeaderValid(keyLength, MAX_KEY_LENGTH) || !isHeaderValid(valueLength, MAX_VALUE_LENGTH)) {
+            if (headerNotValid(keyLength, MAX_KEY_LENGTH) || headerNotValid(valueLength, MAX_VALUE_LENGTH)) {
                 return new ParserResult<>(ERROR, new ProtocolException("Header is invalid", INVALID_HEADER));
             }
 
@@ -77,10 +75,10 @@ public class BinaryRequestParser {
 
             final var key = cursor.getBytes(new byte[keyLength], keyLength);
             final var value = cursor.getBytes(new byte[valueLength], valueLength);
-            keyValuePairs.add(new ParsedRequest.KeyValuePair(key, value));
+            keyValuePairs.add(new DefaultRequest.KeyValuePair(key, value));
         }
 
-        return validateSeparatorAndReturn(cursor, context, flags, method, keyValuePairs);
+        return validateSeparatorAndReturn(cursor, flags, method, keyValuePairs);
     }
 
     private int getHeaderLength(Cursor cursor, int headerSize) {
@@ -103,11 +101,10 @@ public class BinaryRequestParser {
         }
     }
 
-    private ParserResult<ParsedRequest> validateSeparatorAndReturn(Cursor cursor,
-                                                                   ConnectionContext context,
-                                                                   byte flags,
-                                                                   Method method,
-                                                                   List<ParsedRequest.KeyValuePair> keyValuePairs) {
+    private ParserResult<ParsedData> validateSeparatorAndReturn(Cursor cursor,
+                                                                byte flags,
+                                                                Method method,
+                                                                List<DefaultRequest.KeyValuePair> keyValuePairs) {
         if (cursor.bytesAvailable() < 2) {
             cursor.toEnd();
             return new ParserResult<>(NEED_MORE_DATA);
@@ -116,13 +113,13 @@ public class BinaryRequestParser {
         final var secondByte = cursor.pop();
         if (SEPARATOR[0] == firstByte && SEPARATOR[1] == secondByte) {
             cursor.advance();
-            return new ParserResult<>(OK, new ParsedRequest(context.getRequestId(), flags, method, keyValuePairs));
+            return new ParserResult<>(OK, new ParsedData(flags, method, keyValuePairs));
         } else {
             return new ParserResult<>(ERROR, new ProtocolException("Separator does not validate", INVALID_SEPARATOR));
         }
     }
 
-    private boolean isHeaderValid(int header, int maxValue) {
-        return header >= 0 && header <= maxValue;
+    private boolean headerNotValid(int header, int maxValue) {
+        return header < 0 || header > maxValue;
     }
 }
