@@ -15,8 +15,11 @@ import com.kiwi.server.response.WriterProxy;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.kiwi.config.properties.Properties.THREAD_NAME_PREFIX;
 import static com.kiwi.server.accept.ServerStatus.RUNNING;
@@ -36,14 +39,11 @@ public class TCPServer {
     private final int soTimeout;
     private final int maxClients;
     private final int backlog;
-
-    private final ExecutorService connectionThreadPool;
-
     private volatile ServerStatus status;
-
     private ServerSocket serverSocket;
-
     private final KiwiThreadFactory threadFactory;
+    private final AtomicLong threadId = new AtomicLong();
+    private final Map<String, Thread> connectionThreadPool = new HashMap<>();
 
     public TCPServer(ConnectionReader connectionReader, ResponseWriter responseWriter,
                      RequestMetrics requestMetrics, BackPressureGate backPressureGate,
@@ -58,7 +58,6 @@ public class TCPServer {
         this.maxClients = maxClients;
         this.backlog = backlog;
         this.threadFactory = new KiwiThreadFactory(THREAD_NAME_PREFIX + "accept-loop-");
-        this.connectionThreadPool = Executors.newCachedThreadPool(threadFactory);
     }
 
     public void start() throws Exception {
@@ -69,12 +68,7 @@ public class TCPServer {
             Socket socket = null;
             try {
                 socket = serverSocket.accept();
-
-                //for testing purposes timeout for 10 min
-//                socket.setSoTimeout(soTimeout);
                 socket.setSoTimeout(soTimeout);
-                socket.setSoLinger(true, 0);
-//                socket.setTcpNoDelay(true);
 
                 requestMetrics.onConnection();
                 if (requestMetrics.getCurrentClients() > maxClients) {
@@ -82,16 +76,20 @@ public class TCPServer {
                     refuseConnection(socket);
                 } else {
                     requestMetrics.onAccept();
-                    final var connectionId = threadFactory.getCurrentThreadNumber();
+                    final var connectionId = threadId.getAndIncrement();
                     final var requestInflightLock = new WriterLock(connectionId);
                     final var writerProxy = new WriterProxy(
                             responseWriter, socket.getOutputStream(), requestMetrics, requestInflightLock, connectionId);
+                    final var threadName = THREAD_NAME_PREFIX + "read-loop-" + connectionId;
                     final var connectionContext =
                             new ConnectionContext(
-                                    connectionId, socket, backPressureGate, false, writerProxy, requestInflightLock
+                                    connectionId, socket, backPressureGate, false, writerProxy, requestInflightLock,
+                                    () -> connectionThreadPool.remove(threadName)
                             );
                     connectionRegistry.register(connectionContext);
-                    connectionThreadPool.execute(() -> connectionReader.readConnection(connectionContext));
+                    final var thread = threadFactory.newThread(
+                            () -> connectionReader.readConnection(connectionContext), connectionId);
+                    thread.start();
                 }
             } catch (Exception ex) {
                 if (STOPPING == status) {
@@ -110,11 +108,16 @@ public class TCPServer {
 
         }
 
-        connectionThreadPool.shutdown();
-        if (!connectionThreadPool.awaitTermination(10, SECONDS)) {
-            log.warn("Server will be stopped immediately", "Timeout elapsed on readers threads stop");
-            connectionThreadPool.shutdownNow();
+        for (Thread t : connectionThreadPool.values()) {
+            if (t.isAlive()) {
+                t.interrupt();
+                t.join(10000);
+                if (t.isAlive()) {
+                    log.warn("Could not stop thread: " + t.getName() + ". Will be dropped");
+                }
+            }
         }
+        connectionThreadPool.clear();
         this.status = STOPPED;
     }
 

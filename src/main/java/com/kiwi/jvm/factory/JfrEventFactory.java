@@ -78,7 +78,7 @@ public class JfrEventFactory {
         queueFields.add(new ValueDescriptor(String.class, "executorName", executorNameLabel));
 
         final var queueSizeLabel = Collections.singletonList(new AnnotationElement(Label.class, "Queue size"));
-        queueFields.add(new ValueDescriptor(String.class, "queueSize", queueSizeLabel));
+        queueFields.add(new ValueDescriptor(int.class, "queueSize", queueSizeLabel));
 
         final var queueCapacityLabel = Collections.singletonList(new AnnotationElement(Label.class, "Queue cap"));
         queueFields.add(new ValueDescriptor(int.class, "queueCapacity", queueCapacityLabel));

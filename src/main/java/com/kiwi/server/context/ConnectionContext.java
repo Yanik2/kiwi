@@ -21,6 +21,7 @@ public final class ConnectionContext {
     private final AtomicInteger requestIdSequence = new AtomicInteger(1);
     private final WriterProxy writerProxy;
     private final WriterLock writerLock;
+    private final Runnable closeCallback;
 
     private volatile int closeAfter = -1;
 
@@ -29,13 +30,15 @@ public final class ConnectionContext {
                              BackPressureGate backPressureGate,
                              boolean closed,
                              WriterProxy writerProxy,
-                             WriterLock writerLock) {
+                             WriterLock writerLock,
+                             Runnable closeCallback) {
         this.connectionId = connectionId;
         this.socket = socket;
         this.backPressureGate = backPressureGate;
         this.isClosed = closed;
         this.writerProxy = writerProxy;
         this.writerLock = writerLock;
+        this.closeCallback = closeCallback;
     }
 
     public long connectionId() {
@@ -59,6 +62,7 @@ public final class ConnectionContext {
                 //ignore if socket already closed
             }
         }
+        closeCallback.run();
     }
 
     public int getRequestId() {
@@ -74,17 +78,6 @@ public final class ConnectionContext {
             tcpResponse.completeRequest();
             close();
         }
-
-//        if (!this.isClosed() && writerProxy != null) {
-//            if (!writerProxy.addResponse(tcpResponse)) {
-//                log.warn("Close connection on slow client", "Trying to add response to context, when writer proxy is "
-//                        + "not active or response queue is full", connectionId);
-//                tcpResponse.completeRequest();
-//                close();
-//            }
-//        } else {
-//            tcpResponse.completeRequest();
-//        }
 
         if (closeAfter == tcpResponse.requestId()) {
             this.isClosed = false;

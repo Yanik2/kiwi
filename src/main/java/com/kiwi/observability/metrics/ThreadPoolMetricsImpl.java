@@ -61,7 +61,7 @@ public class ThreadPoolMetricsImpl implements ThreadPoolMetrics {
         metricsRegistry.updateCounter(threadPoolName + BP_PAUSE_COUNT);
     }
 
-    public int getRejectedTotal() {
+    public long getRejectedTotal() {
         return (int) metricsRegistry.getCounter(threadPoolName + TP_TASK_REJECTED);
     }
 

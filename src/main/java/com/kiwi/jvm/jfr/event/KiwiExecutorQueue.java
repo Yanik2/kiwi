@@ -12,7 +12,7 @@ public class KiwiExecutorQueue implements KiwiEvent {
     }
 
     public void onEvent(String executorName, int queueSize, int queueCap, int activeWorkers, int maxWorkers,
-                           int rejectedTotal, boolean backpressureActive) {
+                           long rejectedTotal, boolean backpressureActive) {
         if (isJfrEnabled) {
             event.set(0, executorName);
             event.set(1, queueSize);

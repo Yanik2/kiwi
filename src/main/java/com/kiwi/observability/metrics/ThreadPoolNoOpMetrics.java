@@ -42,7 +42,7 @@ public class ThreadPoolNoOpMetrics implements ThreadPoolMetrics {
     }
 
     @Override
-    public int getRejectedTotal() {
+    public long getRejectedTotal() {
         return 0;
     }
 }

@@ -30,15 +30,17 @@ public class KiwiRequest implements KiwiEvent {
 
     public void startExecution() {
         if (isJfrEnabled) {
-            this.beforeExecutionWait = System.nanoTime() - startTime;
-            this.startTime = System.nanoTime();
+            final var currentTime = System.nanoTime();
+            this.beforeExecutionWait = currentTime - startTime;
+            this.startTime = currentTime;
         }
     }
 
     public void waitForComplete() {
         if (isJfrEnabled) {
-            this.executionDuration = System.nanoTime() - startTime;
-            this.startTime = System.nanoTime();
+            final var currentTime = System.nanoTime();
+            this.executionDuration = currentTime - startTime;
+            this.startTime = currentTime;
         }
     }
 

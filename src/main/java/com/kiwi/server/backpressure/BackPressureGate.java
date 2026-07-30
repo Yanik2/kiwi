@@ -30,8 +30,8 @@ public class BackPressureGate {
         lock.lock();
         try {
             if (this.threadPoolExecutor.getLoadFactor() >= BP_HIGH_LOAD_WATERMARK) {
-                threadPoolExecutor.onHighLoad(this.closed);
                 this.closed = true;
+                threadPoolExecutor.onHighLoad(this.closed);
             }
             while (closed) {
                 tpMetrics.onBpPaused(1);
