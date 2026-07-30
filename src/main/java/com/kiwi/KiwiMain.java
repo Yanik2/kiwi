@@ -14,15 +14,15 @@ public class KiwiMain {
 
     public static void main(String[] args) throws Exception {
         log.info("Starting initialization Kiwi");
-        final long start = System.currentTimeMillis();
+        final long start = System.nanoTime() / 1000000;
         final var configContainer = ConfigModule.createConfig();
         final var jvmContainer = JvmModule.create(configContainer.jvmConfig());
-        final var observabilityContainer = ObservabilityModule.create(configContainer, jvmContainer);
-        final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer);
+        final var observabilityContainer = ObservabilityModule.create(configContainer, jvmContainer.jvmInfoProvider());
+        final var concurrencyContainer = ConcurrencyModule.create(observabilityContainer, jvmContainer);
         final var persistentContainer = PersistentModule.create(observabilityContainer, configContainer);
         final var serverContainer = ServerModule.create(observabilityContainer, persistentContainer,
                 concurrencyContainer, configContainer, jvmContainer);
-        final long end = System.currentTimeMillis();
+        final long end = System.nanoTime() / 1000000;
         log.info("Kiwi initialized in [" + (end - start) + "]ms, starting server");
         serverContainer.start();
     }

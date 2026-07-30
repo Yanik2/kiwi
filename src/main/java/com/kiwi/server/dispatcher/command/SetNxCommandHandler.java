@@ -7,7 +7,7 @@ import com.kiwi.persistent.model.expiration.NoOpExpiration;
 import com.kiwi.persistent.mutation.MutationDecision;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.dispatcher.OperationResult;
-import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.DefaultRequest;
 import com.kiwi.server.request.model.TCPRequest;
 
 import static com.kiwi.server.response.model.BinaryResponseValues.FAIL;
@@ -20,7 +20,7 @@ public class SetNxCommandHandler extends StorageCommandHandler {
 
     @Override
     public OperationResult handle(TCPRequest request, ConnectionContext context) {
-        final var parsedRequest = (ParsedRequest) request;
+        final var parsedRequest = (DefaultRequest) request;
 
         final var mutationResult = storageFacade.mutate(new Key(parsedRequest.getKey()), state -> {
             if (state.exists()) {

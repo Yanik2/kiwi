@@ -40,4 +40,9 @@ public class ThreadPoolNoOpMetrics implements ThreadPoolMetrics {
     public void onBpPauses() {
 
     }
+
+    @Override
+    public long getRejectedTotal() {
+        return 0;
+    }
 }

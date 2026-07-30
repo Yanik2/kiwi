@@ -25,7 +25,7 @@ public final class ConfigConstants {
     public static final String JVM_ARENA_DEBUG_POISONING = "jvm.arena.debug_poisoning";
     public static final String JVM_SAFEPOINT_WATCHDOG_ENABLED = "jvm.safepoint_watchdog.enabled";
     public static final String JVM_SAFEPOINT_WATCHDOG_PERIOD_MS = "jvm.safepoint_watchdog.period_ms";
-
+    public static final String JVM_JFR_THRESHOLD_MS = "jvm.jfr.request_event_threshold";
 
     private ConfigConstants() {}
 }

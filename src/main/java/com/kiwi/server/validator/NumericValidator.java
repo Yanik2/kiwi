@@ -2,7 +2,7 @@ package com.kiwi.server.validator;
 
 import com.kiwi.exception.protocol.ProtocolException;
 import com.kiwi.server.request.model.NumericRequest;
-import com.kiwi.server.request.model.ParsedRequest;
+import com.kiwi.server.request.model.DefaultRequest;
 import com.kiwi.server.request.model.TCPRequest;
 
 import java.util.List;
@@ -25,20 +25,20 @@ public class NumericValidator extends SingleKeyValidator {
             return singleKeyValidation;
         }
 
-        final var parsedRequest = (ParsedRequest) request;
+        final var defaultRequest = (DefaultRequest) request;
         long result = 1;
-        if (parsedRequest.getMethod().withValue()) {
-            final byte[] byteValue = parsedRequest.getValue();
-            final var maxLength = EXPIRE.equals(parsedRequest.getMethod())
+        if (defaultRequest.getMethod().withValue()) {
+            final byte[] byteValue = defaultRequest.getValue();
+            final var maxLength = EXPIRE.equals(defaultRequest.getMethod())
                     ? EXPIRE_MAX_VALUE_LENGTH
                     : NUMERIC_LONG_MAX_VALUE_LENGTH;
 
             if (byteValue.length > maxLength) {
-                return new ValidationResult(parsedRequest, List.of(
+                return new ValidationResult(defaultRequest, List.of(
                         new ProtocolException("Length for value in numeric request is too long", VALUE_TOO_LONG)));
             }
             if (byteValue.length < 1) {
-                return new ValidationResult(parsedRequest, List.of(
+                return new ValidationResult(defaultRequest, List.of(
                         new ProtocolException("Length for value in numeric request is too short", VALUE_TOO_SHORT)));
             }
 
@@ -47,7 +47,7 @@ public class NumericValidator extends SingleKeyValidator {
 
             if (isNegative) {
                 if (byteValue.length < 2) {
-                    return new ValidationResult(parsedRequest, List.of(
+                    return new ValidationResult(defaultRequest, List.of(
                             new ProtocolException("Non digit in value for numeric request", NON_DIGIT_IN_NUMERIC_VALUE)));
                 }
                 index = 1;
@@ -61,21 +61,21 @@ public class NumericValidator extends SingleKeyValidator {
                 result *= 10;
                 final int digit = byteValue[index] - ZERO_ASCII;
                 if (digit < 0 || digit > 9) {
-                    return new ValidationResult(parsedRequest, List.of(
+                    return new ValidationResult(defaultRequest, List.of(
                             new ProtocolException("Non digit in value for expiration request", NON_DIGIT_IN_NUMERIC_VALUE)));
                 }
 
                 if ((result + digit) < result) {
-                    return new ValidationResult(parsedRequest, List.of(
+                    return new ValidationResult(defaultRequest, List.of(
                             new ProtocolException("Overflow in request numeric value", NUMERIC_VALUE_IS_TOO_BIG)
                     ));
                 }
                 result += digit;
             }
 
-            result = EXPIRE.equals(parsedRequest.getMethod()) ? result * 1000 : result;
+            result = EXPIRE.equals(defaultRequest.getMethod()) ? result * 1000 : result;
             if (result < 0) {
-                return new ValidationResult(parsedRequest, List.of(
+                return new ValidationResult(defaultRequest, List.of(
                         new ProtocolException("Seconds value is too big for expiration request", VALUE_TOO_LONG)));
             }
 
@@ -83,11 +83,12 @@ public class NumericValidator extends SingleKeyValidator {
         }
 
         return new ValidationResult(
-                new NumericRequest(parsedRequest.getRequestId(),
-                        parsedRequest.getFlags(),
-                        parsedRequest.getKey(),
+                new NumericRequest(defaultRequest.getRequestId(),
+                        defaultRequest.getFlags(),
+                        defaultRequest.getKey(),
                         result,
-                        parsedRequest.getMethod()),
+                        defaultRequest.getMethod(),
+                        defaultRequest.getKiwiRequest()),
                 List.of()
         );
     }

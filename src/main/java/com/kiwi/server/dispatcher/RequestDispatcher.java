@@ -22,8 +22,6 @@ import static com.kiwi.server.request.Method.PTTL;
 import static com.kiwi.server.request.Method.SET;
 import static com.kiwi.server.request.Method.SETNX;
 import static com.kiwi.server.request.Method.TTL;
-import static com.kiwi.server.util.ServerConstants.ERROR_MESSAGE;
-import static com.kiwi.server.util.ServerConstants.OK_MESSAGE;
 
 import com.kiwi.observability.metrics.MethodMetrics;
 import com.kiwi.observability.MetricsProvider;
@@ -50,7 +48,6 @@ import com.kiwi.server.dispatcher.command.TtlCommandHandler;
 import com.kiwi.server.request.Method;
 import com.kiwi.server.context.ConnectionContext;
 import com.kiwi.server.request.model.TCPRequest;
-import com.kiwi.server.response.model.TCPResponse;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
@@ -101,10 +98,11 @@ public class RequestDispatcher {
         return new RequestDispatcher(metrics, Collections.unmodifiableMap(commands));
     }
 
-    public TCPResponse dispatch(TCPRequest request, ConnectionContext context) {
+    public OperationResult dispatch(TCPRequest request, ConnectionContext context) {
         final var result = commands.get(request.getMethod()).handle(request, context);
         metrics.onRequest(request.getMethod());
-        return new TCPResponse(request.getRequestId(), request.getMethod(), context.connectionId(), result.value(),
-                result.success() ? OK_MESSAGE : ERROR_MESSAGE, result.success());
+        return result;
+//        return new TCPResponse(request.getRequestId(), request.getMethod(), context.connectionId(), result.value(),
+//                result.success() ? OK_MESSAGE : ERROR_MESSAGE, result.success());
     }
 }

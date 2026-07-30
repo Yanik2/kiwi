@@ -8,7 +8,6 @@ import com.kiwi.observability.metrics.ThreadPoolMetrics;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 public class KiwiThreadPool {
     private static final KiwiLogger log = KiwiLoggerFactory.getLogger(KiwiThreadPool.class.getName());
@@ -96,8 +95,20 @@ public class KiwiThreadPool {
         };
     }
 
+    public int getQueueSize() {
+        return queue.size();
+    }
+
+    public int getActiveWorkers() {
+        return (int) workers.values().stream().filter(w -> w.isRunning).count();
+    }
+
+    public int getMaxWorkers() {
+        return workers.size();
+    }
+
     private static class Worker implements Runnable {
-        private final Logger log;
+        private final KiwiLogger log;
         private final BlockingQueue<Runnable> queue;
         private final String name;
         private final Consumer<String> onError;
@@ -110,7 +121,7 @@ public class KiwiThreadPool {
                       Consumer<String> onWorkerDone) {
             this.queue = queue;
             this.name = name;
-            this.log = Logger.getLogger(Worker.class.getSimpleName() + "-" + name);
+            this.log = KiwiLoggerFactory.getLogger(Worker.class.getSimpleName() + "-" + name);
             this.onError = onError;
             this.metrics = metrics;
             this.onWorkerDone = onWorkerDone;
@@ -135,11 +146,11 @@ public class KiwiThreadPool {
                     }
                 }
             } catch (KiwiGeneralException ex) {
-                log.severe("Task execution failed, worker [%s], error: %s".formatted(this.name, ex.getMessage()));
+                log.error("Task execution failed, worker[%s]".formatted(this.name), ex.getMessage());
                 metrics.onTaskCompleted();
             } catch (Exception ex) {
-                log.severe("Thread [%s] for worker [%s] was interrupted with exception: %s".formatted(
-                        Thread.currentThread().getName(), this.name, ex.getMessage()));
+                log.error("Thread [%s] for worker [%s] was interrupted".formatted(
+                        Thread.currentThread().getName(), this.name), ex.getMessage());
                 onError.accept(this.name);
             } finally {
                 if (!isRunning) {
@@ -164,6 +175,10 @@ public class KiwiThreadPool {
             log.error("Task will be rejected", ex.getMessage());
             return false;
         }
+    }
+
+    public int getQueueCap() {
+        return this.queueCap;
     }
 
     public double getLoadFactor() {

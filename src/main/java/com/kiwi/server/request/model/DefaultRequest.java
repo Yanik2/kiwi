@@ -1,24 +1,26 @@
 package com.kiwi.server.request.model;
 
+import com.kiwi.jvm.jfr.event.KiwiRequest;
 import com.kiwi.server.request.Method;
 
 import java.util.Collections;
 import java.util.List;
 
-public final class ParsedRequest extends TCPRequest {
+public final class DefaultRequest extends TCPRequest {
     private final List<KeyValuePair> keyValuePairs;
 
-    public ParsedRequest(int requestId,
-                         int flags,
-                         Method method,
-                         List<KeyValuePair> keyValuePairs) {
-        super(requestId, flags, method);
+    public DefaultRequest(int requestId,
+                          KiwiRequest kiwiRequest,
+                          int flags,
+                          Method method,
+                          List<KeyValuePair> keyValuePairs) {
+        super(requestId, flags, method, kiwiRequest);
         this.keyValuePairs = keyValuePairs;
     }
 
-    public ParsedRequest(int requestId, int flags, Method method) {
-        this(requestId, flags, method, null);
-    }
+//    public DefaultRequest(int requestId, int flags, Method method) {
+//        this(requestId, flags, method, null);
+//    }
 
     public byte[] getKey() {
         return this.keyValuePairs.getFirst().key;

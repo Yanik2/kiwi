@@ -6,6 +6,7 @@ public record JvmConfig(
         String jfrDir,
         int jfrMaxAgeSeconds,
         int jfrMaxSizeBytes,
+        int jfrThreshold,
         JvmBuffersStrategy buffersStrategy,
         boolean buffersPoolingEnabled,
         boolean buffersLeakTrackingEnabled,
