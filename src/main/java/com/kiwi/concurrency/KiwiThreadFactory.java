@@ -1,8 +1,9 @@
 package com.kiwi.concurrency;
 
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class KiwiThreadFactory {
+public class KiwiThreadFactory implements ThreadFactory {
     private final AtomicLong threadNumber = new AtomicLong(1);
     private final String namePrefix;
 
@@ -15,6 +16,10 @@ public class KiwiThreadFactory {
                 namePrefix + threadNumber);
         thread.setUncaughtExceptionHandler(KiwiThreadUncaughtExceptionHandler.getInstance());
         return thread;
+    }
+
+    public Thread newThread(Runnable r) {
+        return newThread(r, threadNumber.incrementAndGet());
     }
 
 }

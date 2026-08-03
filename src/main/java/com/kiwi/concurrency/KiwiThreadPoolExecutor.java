@@ -109,7 +109,7 @@ public class KiwiThreadPoolExecutor {
         return executionThreadPool.getMaxWorkers();
     }
 
-    public int rejectedTotal() {
+    public long rejectedTotal() {
         return threadPoolMetrics.getRejectedTotal();
     }
 
