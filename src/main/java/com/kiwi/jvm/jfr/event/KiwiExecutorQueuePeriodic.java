@@ -19,7 +19,7 @@ public class KiwiExecutorQueuePeriodic extends Event {
     private int queueCapacity;
     private int activeWorkers;
     private int maxWorkers;
-    private int rejectedTotal;
+    private long rejectedTotal;
     private boolean backpressureActive;
 
     public static void configure(KiwiThreadPoolExecutor threadPoolExecutor) {
@@ -59,7 +59,7 @@ public class KiwiExecutorQueuePeriodic extends Event {
         this.maxWorkers = maxWorkers;
     }
 
-    public void setRejectedTotal(int rejectedTotal) {
+    public void setRejectedTotal(long rejectedTotal) {
         this.rejectedTotal = rejectedTotal;
     }
 
