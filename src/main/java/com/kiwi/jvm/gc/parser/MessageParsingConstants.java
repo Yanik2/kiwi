@@ -8,7 +8,7 @@ public final class MessageParsingConstants {
     public static final char GIGABYTES_TOKEN = 'G';
     public static final String MILLISECONDS_TOKEN = "ms";
 
-    public static final int BYTES_MULTIPLIER = 1024;
+    public static final long BYTES_MULTIPLIER = 1024;
 
     private MessageParsingConstants() {
     }

@@ -24,7 +24,14 @@ test {
 }
 
 tasks.register('gcParser', JavaExec) {
+    def filepath = providers.gradleProperty("filename")
+    it.doLast {
+        if (!filepath.isPresent()) {
+            print("File name is required")
+        }
+    }
+
+    args(filepath.get())
     it.classpath = sourceSets.main.runtimeClasspath
     it.mainClass = 'com.kiwi.jvm.gc.GcLogMain'
-    it.args 'asdf asdf asdf'
 }

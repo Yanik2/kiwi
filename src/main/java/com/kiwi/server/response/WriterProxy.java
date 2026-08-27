@@ -81,9 +81,11 @@ public class WriterProxy {
             drainMode = drain;
             isActive = false;
         }
-
-        this.responseWriterThread.join(10000);
         this.responseWriterThread.interrupt();
+        this.responseWriterThread.join(10000);
+        if (responseWriterThread.isAlive()) {
+            this.responseWriterThread.interrupt();
+        }
 
         if (drainMode) {
             this.responseWriterThread.interrupt();

@@ -11,7 +11,7 @@ import static com.kiwi.jvm.gc.parser.MessageParsingConstants.KILOBYTES_TOKEN;
 import static com.kiwi.jvm.gc.parser.MessageParsingConstants.MEGABYTES_TOKEN;
 import static com.kiwi.jvm.gc.parser.MessageParsingConstants.MILLISECONDS_TOKEN;
 
-public class GcLogMessageParserImpl {
+public class GcLogMessageParser {
     public GcLogParsedMessage parse(String message) {
         final var cycleType = GcCycleType.getByMessage(message);
 
@@ -57,7 +57,7 @@ public class GcLogMessageParserImpl {
         return new GcLogParsedMessage(cycleType, beforeSize, afterSize, totalSize, timeMillis, message);
     }
 
-    private int getBytesByMeasure(int size, char measure) {
+    private long getBytesByMeasure(int size, char measure) {
         return switch (measure) {
             case KILOBYTES_TOKEN -> size * BYTES_MULTIPLIER;
             case MEGABYTES_TOKEN -> size * BYTES_MULTIPLIER * BYTES_MULTIPLIER;

@@ -34,12 +34,15 @@ public class GcReportService {
         long heapAfterMax = 0;
         long reclaimedTotalBytes = 0;
 
+        int heapBeforeCounter = 0;
+        int heapAfterCounter = 0;
+
         for (GcLogEntry entry : data) {
             totalCollections++;
             final var message = entry.parsedMessage();
 
             switch (message.cycleType()) {
-                case YOUNG_NORMAL -> youngCollections++;
+                case YOUNG_NORMAL, YOUNG_CONCURRENT -> youngCollections++;
                 case YOUNG_MIXED, YOUNG_PREPARE_MIXED -> mixedCollections++;
                 case FULL -> fullCollections++;
             }
@@ -50,8 +53,15 @@ public class GcReportService {
                 maxPauseMs = message.timeSpent();
             }
 
-            heapBeforeAverage += message.heapSizeBefore() >= 0 ? message.heapSizeBefore() : 0;
-            heapAfterAverage += message.heapSizeAfter() >= 0 ? message.heapSizeAfter() : 0;
+            if (message.heapSizeBefore() >= 0) {
+                heapBeforeCounter++;
+                heapBeforeAverage += message.heapSizeBefore();
+            }
+
+            if (message.heapSizeAfter() >= 0) {
+                heapAfterCounter++;
+                heapAfterAverage += message.heapSizeAfter();
+            }
 
             if (message.heapSizeBefore() > heapBeforeMax) {
                 heapBeforeMax = message.heapSizeBefore();
@@ -61,31 +71,43 @@ public class GcReportService {
                 heapAfterMax = message.heapSizeAfter();
             }
 
-            reclaimedTotalBytes += message.heapSizeBefore() - message.heapSizeAfter();
+            if (message.heapSizeBefore() >= 0 && message.heapSizeAfter() >= 0) {
+                reclaimedTotalBytes += message.heapSizeBefore() - message.heapSizeAfter();
+            }
         }
 
         final var sortedData = data.stream()
+                .filter(e -> e.parsedMessage().timeSpent() >= 0)
                 .map(e -> e.parsedMessage().timeSpent())
                 .sorted()
                 .toList();
-        int medianIndex = (int) (sortedData.size() * 0.5);
-        int p90Index = (int) (sortedData.size() * 0.9);
-        int p95Index = (int) (sortedData.size() * 0.95);
 
-        System.out.println("Total collections: " + totalCollections);
-        System.out.println("Young collections: " + youngCollections);
-        System.out.println("Mixed collections: " + mixedCollections);
-        System.out.println("Full collections: " + fullCollections);
-        System.out.println("Total pause ms: " + totalPauseMs);
-        System.out.println("Average pause ms: " + (totalPauseMs / totalCollections));
-        System.out.println("Max pause ms: " + maxPauseMs);
-        System.out.println("P50 pause ms: " + sortedData.get(medianIndex));
-        System.out.println("P90 pause ms: " + sortedData.get(p90Index));
-        System.out.println("P95 pause ms: " + sortedData.get(p95Index));
-        System.out.println("Heap before average: " + (heapBeforeAverage / totalCollections));
-        System.out.println("Heap after average: " + (heapAfterAverage / totalCollections));
-        System.out.println("Heap before max: " + heapBeforeMax);
-        System.out.println("Heap after max: " + heapAfterMax);
-        System.out.println("Reclaimed total bytes: " + reclaimedTotalBytes);
+        if (totalCollections > 0 && !sortedData.isEmpty()) {
+            int medianIndex = (int) (sortedData.size() * 0.5);
+            int p90Index = (int) (sortedData.size() * 0.9);
+            int p95Index = (int) (sortedData.size() * 0.95);
+
+            System.out.println("Total collections: " + totalCollections);
+            System.out.println("Young collections: " + youngCollections);
+            System.out.println("Mixed collections: " + mixedCollections);
+            System.out.println("Full collections: " + fullCollections);
+            System.out.println("Total pause ms: " + totalPauseMs);
+            System.out.println("Average pause ms: " + (totalPauseMs / totalCollections));
+            System.out.println("Max pause ms: " + maxPauseMs);
+            System.out.println("P50 pause ms: " + sortedData.get(medianIndex));
+            System.out.println("P90 pause ms: " + sortedData.get(p90Index));
+            System.out.println("P95 pause ms: " + sortedData.get(p95Index));
+            if (heapBeforeCounter > 0) {
+                System.out.println("Heap before average: " + (heapBeforeAverage / heapBeforeCounter));
+            }
+            if (heapAfterCounter > 0) {
+                System.out.println("Heap after average: " + (heapAfterAverage / heapAfterCounter));
+            }
+            System.out.println("Heap before max: " + heapBeforeMax);
+            System.out.println("Heap after max: " + heapAfterMax);
+            System.out.println("Reclaimed total bytes: " + reclaimedTotalBytes);
+        } else {
+            System.out.println("Log is empty");
+        }
     }
 }

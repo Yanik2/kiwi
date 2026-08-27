@@ -23,14 +23,14 @@ public class GcLogParser {
     private static final char CLOSING_SQUARE_BRACKET = ']';
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private static final int MAX_FILE_LENGTH = 1048576;
+    private static final int MAX_FILE_LENGTH = 104857600;
     private static final char DOT = '.';
     private static final char S_SYMBOL = 's';
     private static final char COMMA = ',';
     private static final String GC_MESSAGE_PREFIX = "GC";
     private static final String SAFEPOINT_MESSAGE_PREFIX = "Safepoint";
 
-    private final GcLogMessageParserImpl baseMessageParser = new GcLogMessageParserImpl();
+    private final GcLogMessageParser baseMessageParser = new GcLogMessageParser();
 
     public List<GcLogEntry> parse(String filename) {
         final var file = getFile(filename);
