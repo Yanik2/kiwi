@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static com.kiwi.jvm.gc.GcEntryType.GC;
@@ -36,64 +37,71 @@ public class GcLogParser {
         try (final var reader = new BufferedReader(new FileReader(file))) {
             return reader.lines()
                     .map(getGcEntry())
+                    .filter(Objects::nonNull)
                     .toList();
         } catch (Exception ex) {
-            System.out.println();
-            //TODO
-            return null;
+            System.out.println("Problem with file: " + ex.getMessage());
+            throw new GcLogParsingException("Problem with file", ex);
         }
     }
 
     private Function<String, GcLogEntry> getGcEntry() {
         return line -> {
-            int currentIndex;
-            var openingBracket = line.indexOf(OPENING_SQUARE_BRACKET);
-            var closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
-            final var timestamp = LocalDateTime.parse(line.substring(openingBracket + 1, closingBracket),
-                    DATE_TIME_FORMATTER);
+            try {
+                int currentIndex;
+                var openingBracket = line.indexOf(OPENING_SQUARE_BRACKET);
+                var closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
+                final var timestamp = LocalDateTime.parse(line.substring(openingBracket + 1, closingBracket),
+                        DATE_TIME_FORMATTER);
 
-            currentIndex = closingBracket + 1;
-            openingBracket = line.indexOf(OPENING_SQUARE_BRACKET, currentIndex);
-            closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
-            final var dotIndex = line.indexOf(DOT, openingBracket + 1);
-            final var integerPart = line.substring(openingBracket + 1, dotIndex);
-            final var sSymbolIndex = line.indexOf(S_SYMBOL, dotIndex, closingBracket);
-            final var fractionalPart = line.substring(dotIndex + 1, sSymbolIndex);
-            final float uptime = Integer.parseInt(integerPart) + (Integer.parseInt(fractionalPart) / 1000.0f);
+                currentIndex = closingBracket + 1;
+                openingBracket = line.indexOf(OPENING_SQUARE_BRACKET, currentIndex);
+                closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
+                final var dotIndex = line.indexOf(DOT, openingBracket + 1);
+                final var integerPart = line.substring(openingBracket + 1, dotIndex);
+                final var sSymbolIndex = line.indexOf(S_SYMBOL, dotIndex, closingBracket);
+                final var fractionalPart = line.substring(dotIndex + 1, sSymbolIndex);
+                final float uptime = Integer.parseInt(integerPart) + (Integer.parseInt(fractionalPart) / 1000.0f);
 
-            currentIndex = closingBracket + 1;
-            openingBracket = line.indexOf(OPENING_SQUARE_BRACKET, currentIndex);
-            closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
-            final var level = line.substring(openingBracket + 1, closingBracket);
+                currentIndex = closingBracket + 1;
+                openingBracket = line.indexOf(OPENING_SQUARE_BRACKET, currentIndex);
+                closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
+                final var level = line.substring(openingBracket + 1, closingBracket);
 
-            currentIndex = closingBracket + 1;
-            openingBracket = line.indexOf(OPENING_SQUARE_BRACKET, currentIndex);
-            closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
-            final var tags = getTags(line.substring(openingBracket + 1, closingBracket));
-            currentIndex = closingBracket + 2;
+                currentIndex = closingBracket + 1;
+                openingBracket = line.indexOf(OPENING_SQUARE_BRACKET, currentIndex);
+                closingBracket = line.indexOf(CLOSING_SQUARE_BRACKET, openingBracket);
+                final var tags = getTags(line.substring(openingBracket + 1, closingBracket));
+                currentIndex = closingBracket + 2;
 
-            GcEntryType entryType;
-            final var message = line.substring(currentIndex);
-            int gcId = -1;
-            if (message.startsWith(GC_MESSAGE_PREFIX)) {
-                entryType = GC;
-                gcId = Integer.parseInt(message.substring(3, message.indexOf(CLOSING_BRACKET, 3)));
-                currentIndex = line.indexOf(CLOSING_BRACKET, currentIndex) + 2;
-            } else if (message.startsWith(SAFEPOINT_MESSAGE_PREFIX)) {
-                entryType = GcEntryType.SAFEPOINT;
-            } else {
-                entryType = OTHER;
+                GcEntryType entryType;
+                final var message = line.substring(currentIndex);
+                int gcId = -1;
+                if (message.startsWith(GC_MESSAGE_PREFIX)) {
+                    entryType = GC;
+                    gcId = Integer.parseInt(message.substring(3, message.indexOf(CLOSING_BRACKET, 3)));
+                    currentIndex = line.indexOf(CLOSING_BRACKET, currentIndex) + 2;
+                } else if (message.startsWith(SAFEPOINT_MESSAGE_PREFIX)) {
+                    entryType = GcEntryType.SAFEPOINT;
+                } else {
+                    entryType = OTHER;
+                }
+                final var logMessage = line.substring(currentIndex);
+                return new GcLogEntry(
+                        timestamp,
+                        uptime,
+                        level,
+                        tags,
+                        GC.equals(entryType) ? gcId : -1,
+                        entryType,
+                        baseMessageParser.parse(logMessage)
+                );
+            } catch (Exception ex) {
+                System.out.println("Error during parsing, row will be skipped");
+                System.out.println("Exception: " + ex.getMessage());
+                System.out.println("Line: " + line);
+                return null;
             }
-            final var logMessage = line.substring(currentIndex);
-            return new GcLogEntry(
-                    timestamp,
-                    uptime,
-                    level,
-                    tags,
-                    GC.equals(entryType) ? gcId : -1,
-                    entryType,
-                    baseMessageParser.parse(logMessage)
-            );
         };
     }
 
