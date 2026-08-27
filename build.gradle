@@ -22,3 +22,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.register('gcParser', JavaExec) {
+    it.classpath = sourceSets.main.runtimeClasspath
+    it.mainClass = 'com.kiwi.jvm.gc.GcLogMain'
+    it.args 'asdf asdf asdf'
+}

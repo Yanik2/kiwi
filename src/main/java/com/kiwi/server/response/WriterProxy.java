@@ -77,15 +77,13 @@ public class WriterProxy {
     }
 
     public void stop(boolean drain) throws InterruptedException {
-        if (!isActive) {
-            return;
+        if (isActive) {
+            drainMode = drain;
+            isActive = false;
         }
-        this.isActive = false;
-        if (drain) {
-            drainMode = true;
-        }
-        this.responseWriterThread.interrupt();
+
         this.responseWriterThread.join(10000);
+        this.responseWriterThread.interrupt();
 
         if (drainMode) {
             this.responseWriterThread.interrupt();

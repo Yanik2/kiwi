@@ -14,7 +14,7 @@ public class Properties {
     public static final int REJECTION_POOL_SIZE = 1;
     public static final int REJECTION_QUEUE_SIZE = 100;
     public static final int SERVER_THREAD_POOL_SIZE = 12;
-    public static final int SERVER_THREAD_POOL_QUEUE_CAP = 1000;
+    public static final int SERVER_THREAD_POOL_QUEUE_CAP = 10000;
 
     public static final double BP_HIGH_LOAD_WATERMARK = 0.8;
     public static final double BP_LOW_LOAD_WATERMARK = 0.5;
