@@ -39,6 +39,8 @@ public class KiwiThreadPoolExecutor {
     public void submit(Task task) {
         final var taskSubmitted = executionThreadPool.submit(task::execute, task.getTimeout());
         if (!taskSubmitted) {
+            logger.info("Task cannot be submitted to execution thread pool and will be rejected", "Queue size: "
+                    + executionThreadPool.getQueueSize());
             final var rejected = rejectionThreadPool.submit(task::reject, 0);
             if (!rejected) {
                 logger.info("Task cannot be processed, thread pool executor: [" + this.name + "], " +

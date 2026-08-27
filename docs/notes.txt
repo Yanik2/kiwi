@@ -8,10 +8,12 @@
 8. Figure out sizes for queues
 9. Add to multithreading test assertions, fix connection
 10. Close connection operation blocks thread from main kiwi thread pool
-11. Thread pool workers are still using java logger. Need to change to kiwi logger (and check for names, they are weird)
-12. Metrics registry replace concurrent hash map with simple hash map, use as values atomic classes
+11. Metrics registry replace concurrent hash map with simple hash map, use as values atomic classes
     Currently in JFR.LockInstances Total Blocked time is 1.586s for 5 min run
-13. Calculate relations between inflight requests, backpressure and queue size in thread pool
-14. Something blocking request in WriterProxy, it can wait for write more than 20 seconds
-15. On timeout response being added into queue, but writer thread is stopped, so method returns true as response was
+12. Calculate relations between inflight requests, backpressure and queue size in thread pool
+13. Slow clients blocking request in WriterProxy, it can wait for write more than 20 seconds
+14. On timeout response being added into queue, but writer thread is stopped, so method returns true as response was
     added to writer queue, but never was read from queue
+15. When connection closed because of error, execution might be blocked in Storage locks, one on resize, others on
+    whatever operation requires lock
+16. Implement backpressure and slow client detection on output channel
